@@ -1,3 +1,5 @@
+using FrierenHR.Application.Features.RulesConfig;
+using FrierenHR.Core.RulesEngine;
 using FrierenHR.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,9 +8,19 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<FrierenHRDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddControllers();
+
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+
+builder.Services.AddScoped<IRuleConfigRepository, RuleConfigRepository>();
+builder.Services.AddScoped<IRuleConfigService, RuleConfigService>();
+builder.Services.AddSingleton<IRuleEvaluator, RuleEvaluator>();
+
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment()) {
