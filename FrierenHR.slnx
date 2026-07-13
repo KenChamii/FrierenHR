@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="FrierenHR.Application/FrierenHR.Application.csproj" />
+  <Project Path="FrierenHR.Core/FrierenHR.Core.csproj" />
+  <Project Path="FrierenHR.Infrastructure/FrierenHR.Infrastructure.csproj" />
+  <Project Path="FrierenHR.Tests/FrierenHR.Tests.csproj" />
+  <Project Path="FrierenHR.WebAPI/FrierenHR.WebAPI.csproj" />
+</Solution>
