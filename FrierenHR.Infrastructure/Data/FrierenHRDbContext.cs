@@ -10,6 +10,8 @@ public class FrierenHRDbContext : DbContext
 
     public DbSet<AppConfig> AppConfigs => Set<AppConfig>();
     public DbSet<Company> Companies => Set<Company>();
+
+    public DbSet<CompanyRuleConfig> CompanyRuleConfigs => Set<CompanyRuleConfig>();
     // Add each new DbSet here as you create the entity in later phases —
     // this is the ONE file you touch every phase, everything else is additive.
 
