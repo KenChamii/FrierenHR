@@ -1,0 +1,10 @@
+﻿using FrierenHR.Core.Common;
+
+namespace FrierenHR.Core.Entities;
+
+public class Company : BaseEntity
+{
+    public string Name { get; set; } = string.Empty;
+    public string Code { get; set; } = string.Empty; // short unique code e.g. "ACME"
+    public bool IsActive { get; set; } = true;
+}
