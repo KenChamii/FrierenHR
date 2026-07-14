@@ -1,3 +1,4 @@
+using FrierenHR.Application.Features.Attendance;
 using FrierenHR.Application.Features.Company;
 using FrierenHR.Application.Features.Employee;
 using FrierenHR.Application.Features.Leave;
@@ -53,6 +54,8 @@ builder.Services.AddSingleton<LeaveAccrualBackgroundService>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<LeaveAccrualBackgroundService>());
 builder.Services.AddScoped<ILeaveRepository, LeaveRepository>();
 builder.Services.AddScoped<ILeaveService, LeaveService>();
+builder.Services.AddScoped<IAttendanceRepository, AttendanceRepository>();
+builder.Services.AddScoped<IAttendanceService, AttendanceService>();
 
 
 var app = builder.Build();
