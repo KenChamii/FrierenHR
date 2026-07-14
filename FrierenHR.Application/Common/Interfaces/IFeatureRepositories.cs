@@ -1,4 +1,5 @@
-﻿using FrierenHR.Core.Entities;
+﻿using FrierenHR.Application.Common.Interfaces;
+using FrierenHR.Core.Entities;
 using FrierenHR.Core.Enums;
 
 public interface IRuleConfigRepository
@@ -8,4 +9,12 @@ public interface IRuleConfigRepository
     void Update(CompanyRuleConfig config);
     Task<int> SaveChangesAsync(CancellationToken ct = default);
     Task<CompanyRuleConfig?> GetByIdAsync(Guid id, CancellationToken ct = default);
+}
+public interface ICompanyRepository : IRepository<Company> { Task<Company?> GetByCodeAsync(string code, CancellationToken ct = default); }
+public interface IDepartmentRepository : IRepository<Department> { Task<List<Department>> GetByCompanyAsync(Guid companyId, CancellationToken ct = default); }
+public interface IEmployeeRepository : IRepository<Employee>
+{
+    Task<List<Employee>> GetByCompanyAsync(Guid companyId, CancellationToken ct = default);
+    Task<Employee?> GetByEmailAsync(string email, CancellationToken ct = default);
+    Task<List<Employee>> GetDirectReportsAsync(Guid managerId, CancellationToken ct = default);
 }
