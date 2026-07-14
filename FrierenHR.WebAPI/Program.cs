@@ -1,9 +1,11 @@
 using FrierenHR.Application.Features.Company;
 using FrierenHR.Application.Features.Employee;
+using FrierenHR.Application.Features.Leave;
 using FrierenHR.Application.Features.RulesConfig;
 using FrierenHR.Core.RulesEngine;
 using FrierenHR.Infrastructure.Data;
 using FrierenHR.Infrastructure.Repositories;
+using FrierenHR.WebAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -47,6 +49,10 @@ builder.Services.AddScoped<IRuleConfigService, RuleConfigService>();
 builder.Services.AddScoped<ICompanyService, CompanyService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddSingleton<IRuleEvaluator, RuleEvaluator>();
+builder.Services.AddSingleton<LeaveAccrualBackgroundService>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<LeaveAccrualBackgroundService>());
+builder.Services.AddScoped<ILeaveRepository, LeaveRepository>();
+builder.Services.AddScoped<ILeaveService, LeaveService>();
 
 
 var app = builder.Build();

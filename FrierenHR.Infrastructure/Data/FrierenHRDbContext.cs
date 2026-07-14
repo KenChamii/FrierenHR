@@ -14,8 +14,8 @@ public class FrierenHRDbContext : DbContext
     public DbSet<Department> Departments => Set<Department>();
     public DbSet<Employee> Employees => Set<Employee>();
     public DbSet<CompanyRuleConfig> CompanyRuleConfigs => Set<CompanyRuleConfig>();
-    // Add each new DbSet here as you create the entity in later phases —
-    // this is the ONE file you touch every phase, everything else is additive.
+    public DbSet<LeaveRequest> LeaveRequests => Set<LeaveRequest>();
+    public DbSet<LeaveBalance> LeaveBalances => Set<LeaveBalance>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

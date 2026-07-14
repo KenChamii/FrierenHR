@@ -18,3 +18,12 @@ public interface IEmployeeRepository : IRepository<Employee>
     Task<Employee?> GetByEmailAsync(string email, CancellationToken ct = default);
     Task<List<Employee>> GetDirectReportsAsync(Guid managerId, CancellationToken ct = default);
 }
+
+public interface ILeaveRepository : IRepository<LeaveRequest>
+{
+    Task<List<LeaveRequest>> GetByEmployeeAsync(Guid employeeId, CancellationToken ct = default);
+    Task<List<LeaveRequest>> GetPendingForApproverAsync(Guid approverEmployeeId, CancellationToken ct = default);
+    Task<LeaveBalance?> GetBalanceAsync(Guid employeeId, LeaveType leaveType, CancellationToken ct = default);
+    Task<List<LeaveBalance>> GetBalancesAsync(Guid employeeId, CancellationToken ct = default);
+    Task UpsertBalanceAsync(LeaveBalance balance, CancellationToken ct = default);
+}

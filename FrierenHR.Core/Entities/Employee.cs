@@ -19,7 +19,8 @@ public class Employee : BaseEntity
     public DateTime HireDate { get; set; }
     public EmployeeRole Role { get; set; } = EmployeeRole.Employee;
     public bool IsActive { get; set; } = true;
-
+    public ICollection<LeaveRequest> LeaveRequests { get; set; } = new List<LeaveRequest>();
+    public ICollection<LeaveBalance> LeaveBalances { get; set; } = new List<LeaveBalance>();
 
     public int TenureMonths(DateTime? asOf = null)
     {
