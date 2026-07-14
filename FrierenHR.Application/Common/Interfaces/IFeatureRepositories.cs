@@ -27,3 +27,9 @@ public interface ILeaveRepository : IRepository<LeaveRequest>
     Task<List<LeaveBalance>> GetBalancesAsync(Guid employeeId, CancellationToken ct = default);
     Task UpsertBalanceAsync(LeaveBalance balance, CancellationToken ct = default);
 }
+
+public interface IAttendanceRepository : IRepository<AttendanceLog>
+{
+    Task<AttendanceLog?> GetOpenLogAsync(Guid employeeId, CancellationToken ct = default);
+    Task<List<AttendanceLog>> GetByEmployeeAsync(Guid employeeId, DateTime? from = null, DateTime? to = null, CancellationToken ct = default);
+}

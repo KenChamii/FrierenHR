@@ -16,10 +16,12 @@ public class FrierenHRDbContext : DbContext
     public DbSet<CompanyRuleConfig> CompanyRuleConfigs => Set<CompanyRuleConfig>();
     public DbSet<LeaveRequest> LeaveRequests => Set<LeaveRequest>();
     public DbSet<LeaveBalance> LeaveBalances => Set<LeaveBalance>();
+    public DbSet<AttendanceLog> AttendanceLogs => Set<AttendanceLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(FrierenHRDbContext).Assembly);
         base.OnModelCreating(modelBuilder);
     }
+
 }
