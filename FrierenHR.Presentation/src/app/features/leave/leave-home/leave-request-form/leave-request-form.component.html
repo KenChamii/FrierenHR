@@ -1,0 +1,26 @@
+<form [formGroup]="form" (ngSubmit)="submit()" class="leave-form">
+  @if (errorMessage()) { <p-message severity="error" [text]="errorMessage()!" styleClass="w-full mb-2" /> }
+  @if (result()) {
+    <p-message [severity]="result()!.status === 'Approved' ? 'success' : 'info'"
+      [text]="'Request submitted — status: ' + result()!.status" styleClass="w-full mb-2" />
+  }
+
+  <label for="leaveType">Leave type</label>
+  <p-dropdown [options]="leaveTypes" formControlName="leaveType" styleClass="w-full" />
+
+  <div class="date-row">
+    <div>
+      <label for="startDate">Start date</label>
+      <p-datepicker formControlName="startDate" dateFormat="yy-mm-dd" styleClass="w-full" />
+    </div>
+    <div>
+      <label for="endDate">End date</label>
+      <p-datepicker formControlName="endDate" dateFormat="yy-mm-dd" styleClass="w-full" />
+    </div>
+  </div>
+
+  <label for="reason">Reason (optional)</label>
+  <textarea pTextarea formControlName="reason" rows="3" class="w-full"></textarea>
+
+  <p-button label="Submit Request" type="submit" [loading]="submitting()" [disabled]="form.invalid" styleClass="mt-3" />
+</form>
