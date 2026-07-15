@@ -1,0 +1,51 @@
+<h2>Rules Config</h2>
+<p class="hint">Edit a rule as JSON, save it, then test it against sample facts — no redeploy needed.</p>
+
+<div class="rule-config-grid">
+  <p-panel header="Rule Definition" [formGroup]="form">
+    @if (saveError()) { <p-message severity="error" [text]="saveError()!" styleClass="w-full mb-2" /> }
+    @if (saveSuccess()) { <p-message severity="success" text="Saved." styleClass="w-full mb-2" /> }
+
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <label for="companyId">Company ID</label>
+      <input pInputText id="companyId" formControlName="companyId" placeholder="paste a company guid" class="w-full" />
+
+      <label for="ruleType">Rule type</label>
+      <p-dropdown [options]="ruleTypes" formControlName="ruleType" styleClass="w-full" />
+
+      <label for="ruleJson">Rule JSON</label>
+      <textarea pTextarea formControlName="ruleJson" rows="10" class="w-full code-area"></textarea>
+
+      <div class="inline-row">
+        <div>
+          <label for="priority">Priority</label>
+          <p-inputnumber formControlName="priority" [min]="0" styleClass="w-full" />
+        </div>
+        <div class="switch-row">
+          <label for="isActive">Active</label>
+          <p-toggleswitch formControlName="isActive" />
+        </div>
+      </div>
+
+      <p-button label="Save Rule" type="submit" [loading]="saving()" [disabled]="form.invalid" styleClass="mt-3" />
+    </form>
+  </p-panel>
+
+  <p-panel header="Test Evaluate">
+    @if (testError()) { <p-message severity="error" [text]="testError()!" styleClass="w-full mb-2" /> }
+
+    <label for="facts">Sample facts (JSON)</label>
+    <textarea pTextarea rows="6" class="w-full code-area" [ngModel]="testFactsJson()" (ngModelChange)="testFactsJson.set($event)"></textarea>
+
+    <p-button label="Run Test" icon="pi pi-play" [loading]="testing()" (onClick)="runTest()" styleClass="mt-3" />
+
+    @if (testResult(); as result) {
+      <div class="result-box" [class.matched]="result.matched">
+        <div><strong>Matched:</strong> {{ result.matched }}</div>
+        <div><strong>Action:</strong> {{ result.actionType ?? '—' }}</div>
+        <div><strong>Result value:</strong> {{ result.resultValue ?? '—' }}</div>
+        <div><strong>Message:</strong> {{ result.message }}</div>
+      </div>
+    }
+  </p-panel>
+</div>

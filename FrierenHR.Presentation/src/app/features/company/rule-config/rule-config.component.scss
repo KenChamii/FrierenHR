@@ -1,0 +1,15 @@
+.hint { color: var(--hr-text-muted); margin-top: -0.5rem; }
+.rule-config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start; }
+label { font-size: 0.85rem; color: var(--hr-text-muted); margin-top: 0.5rem; display: block; }
+.code-area { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; }
+.inline-row { display: flex; gap: 1.5rem; align-items: flex-end; margin-top: 0.5rem; }
+.switch-row { display: flex; align-items: center; gap: 0.5rem; }
+
+.result-box {
+  margin-top: 1rem; padding: 0.85rem 1rem; border-radius: var(--hr-radius);
+  background: var(--hr-bg); border-left: 4px solid var(--hr-border); font-size: 0.9rem;
+
+  &.matched { border-left-color: var(--hr-accent); }
+}
+
+@media (max-width: 900px) { .rule-config-grid { grid-template-columns: 1fr; } }
