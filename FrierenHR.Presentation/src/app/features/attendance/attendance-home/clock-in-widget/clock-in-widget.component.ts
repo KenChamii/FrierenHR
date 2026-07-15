@@ -2,9 +2,9 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
-import { AttendanceService } from '../../../core/services/attendance.service';
-import { AuthService } from '../../../core/services/auth.service';
-import { AttendanceLogDto } from '../../../core/models/attendance.model';
+import { AttendanceService } from '../../../../core/services/attendance.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { AttendanceLogDto } from '../../../../core/models/attendance.model';
 
 @Component({
   selector: 'app-clock-in-widget',

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, signal } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
@@ -6,9 +6,9 @@ import { PasswordModule } from 'primeng/password';
 import { DropdownModule } from 'primeng/dropdown';
 import { DatePickerModule } from 'primeng/datepicker';
 import { ButtonModule } from 'primeng/button';
-import { EmployeeService } from '../../../core/services/employee.service';
-import { EmployeeDto } from '../../../core/models/employee.model';
-import { EMPLOYEE_ROLES } from '../../../core/models/enums.model';
+import { EmployeeService } from '../../../../core/services/employee.service';
+import { EmployeeDto } from '../../../../core/models/employee.model';
+import { EMPLOYEE_ROLES } from '../../../../core/models/enums.model';
 
 @Component({
   selector: 'app-employee-form',
@@ -18,6 +18,9 @@ import { EMPLOYEE_ROLES } from '../../../core/models/enums.model';
   styleUrl: './employee-form.component.scss',
 })
 export class EmployeeFormComponent implements OnInit {
+  private readonly fb = inject(FormBuilder);
+  private readonly employeeService = inject(EmployeeService);
+
   @Input() employee: EmployeeDto | null = null;
   @Output() saved = new EventEmitter<void>();
   @Output() cancelled = new EventEmitter<void>();
@@ -34,8 +37,6 @@ export class EmployeeFormComponent implements OnInit {
     hireDate: [new Date(), Validators.required],
     role: ['Employee', Validators.required],
   });
-
-  constructor(private fb: FormBuilder, private employeeService: EmployeeService) {}
 
   ngOnInit(): void {
     if (this.employee) {

@@ -1,6 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DropdownModule } from 'primeng/dropdown';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
@@ -20,11 +20,14 @@ const SAMPLE_RULE_JSON = JSON.stringify(
 @Component({
   selector: 'app-rule-config',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, DropdownModule, InputNumberModule, ToggleSwitchModule, TextareaModule, ButtonModule, MessageModule, PanelModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, DropdownModule, InputNumberModule, ToggleSwitchModule, TextareaModule, ButtonModule, MessageModule, PanelModule],
   templateUrl: './rule-config.component.html',
   styleUrl: './rule-config.component.scss',
 })
 export class RuleConfigComponent {
+  private readonly fb = inject(FormBuilder);
+  private readonly rulesConfigService = inject(RulesConfigService);
+
   readonly ruleTypes = RULE_TYPES;
   readonly saving = signal(false);
   readonly testing = signal(false);
@@ -42,8 +45,6 @@ export class RuleConfigComponent {
   });
 
   testFactsJson = signal('{ "tenureMonths": 14, "currentBalance": 3 }');
-
-  constructor(private fb: FormBuilder, private rulesConfigService: RulesConfigService) {}
 
   save(): void {
     if (this.form.invalid) return;

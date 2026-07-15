@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
@@ -6,8 +6,8 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { DropdownModule } from 'primeng/dropdown';
 import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
-import { ApprovalService } from '../../../core/services/approval.service';
-import { EMPLOYEE_ROLES } from '../../../core/models/enums.model';
+import { ApprovalService } from '../../../../core/services/approval.service';
+import { EMPLOYEE_ROLES } from '../../../../core/models/enums.model';
 
 @Component({
   selector: 'app-chain-config',
@@ -17,6 +17,9 @@ import { EMPLOYEE_ROLES } from '../../../core/models/enums.model';
   styleUrl: './chain-config.component.scss',
 })
 export class ChainConfigComponent {
+  private readonly fb = inject(FormBuilder);
+  private readonly approvalService = inject(ApprovalService);
+
   readonly roles = EMPLOYEE_ROLES;
   readonly saving = signal(false);
   readonly saveError = signal<string | null>(null);
@@ -29,8 +32,6 @@ export class ChainConfigComponent {
   });
 
   get steps(): FormArray { return this.form.get('steps') as FormArray; }
-
-  constructor(private fb: FormBuilder, private approvalService: ApprovalService) {}
 
   newStep(stepOrder: number, approverRole: string, escalateAfterDays: number) {
     return this.fb.group({

@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePickerModule } from 'primeng/datepicker';
@@ -6,10 +6,10 @@ import { DropdownModule } from 'primeng/dropdown';
 import { TextareaModule } from 'primeng/textarea';
 import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
-import { LeaveService } from '../../../core/services/leave.service';
-import { AuthService } from '../../../core/services/auth.service';
-import { LEAVE_TYPES } from '../../../core/models/enums.model';
-import { LeaveRequestDto } from '../../../core/models/leave.model';
+import { LeaveService } from '../../../../core/services/leave.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { LEAVE_TYPES } from '../../../../core/models/enums.model';
+import { LeaveRequestDto } from '../../../../core/models/leave.model';
 
 @Component({
   selector: 'app-leave-request-form',
@@ -19,6 +19,10 @@ import { LeaveRequestDto } from '../../../core/models/leave.model';
   styleUrl: './leave-request-form.component.scss',
 })
 export class LeaveRequestFormComponent {
+  private readonly fb = inject(FormBuilder);
+  private readonly leaveService = inject(LeaveService);
+  private readonly authService = inject(AuthService);
+
   readonly leaveTypes = LEAVE_TYPES;
   readonly submitting = signal(false);
   readonly result = signal<LeaveRequestDto | null>(null);
@@ -30,8 +34,6 @@ export class LeaveRequestFormComponent {
     endDate: [new Date(), Validators.required],
     reason: [''],
   });
-
-  constructor(private fb: FormBuilder, private leaveService: LeaveService, private authService: AuthService) {}
 
   submit(): void {
     if (this.form.invalid) return;

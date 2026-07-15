@@ -7,7 +7,7 @@ import { DialogModule } from 'primeng/dialog';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { EmployeeDto } from '../../../core/models/employee.model';
-import { EmployeeFormComponent } from '../employee-form/employee-form.component';
+import { EmployeeFormComponent } from './employee-form/employee-form.component';
 
 @Component({
   selector: 'app-employee-list',

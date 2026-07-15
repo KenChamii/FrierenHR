@@ -1,1 +1,5 @@
-export const environment = { production: false, apiUrl: 'https://localhost:5001', hubUrl: 'https://localhost:5001/hubs/chat' };
+export const environment = {
+  production: true,
+  apiUrl: 'https://localhost:7279',
+  hubUrl: 'https://localhost:7279/hubs/chat'
+};

@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
-import { LeaveService } from '../../../core/services/leave.service';
-import { ApprovalService } from '../../../core/services/approval.service';
-import { AuthService } from '../../../core/services/auth.service';
-import { LeaveRequestDto } from '../../../core/models/leave.model';
+import { LeaveService } from '../../../../core/services/leave.service';
+import { ApprovalService } from '../../../../core/services/approval.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { LeaveRequestDto } from '../../../../core/models/leave.model';
 
 // NOTE: LeaveRequestDto doesn't carry an ApprovalInstance id directly — in a real build, extend
 // LeaveRequestDto (or add a dedicated endpoint) to include the current ApprovalInstanceDto so this

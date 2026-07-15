@@ -3,9 +3,9 @@ import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
-import { LeaveService } from '../../../core/services/leave.service';
-import { AuthService } from '../../../core/services/auth.service';
-import { LeaveRequestDto } from '../../../core/models/leave.model';
+import { LeaveService } from '../../../../core/services/leave.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { LeaveRequestDto } from '../../../../core/models/leave.model';
 
 @Component({
   selector: 'app-approval-queue',

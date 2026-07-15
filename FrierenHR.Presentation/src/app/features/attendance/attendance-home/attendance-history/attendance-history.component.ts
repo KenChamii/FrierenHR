@@ -1,9 +1,9 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
-import { AttendanceService } from '../../../core/services/attendance.service';
-import { AuthService } from '../../../core/services/auth.service';
-import { AttendanceLogDto } from '../../../core/models/attendance.model';
+import { AttendanceService } from '../../../../core/services/attendance.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { AttendanceLogDto } from '../../../../core/models/attendance.model';
 
 @Component({
   selector: 'app-attendance-history',

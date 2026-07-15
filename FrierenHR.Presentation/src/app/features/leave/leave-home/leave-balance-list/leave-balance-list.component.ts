@@ -1,9 +1,9 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
-import { LeaveService } from '../../../core/services/leave.service';
-import { AuthService } from '../../../core/services/auth.service';
-import { LeaveBalanceDto } from '../../../core/models/leave.model';
+import { LeaveService } from '../../../../core/services/leave.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { LeaveBalanceDto } from '../../../../core/models/leave.model';
 
 @Component({
   selector: 'app-leave-balance-list',
