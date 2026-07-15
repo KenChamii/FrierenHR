@@ -1,0 +1,2 @@
+.attendance-grid { display: grid; grid-template-columns: 320px 1fr; gap: 1.5rem; align-items: start; }
+@media (max-width: 800px) { .attendance-grid { grid-template-columns: 1fr; } }

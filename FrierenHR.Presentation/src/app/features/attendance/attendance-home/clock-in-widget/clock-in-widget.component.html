@@ -1,0 +1,11 @@
+<p-card header="Time Clock">
+  @if (loading()) {
+    <p>Loading…</p>
+  } @else if (openLog()) {
+    <p>Clocked in at {{ openLog()!.timeIn | date: 'shortTime' }}</p>
+    <p-button label="Clock Out" icon="pi pi-sign-out" severity="danger" [loading]="working()" (onClick)="clockOut()" styleClass="w-full" />
+  } @else {
+    <p>Not clocked in today.</p>
+    <p-button label="Clock In" icon="pi pi-sign-in" [loading]="working()" (onClick)="clockIn()" styleClass="w-full" />
+  }
+</p-card>

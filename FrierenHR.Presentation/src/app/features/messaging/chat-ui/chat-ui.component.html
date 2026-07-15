@@ -1,0 +1,38 @@
+<div class="chat-shell">
+  <aside class="conversation-list">
+    <h3>Conversations</h3>
+    @if (loadingConversations()) {
+      <p>Loading…</p>
+    } @else {
+      @for (conversation of conversations(); track conversation.id) {
+        <button type="button" class="conversation-item" [class.active]="conversation.id === activeConversationId()" (click)="selectConversation(conversation)">
+          <span class="name">{{ conversation.name ?? (conversation.type + ' chat') }}</span>
+          @if (conversation.lastMessagePreview) { <span class="preview">{{ conversation.lastMessagePreview }}</span> }
+        </button>
+      } @empty {
+        <p class="empty">No conversations yet.</p>
+      }
+    }
+  </aside>
+
+  <section class="chat-pane">
+    @if (!activeConversationId()) {
+      <p class="placeholder">Select a conversation to start chatting.</p>
+    } @else {
+      <div class="messages">
+        @if (loadingHistory()) { <p>Loading history…</p> }
+        @for (message of allMessages(); track message.id) {
+          <div class="bubble" [class.mine]="isMine(message)">
+            <div class="sender">{{ message.senderName }}</div>
+            <div class="body">{{ message.body }}</div>
+            <div class="time">{{ message.sentAt | date: 'shortTime' }}</div>
+          </div>
+        }
+      </div>
+      <div class="composer">
+        <input pInputText [ngModel]="draft()" (ngModelChange)="draft.set($event)" (keyup.enter)="send()" placeholder="Type a message…" class="w-full" />
+        <p-button icon="pi pi-send" (onClick)="send()" [disabled]="!draft().trim()" />
+      </div>
+    }
+  </section>
+</div>

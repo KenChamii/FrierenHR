@@ -1,0 +1,19 @@
+<h2>Dashboard</h2>
+<div class="stat-grid">
+  <p-card styleClass="stat-card accent">
+    <div class="stat-value">{{ stats().totalEmployees }}</div>
+    <div class="stat-label">Total Employees</div>
+  </p-card>
+  <p-card styleClass="stat-card">
+    <div class="stat-value">{{ stats().pendingLeaveRequests }}</div>
+    <div class="stat-label">Pending Leave Requests</div>
+  </p-card>
+  <p-card styleClass="stat-card">
+    <div class="stat-value">{{ stats().onLeaveToday }}</div>
+    <div class="stat-label">On Leave Today</div>
+  </p-card>
+  <p-card styleClass="stat-card">
+    <div class="stat-value">{{ stats().openApprovals }}</div>
+    <div class="stat-label">Open Approvals</div>
+  </p-card>
+</div>

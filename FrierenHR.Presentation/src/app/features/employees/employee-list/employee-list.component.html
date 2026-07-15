@@ -1,0 +1,31 @@
+<div class="header-row">
+  <h2>Employees</h2>
+  <p-button label="Add Employee" icon="pi pi-plus" (onClick)="openCreate()" />
+</div>
+
+<p-table [value]="employees()" [loading]="loading()" [paginator]="true" [rows]="10" responsiveLayout="scroll">
+  <ng-template pTemplate="header">
+    <tr>
+      <th>Name</th><th>Email</th><th>Department</th><th>Manager</th><th>Role</th><th>Tenure</th><th>Status</th><th></th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-employee>
+    <tr>
+      <td>{{ employee.firstName }} {{ employee.lastName }}</td>
+      <td>{{ employee.email }}</td>
+      <td>{{ employee.departmentName ?? '—' }}</td>
+      <td>{{ employee.managerName ?? '—' }}</td>
+      <td><p-tag [value]="employee.role" [severity]="severityFor(employee.role)" /></td>
+      <td>{{ employee.tenureMonths }} mo</td>
+      <td><p-tag [value]="employee.isActive ? 'Active' : 'Inactive'" [severity]="employee.isActive ? 'success' : 'danger'" /></td>
+      <td><p-button icon="pi pi-pencil" [text]="true" (onClick)="openEdit(employee)" /></td>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="emptymessage"><tr><td colspan="8">No employees yet.</td></tr></ng-template>
+</p-table>
+
+<p-dialog [header]="editingEmployee() ? 'Edit Employee' : 'Add Employee'" [(visible)]="dialogVisible" [modal]="true" [style]="{ width: '480px' }">
+  @if (dialogVisible()) {
+    <app-employee-form [employee]="editingEmployee()" (saved)="onSaved()" (cancelled)="dialogVisible.set(false)" />
+  }
+</p-dialog>

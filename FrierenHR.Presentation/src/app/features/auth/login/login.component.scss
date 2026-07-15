@@ -1,0 +1,12 @@
+.login-page {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: var(--hr-bg);
+}
+.login-card {
+  width: 360px; background: var(--hr-surface); border-radius: var(--hr-radius);
+  box-shadow: var(--hr-shadow); padding: 2rem; display: flex; flex-direction: column; gap: 0.5rem;
+
+  h1 { margin: 0; color: var(--hr-accent-dark); }
+  .subtitle { margin: 0 0 1rem; color: var(--hr-text-muted); }
+  label { font-size: 0.85rem; color: var(--hr-text-muted); margin-top: 0.5rem; }
+}

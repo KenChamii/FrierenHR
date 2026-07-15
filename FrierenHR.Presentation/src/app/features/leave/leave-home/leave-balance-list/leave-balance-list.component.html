@@ -1,0 +1,11 @@
+<p-table [value]="balances()" [loading]="loading()" responsiveLayout="scroll">
+  <ng-template pTemplate="header"><tr><th>Leave Type</th><th>Balance (days)</th><th>Last Accrual</th></tr></ng-template>
+  <ng-template pTemplate="body" let-balance>
+    <tr>
+      <td>{{ balance.leaveType }}</td>
+      <td>{{ balance.balance }}</td>
+      <td>{{ balance.lastAccrualDate ? (balance.lastAccrualDate | date: 'mediumDate') : '—' }}</td>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="emptymessage"><tr><td colspan="3">No balances yet — accrual hasn't run for this employee.</td></tr></ng-template>
+</p-table>

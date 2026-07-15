@@ -1,0 +1,6 @@
+.hint { color: var(--hr-text-muted); }
+.chain-form { display: flex; flex-direction: column; gap: 0.4rem; max-width: 560px; }
+label { font-size: 0.85rem; color: var(--hr-text-muted); margin-top: 0.5rem; }
+.steps { display: flex; flex-direction: column; gap: 0.5rem; margin: 0.75rem 0; }
+.step-row { display: flex; align-items: center; gap: 0.75rem; }
+.step-order { width: 60px; font-size: 0.85rem; color: var(--hr-text-muted); }
