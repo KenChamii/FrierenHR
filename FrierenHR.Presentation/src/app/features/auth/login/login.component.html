@@ -1,0 +1,18 @@
+<div class="login-page">
+  <form class="login-card" [formGroup]="form" (ngSubmit)="submit()">
+    <h1>FrierenHR</h1>
+    <p class="subtitle">Sign in to continue</p>
+
+    @if (errorMessage()) {
+      <p-message severity="error" [text]="errorMessage()!" styleClass="w-full mb-3" />
+    }
+
+    <label for="email">Email</label>
+    <input pInputText id="email" formControlName="email" placeholder="you@company.com" class="w-full" />
+
+    <label for="password">Password</label>
+    <p-password formControlName="password" [feedback]="false" [toggleMask]="true" inputStyleClass="w-full" styleClass="w-full" />
+
+    <p-button label="Sign In" type="submit" [loading]="loading()" [disabled]="form.invalid" styleClass="w-full mt-3" />
+  </form>
+</div>

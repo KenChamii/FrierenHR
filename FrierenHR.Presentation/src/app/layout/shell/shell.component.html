@@ -1,0 +1,29 @@
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">FrierenHR</div>
+    <nav>
+      @for (item of navItems; track item.path) {
+        @if (visible(item)) {
+          <a [routerLink]="item.path" routerLinkActive="active" class="nav-link">
+            <i [class]="item.icon"></i><span>{{ item.label }}</span>
+          </a>
+        }
+      }
+    </nav>
+    <div class="sidebar-footer">
+      <button class="nav-link" type="button" (click)="logout()">
+        <i class="pi pi-sign-out"></i><span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <span class="welcome">Hi, {{ authService.currentFullName() }}</span>
+      <span class="role-badge">{{ authService.currentRole() }}</span>
+    </header>
+    <main class="content">
+      <router-outlet />
+    </main>
+  </div>
+</div>
