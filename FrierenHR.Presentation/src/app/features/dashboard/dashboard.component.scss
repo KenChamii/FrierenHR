@@ -1,0 +1,10 @@
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem; }
+
+:host ::ng-deep .stat-card {
+  border-radius: var(--hr-radius); box-shadow: var(--hr-shadow); border: none;
+
+  &.accent { background: var(--hr-accent); color: #fff; .stat-label { color: rgba(255,255,255,0.8); } }
+}
+
+.stat-value { font-size: 2rem; font-weight: 700; }
+.stat-label { color: var(--hr-text-muted); font-size: 0.85rem; margin-top: 0.25rem; }
