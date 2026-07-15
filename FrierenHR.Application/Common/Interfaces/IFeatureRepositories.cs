@@ -33,3 +33,15 @@ public interface IAttendanceRepository : IRepository<AttendanceLog>
     Task<AttendanceLog?> GetOpenLogAsync(Guid employeeId, CancellationToken ct = default);
     Task<List<AttendanceLog>> GetByEmployeeAsync(Guid employeeId, DateTime? from = null, DateTime? to = null, CancellationToken ct = default);
 }
+
+public interface IApprovalRepository
+{
+    Task<ApprovalChain> AddChainAsync(ApprovalChain chain, CancellationToken ct = default);
+    Task<ApprovalChain?> GetChainByIdAsync(Guid chainId, CancellationToken ct = default);
+    Task<ApprovalChain?> GetChainForCompanyAsync(Guid companyId, CancellationToken ct = default);
+    Task<ApprovalInstance> AddInstanceAsync(ApprovalInstance instance, CancellationToken ct = default);
+    Task<ApprovalInstance?> GetInstanceByIdAsync(Guid instanceId, CancellationToken ct = default);
+    void UpdateInstance(ApprovalInstance instance);
+    Task<List<ApprovalInstance>> GetAllPendingInstancesAsync(CancellationToken ct = default);
+    Task<int> SaveChangesAsync(CancellationToken ct = default);
+}

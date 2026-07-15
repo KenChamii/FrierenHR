@@ -1,9 +1,10 @@
-﻿using System.Text.Json;
-using FrierenHR.Application.Common.DTOs;
+﻿using FrierenHR.Application.Common.DTOs;
 using FrierenHR.Application.Common.Interfaces;
+using FrierenHR.Application.Features.Approval;
 using FrierenHR.Core.Entities;
 using FrierenHR.Core.Enums;
 using FrierenHR.Core.RulesEngine;
+using System.Text.Json;
 
 
 namespace FrierenHR.Application.Features.Leave;
@@ -14,15 +15,17 @@ public class LeaveService : ILeaveService
     private readonly ILeaveRepository _leaveRepository;
     private readonly IRuleConfigRepository _ruleConfigRepository;
     private readonly IRuleEvaluator _ruleEvaluator;
+    private readonly IApprovalService _approvalService;
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     public LeaveService(IEmployeeRepository employeeRepository, ILeaveRepository leaveRepository,
-        IRuleConfigRepository ruleConfigRepository, IRuleEvaluator ruleEvaluator)
+        IRuleConfigRepository ruleConfigRepository, IRuleEvaluator ruleEvaluator, IApprovalService approvalService)
     {
         _employeeRepository = employeeRepository;
         _leaveRepository = leaveRepository;
         _ruleConfigRepository = ruleConfigRepository;
         _ruleEvaluator = ruleEvaluator;
+        _approvalService = approvalService;
     }
 
     public async Task<LeaveRequestDto> RequestLeaveAsync(CreateLeaveRequestDto dto, CancellationToken ct = default)
@@ -56,6 +59,19 @@ public class LeaveService : ILeaveService
         };
 
         await _leaveRepository.AddAsync(entity, ct);
+
+        if (requiresApproval)
+        {
+            var chain = await _approvalService.GetChainForCompanyAsync(employee.CompanyId, ct);
+            if (chain is not null)
+                await _approvalService.StartInstanceAsync(entity.Id, chain.Id, ct); // multi-step path
+                                                                                    // else: falls through to the simple Phase-3 bool-based Pending/Approved/Rejected path — unchanged
+        }
+        else
+        {
+            await ApplyBalanceDeduction(employee.Id, dto.LeaveType, days, ct);
+        }
+
         if (!requiresApproval) await ApplyBalanceDeduction(employee.Id, dto.LeaveType, days, ct);
         await _leaveRepository.SaveChangesAsync(ct);
         return ToDto(entity, employee);
