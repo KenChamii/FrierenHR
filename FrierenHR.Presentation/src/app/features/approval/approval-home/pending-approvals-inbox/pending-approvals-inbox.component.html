@@ -1,0 +1,16 @@
+<p-table [value]="requests()" [loading]="loading()" responsiveLayout="scroll">
+  <ng-template pTemplate="header"><tr><th>Employee</th><th>Type</th><th>Dates</th><th>Status</th><th></th></tr></ng-template>
+  <ng-template pTemplate="body" let-request>
+    <tr>
+      <td>{{ request.employeeName }}</td>
+      <td>{{ request.leaveType }}</td>
+      <td>{{ request.startDate | date: 'MMM d' }} – {{ request.endDate | date: 'MMM d' }}</td>
+      <td><p-tag value="Pending" severity="info" /></td>
+      <td class="actions">
+        <p-button icon="pi pi-check" severity="success" [text]="true" [loading]="decidingId() === request.id" (onClick)="decide(request, true)" />
+        <p-button icon="pi pi-times" severity="danger" [text]="true" [loading]="decidingId() === request.id" (onClick)="decide(request, false)" />
+      </td>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="emptymessage"><tr><td colspan="5">Nothing pending.</td></tr></ng-template>
+</p-table>

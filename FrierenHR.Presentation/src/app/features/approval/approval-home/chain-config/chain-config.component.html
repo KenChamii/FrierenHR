@@ -1,0 +1,26 @@
+<p class="hint">Build a multi-step approval chain (e.g. Manager → HRAdmin). Companies with no chain configured fall back to the simple single-decision path automatically.</p>
+
+@if (saveError()) { <p-message severity="error" [text]="saveError()!" styleClass="w-full mb-2" /> }
+@if (saveSuccess()) { <p-message severity="success" text="Chain saved." styleClass="w-full mb-2" /> }
+
+<form [formGroup]="form" (ngSubmit)="save()" class="chain-form">
+  <label for="companyId">Company ID</label>
+  <input pInputText id="companyId" formControlName="companyId" class="w-full" />
+
+  <label for="name">Chain name</label>
+  <input pInputText id="name" formControlName="name" class="w-full" />
+
+  <div formArrayName="steps" class="steps">
+    @for (step of steps.controls; track $index) {
+      <div [formGroupName]="$index" class="step-row">
+        <span class="step-order">Step {{ $index + 1 }}</span>
+        <p-dropdown [options]="roles" formControlName="approverRole" placeholder="Approver role" />
+        <p-inputnumber formControlName="escalateAfterDays" [min]="1" placeholder="Escalate after (days)" />
+        <p-button icon="pi pi-trash" severity="danger" [text]="true" type="button" (onClick)="removeStep($index)" [disabled]="steps.length === 1" />
+      </div>
+    }
+  </div>
+
+  <p-button label="Add Step" icon="pi pi-plus" [text]="true" type="button" (onClick)="addStep()" />
+  <p-button label="Save Chain" type="submit" [loading]="saving()" [disabled]="form.invalid" styleClass="mt-3" />
+</form>
