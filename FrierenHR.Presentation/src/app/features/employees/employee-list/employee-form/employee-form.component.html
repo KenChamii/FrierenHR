@@ -1,0 +1,28 @@
+<form [formGroup]="form" (ngSubmit)="submit()" class="employee-form">
+  @if (errorMessage()) { <small class="p-error">{{ errorMessage() }}</small> }
+
+  <label for="firstName">First name</label>
+  <input pInputText id="firstName" formControlName="firstName" class="w-full" />
+
+  <label for="lastName">Last name</label>
+  <input pInputText id="lastName" formControlName="lastName" class="w-full" />
+
+  <label for="email">Email</label>
+  <input pInputText id="email" formControlName="email" class="w-full" />
+
+  @if (!employee) {
+    <label for="password">Temporary password</label>
+    <p-password formControlName="password" [feedback]="false" [toggleMask]="true" inputStyleClass="w-full" styleClass="w-full" />
+  }
+
+  <label for="hireDate">Hire date</label>
+  <p-datepicker formControlName="hireDate" dateFormat="yy-mm-dd" styleClass="w-full" />
+
+  <label for="role">Role</label>
+  <p-dropdown [options]="roles" formControlName="role" styleClass="w-full" />
+
+  <div class="actions">
+    <p-button label="Cancel" [text]="true" type="button" (onClick)="cancelled.emit()" />
+    <p-button label="Save" type="submit" [loading]="saving()" [disabled]="form.invalid" />
+  </div>
+</form>
