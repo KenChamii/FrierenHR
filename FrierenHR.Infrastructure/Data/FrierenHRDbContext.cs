@@ -17,6 +17,8 @@ public class FrierenHRDbContext : DbContext
     public DbSet<LeaveRequest> LeaveRequests => Set<LeaveRequest>();
     public DbSet<LeaveBalance> LeaveBalances => Set<LeaveBalance>();
     public DbSet<AttendanceLog> AttendanceLogs => Set<AttendanceLog>();
+    public DbSet<ApprovalChain> ApprovalChains => Set<ApprovalChain>();
+    public DbSet<ApprovalInstance> ApprovalInstances => Set<ApprovalInstance>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

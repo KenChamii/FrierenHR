@@ -4,6 +4,7 @@ using FrierenHR.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FrierenHR.Infrastructure.Migrations
 {
     [DbContext(typeof(FrierenHRDbContext))]
-    partial class FrierenHRDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260715040836_AddApprovalChain")]
+    partial class AddApprovalChain
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

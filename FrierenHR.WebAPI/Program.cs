@@ -1,3 +1,4 @@
+using FrierenHR.Application.Features.Approval;
 using FrierenHR.Application.Features.Attendance;
 using FrierenHR.Application.Features.Company;
 using FrierenHR.Application.Features.Employee;
@@ -56,7 +57,8 @@ builder.Services.AddScoped<ILeaveRepository, LeaveRepository>();
 builder.Services.AddScoped<ILeaveService, LeaveService>();
 builder.Services.AddScoped<IAttendanceRepository, AttendanceRepository>();
 builder.Services.AddScoped<IAttendanceService, AttendanceService>();
-
+builder.Services.AddScoped<IApprovalRepository, ApprovalRepository>();
+builder.Services.AddScoped<IApprovalService, ApprovalService>();
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment()) {
