@@ -1,4 +1,5 @@
-﻿using FrierenHR.Application.Common.Interfaces;
+﻿using FrierenHR.Application.Common.DTOs;
+using FrierenHR.Application.Common.Interfaces;
 using FrierenHR.Core.Entities;
 using FrierenHR.Core.Enums;
 
@@ -44,4 +45,14 @@ public interface IApprovalRepository
     void UpdateInstance(ApprovalInstance instance);
     Task<List<ApprovalInstance>> GetAllPendingInstancesAsync(CancellationToken ct = default);
     Task<int> SaveChangesAsync(CancellationToken ct = default);
+}
+
+
+public interface IMessagingRepository
+{
+    Task<Conversation?> GetDirectConversationAsync(Guid employeeAId, Guid employeeBId, CancellationToken ct = default);
+    Task<Conversation> CreateConversationAsync(Conversation conversation, CancellationToken ct = default);
+    Task<List<ConversationDto>> GetConversationsForEmployeeAsync(Guid employeeId, CancellationToken ct = default);
+    Task<Message> AddMessageAsync(Message message, CancellationToken ct = default);
+    Task<List<MessageDto>> GetHistoryAsync(Guid conversationId, int skip, int take, CancellationToken ct = default);
 }
