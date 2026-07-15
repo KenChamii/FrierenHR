@@ -3,10 +3,12 @@ using FrierenHR.Application.Features.Attendance;
 using FrierenHR.Application.Features.Company;
 using FrierenHR.Application.Features.Employee;
 using FrierenHR.Application.Features.Leave;
+using FrierenHR.Application.Features.Messaging;
 using FrierenHR.Application.Features.RulesConfig;
 using FrierenHR.Core.RulesEngine;
 using FrierenHR.Infrastructure.Data;
 using FrierenHR.Infrastructure.Repositories;
+using FrierenHR.WebAPI.Hubs;
 using FrierenHR.WebAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -41,7 +43,7 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+builder.Services.AddSignalR();
 
 builder.Services.AddScoped<IRuleConfigRepository, RuleConfigRepository>();
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
@@ -59,6 +61,12 @@ builder.Services.AddScoped<IAttendanceRepository, AttendanceRepository>();
 builder.Services.AddScoped<IAttendanceService, AttendanceService>();
 builder.Services.AddScoped<IApprovalRepository, ApprovalRepository>();
 builder.Services.AddScoped<IApprovalService, ApprovalService>();
+builder.Services.AddScoped<IMessagingRepository, MessagingRepository>();
+builder.Services.AddScoped<IMessagingService, MessagingService>();
+
+builder.Services.AddCors(o => o.AddPolicy("AngularDev", p => p
+    .WithOrigins("http://localhost:4200")
+    .AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment()) {
@@ -72,5 +80,7 @@ if (app.Environment.IsDevelopment()) {
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseCors("AngularDev");
 app.MapControllers();
+app.MapHub<ChatHub>("/hubs/chat");
 app.Run();

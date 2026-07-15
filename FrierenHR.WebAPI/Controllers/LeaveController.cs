@@ -13,7 +13,8 @@ public class LeaveController : ControllerBase
     public LeaveController(ILeaveService leaveService) => _leaveService = leaveService;
 
     [HttpPost("requests")]
-    public async Task<ActionResult<LeaveRequestDto>> Request(CreateLeaveRequestDto dto, CancellationToken ct)
+    [HttpPost]
+    public async Task<IActionResult> RequestLeave(CreateLeaveRequestDto dto, CancellationToken ct)
     {
         try { return Ok(await _leaveService.RequestLeaveAsync(dto, ct)); }
         catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }

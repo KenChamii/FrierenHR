@@ -19,7 +19,9 @@ public class FrierenHRDbContext : DbContext
     public DbSet<AttendanceLog> AttendanceLogs => Set<AttendanceLog>();
     public DbSet<ApprovalChain> ApprovalChains => Set<ApprovalChain>();
     public DbSet<ApprovalInstance> ApprovalInstances => Set<ApprovalInstance>();
-
+    public DbSet<Conversation> Conversations => Set<Conversation>();
+    public DbSet<ConversationParticipant> ConversationParticipants => Set<ConversationParticipant>();
+    public DbSet<Message> Messages => Set<Message>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(FrierenHRDbContext).Assembly);
