@@ -20,15 +20,15 @@ export class DashboardComponent implements OnInit {
   readonly loading = signal(true);
 
   constructor(
-    private authService: AuthService,
+    public authService: AuthService,
     private employeeService: EmployeeService,
     private leaveService: LeaveService,
   ) {}
 
   ngOnInit(): void {
-    const companyId = ''; // TODO: resolve from the logged-in employee's CompanyDto once EmployeeDto is cached client-side
+    const companyId = this.authService.currentCompanyId();
     const approverId = this.authService.currentEmployeeId();
-    if (!approverId) { this.loading.set(false); return; }
+    if (!approverId || !companyId) { this.loading.set(false); return; }
 
     forkJoin({
       employees: this.employeeService.getByCompany(companyId),

@@ -1,10 +1,63 @@
-.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem; }
+.dash-header {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--hr-radius-lg);
+  background: var(--hr-hero-gradient);
+  padding: 2rem 1.75rem;
+  margin-bottom: 1.5rem;
+  min-height: 130px;
+  display: flex;
+  align-items: center;
+  box-shadow: var(--hr-shadow-lg);
 
-:host ::ng-deep .stat-card {
-  border-radius: var(--hr-radius); box-shadow: var(--hr-shadow); border: none;
+  .dash-scene {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
 
-  &.accent { background: var(--hr-accent); color: #fff; .stat-label { color: rgba(255,255,255,0.8); } }
+  .dash-header-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  h2 { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.01em; color: #fff; }
+  .subtitle { margin: 0.15rem 0 0; color: rgba(234,244,238,0.85); font-size: 0.9rem; }
 }
 
-.stat-value { font-size: 2rem; font-weight: 700; }
-.stat-label { color: var(--hr-text-muted); font-size: 0.85rem; margin-top: 0.25rem; }
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.1rem;
+}
+
+:host ::ng-deep .stat-card {
+  border: none;
+
+  .p-card-body { padding: 1.4rem 1.4rem 1.5rem; }
+  .p-card-content { padding: 0; }
+
+  &.accent {
+    background: var(--hr-accent-gradient);
+    color: #fff;
+
+    .stat-label { color: rgba(255,255,255,0.82); }
+    .stat-icon { background: rgba(255,255,255,0.16); color: #fff; }
+  }
+}
+
+.stat-icon {
+  width: 42px; height: 42px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--hr-accent-soft); color: var(--hr-accent-dark);
+  font-size: 1.05rem; margin-bottom: 0.9rem;
+
+  &.warning { background: #fdf1dd; color: #b9791a; }
+  &.info { background: #e5eefb; color: #2d63b0; }
+  &.success { background: #e4f5ea; color: #1f7a4d; }
+}
+
+.stat-value { font-size: 2.1rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+.stat-label { color: var(--hr-text-muted); font-size: 0.85rem; margin-top: 0.35rem; }

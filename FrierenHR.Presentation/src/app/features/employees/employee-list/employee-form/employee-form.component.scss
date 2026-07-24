@@ -1,3 +1,4 @@
 .employee-form { display: flex; flex-direction: column; gap: 0.4rem; }
 label { font-size: 0.85rem; color: var(--hr-text-muted); margin-top: 0.5rem; }
+.field-hint { font-size: 0.75rem; color: var(--hr-text-muted); margin-top: -0.15rem; }
 .actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.25rem; }

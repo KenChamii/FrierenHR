@@ -1,11 +1,13 @@
 ﻿using FrierenHR.Application.Common.DTOs;
 using FrierenHR.Application.Features.RulesConfig;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FrierenHR.WebAPI.Controllers;
 
 [ApiController]
 [Route("api/rules-config")]
+[Authorize(Roles = "HRAdmin")]
 public class RulesConfigController : ControllerBase
 {
     private readonly IRuleConfigService _ruleConfigService;

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
@@ -25,6 +25,17 @@ export class ShellComponent {
   ];
 
   constructor(public authService: AuthService) {}
+
+  readonly initials = computed(() => {
+    const name = this.authService.currentFullName();
+    if (!name) return '?';
+    return name
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase())
+      .join('');
+  });
 
   visible(item: NavItem): boolean {
     return !item.roles || item.roles.includes(this.authService.currentRole() ?? '');

@@ -1,18 +1,100 @@
 <div class="login-page">
-  <form class="login-card" [formGroup]="form" (ngSubmit)="submit()">
-    <h1>FrierenHR</h1>
-    <p class="subtitle">Sign in to continue</p>
+  <div class="login-card">
+    <div class="hero">
+      <svg class="hero-scene" viewBox="0 0 800 460" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <radialGradient id="moonGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="moonBody" cx="35%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#eafff2"/>
+            <stop offset="100%" stop-color="#8fe0b4"/>
+          </radialGradient>
+          <symbol id="hr-pine" viewBox="0 0 40 90">
+            <rect x="17" y="72" width="6" height="16" fill="currentColor"/>
+            <polygon points="20,0 34,34 6,34" fill="currentColor"/>
+            <polygon points="20,16 36,52 4,52" fill="currentColor"/>
+            <polygon points="20,34 40,74 0,74" fill="currentColor"/>
+          </symbol>
+          <symbol id="hr-spark" viewBox="0 0 20 20">
+            <path d="M10 0 L12.5 7.5 L20 10 L12.5 12.5 L10 20 L7.5 12.5 L0 10 L7.5 7.5 Z" fill="currentColor"/>
+          </symbol>
+        </defs>
 
-    @if (errorMessage()) {
-      <p-message severity="error" [text]="errorMessage()!" styleClass="w-full mb-3" />
-    }
+        <g color="#ffffff">
+          <use href="#hr-spark" width="14" height="14" x="70" y="45" opacity="0.55"/>
+          <use href="#hr-spark" width="10" height="10" x="690" y="30" opacity="0.45"/>
+          <use href="#hr-spark" width="8" height="8" x="610" y="120" opacity="0.4"/>
+          <use href="#hr-spark" width="8" height="8" x="140" y="130" opacity="0.35"/>
+          <use href="#hr-spark" width="9" height="9" x="390" y="18" opacity="0.5"/>
+          <circle cx="740" cy="190" r="1.8" fill="#fff" opacity="0.5"/>
+          <circle cx="40" cy="210" r="1.6" fill="#fff" opacity="0.4"/>
+          <circle cx="470" cy="90" r="1.6" fill="#fff" opacity="0.4"/>
+        </g>
 
-    <label for="email">Email</label>
-    <input pInputText id="email" formControlName="email" placeholder="you@company.com" class="w-full" />
+        <circle cx="400" cy="150" r="95" fill="url(#moonGlow)"/>
+        <circle cx="400" cy="150" r="44" fill="url(#moonBody)"/>
 
-    <label for="password">Password</label>
-    <p-password formControlName="password" [feedback]="false" [toggleMask]="true" inputStyleClass="w-full" styleClass="w-full" />
+        <path d="M0,300 C120,240 220,320 340,265 C460,215 560,290 680,245 C740,222 780,238 800,228 L800,460 L0,460 Z" fill="rgba(255,255,255,0.08)"/>
+        <g color="rgba(255,255,255,0.16)">
+          <use href="#hr-pine" width="40" height="90" transform="translate(90,255) scale(0.65)"/>
+          <use href="#hr-pine" width="40" height="90" transform="translate(630,235) scale(0.55)"/>
+          <use href="#hr-pine" width="40" height="90" transform="translate(700,245) scale(0.7)"/>
+        </g>
 
-    <p-button label="Sign In" type="submit" [loading]="loading()" [disabled]="form.invalid" styleClass="w-full mt-3" />
-  </form>
+        <path d="M0,340 C90,300 170,360 260,320 C350,285 430,345 520,315 C610,285 700,330 800,300 L800,460 L0,460 Z" fill="rgba(255,255,255,0.14)"/>
+        <g color="rgba(255,255,255,0.22)">
+          <use href="#hr-pine" width="40" height="90" transform="translate(150,300) scale(0.85)"/>
+          <use href="#hr-pine" width="40" height="90" transform="translate(210,285) scale(1.05)"/>
+          <use href="#hr-pine" width="40" height="90" transform="translate(540,300) scale(0.9)"/>
+          <use href="#hr-pine" width="40" height="90" transform="translate(600,280) scale(1.1)"/>
+          <use href="#hr-pine" width="40" height="90" transform="translate(660,295) scale(0.75)"/>
+        </g>
+      </svg>
+
+      <div class="hero-content">
+        <div class="brand-mark">
+          <i class="pi pi-sitemap"></i>
+        </div>
+        <h1>FrierenHR</h1>
+        <p>Manage your people, leave and approvals in one calm, connected place.</p>
+      </div>
+    </div>
+
+    <form class="form-panel" [formGroup]="form" (ngSubmit)="submit()">
+      <h2>User Login</h2>
+      <p class="form-subtitle">Sign in to continue to your workspace</p>
+
+      @if (errorMessage()) {
+        <p-message severity="error" [text]="errorMessage()!" styleClass="w-full mb-3" />
+      }
+
+      <div class="field">
+        <label for="email">Email</label>
+        <div class="input-wrap">
+          <i class="pi pi-user"></i>
+          <input pInputText id="email" formControlName="email" placeholder="you@company.com" class="w-full" autocomplete="email" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <div class="input-wrap">
+          <i class="pi pi-lock"></i>
+          <p-password formControlName="password" [feedback]="false" [toggleMask]="true" inputStyleClass="w-full" styleClass="w-full" autocomplete="current-password" />
+        </div>
+      </div>
+
+      <div class="row-between">
+        <label class="remember">
+          <p-checkbox [binary]="true" formControlName="remember" />
+          Remember me
+        </label>
+        <a class="forgot" href="javascript:void(0)">Forgot password?</a>
+      </div>
+
+      <p-button label="Login" type="submit" [loading]="loading()" [disabled]="form.invalid" styleClass="w-full login-btn" />
+    </form>
+  </div>
 </div>

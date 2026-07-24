@@ -7,6 +7,7 @@ import { DropdownModule } from 'primeng/dropdown';
 import { DatePickerModule } from 'primeng/datepicker';
 import { ButtonModule } from 'primeng/button';
 import { EmployeeService } from '../../../../core/services/employee.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { EmployeeDto } from '../../../../core/models/employee.model';
 import { EMPLOYEE_ROLES } from '../../../../core/models/enums.model';
 
@@ -20,6 +21,7 @@ import { EMPLOYEE_ROLES } from '../../../../core/models/enums.model';
 export class EmployeeFormComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly employeeService = inject(EmployeeService);
+  private readonly authService = inject(AuthService);
 
   @Input() employee: EmployeeDto | null = null;
   @Output() saved = new EventEmitter<void>();
@@ -38,6 +40,10 @@ export class EmployeeFormComponent implements OnInit {
     role: ['Employee', Validators.required],
   });
 
+  // Mirrors PasswordPolicy on the backend (min 8 chars, at least one letter and one digit) —
+  // this is just for fast feedback; the server re-validates regardless.
+  private readonly passwordValidators = [Validators.required, Validators.minLength(8), Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d).+$/)];
+
   ngOnInit(): void {
     if (this.employee) {
       this.form.patchValue({
@@ -47,7 +53,7 @@ export class EmployeeFormComponent implements OnInit {
       this.form.get('email')?.disable();
       this.form.get('password')?.clearValidators();
     } else {
-      this.form.get('password')?.setValidators(Validators.required);
+      this.form.get('password')?.setValidators(this.passwordValidators);
     }
   }
 
@@ -63,7 +69,7 @@ export class EmployeeFormComponent implements OnInit {
           firstName: raw.firstName!, lastName: raw.lastName!, role: raw.role as any, isActive: true,
         })
       : this.employeeService.create({
-          companyId: '', // TODO: supply from the logged-in HRAdmin's own companyId
+          companyId: this.authService.currentCompanyId() ?? '',
           firstName: raw.firstName!, lastName: raw.lastName!, email: raw.email!,
           password: raw.password!, hireDate: (raw.hireDate as Date).toISOString(), role: raw.role as any,
         });

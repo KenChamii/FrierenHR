@@ -1,0 +1,37 @@
+<p-card styleClass="week-card">
+  <div class="week-header">
+    <div>
+      <h3>This Week</h3>
+      <p class="range">{{ weekStart | date: 'MMM d' }} – {{ weekEnd | date: 'MMM d' }}</p>
+    </div>
+    <p-tag [value]="status()" [severity]="severityFor(status())" />
+  </div>
+
+  <div class="total-hours">
+    <span class="value">{{ totalHours() | number: '1.1-1' }}</span>
+    <span class="unit">hours logged</span>
+  </div>
+
+  @if (status() === 'Rejected' && timesheet()?.comment) {
+    <p-message severity="warn" [text]="'Rejected: ' + timesheet()!.comment" styleClass="w-full mb-2" />
+  }
+
+  @if (errorMessage()) {
+    <p-message severity="error" [text]="errorMessage()!" styleClass="w-full mb-2" />
+  }
+
+  @if (canSubmit()) {
+    <p-button
+      [label]="status() === 'Rejected' ? 'Resubmit Week' : 'Submit Week'"
+      icon="pi pi-send"
+      [loading]="submitting()"
+      styleClass="w-full"
+      (onClick)="submit()"
+    />
+  } @else {
+    <p class="locked-note">
+      <i class="pi pi-lock"></i>
+      {{ status() === 'Submitted' ? 'Awaiting approval — attendance for this week is locked.' : 'Approved — attendance for this week is locked.' }}
+    </p>
+  }
+</p-card>

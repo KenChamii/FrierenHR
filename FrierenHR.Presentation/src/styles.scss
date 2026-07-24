@@ -1,1 +1,33 @@
-/* You can add global styles to this file, and also import other style files */
+/* Global styles */
+@import './styles/theme';
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--hr-font);
+  background: var(--hr-bg);
+  color: var(--hr-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--hr-font);
+  color: var(--hr-text);
+  margin: 0 0 0.25rem;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: #cfe0d6; border-radius: 999px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* Soften default PrimeNG card shadow app-wide to match the brand */
+.p-card {
+  box-shadow: var(--hr-shadow) !important;
+  border-radius: var(--hr-radius) !important;
+}

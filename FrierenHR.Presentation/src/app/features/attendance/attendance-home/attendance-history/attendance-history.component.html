@@ -1,12 +1,22 @@
+<p-confirmDialog />
+
+@if (errorMessage()) {
+  <p-message severity="error" [text]="errorMessage()!" styleClass="w-full mb-2" />
+}
+
 <p-table [value]="logs()" [loading]="loading()" [paginator]="true" [rows]="10" responsiveLayout="scroll">
-  <ng-template pTemplate="header"><tr><th>Time In</th><th>Time Out</th><th>Source</th><th>Hours</th></tr></ng-template>
+  <ng-template pTemplate="header"><tr><th>Time In</th><th>Time Out</th><th>Break</th><th>Source</th><th>Hours</th><th></th></tr></ng-template>
   <ng-template pTemplate="body" let-log>
     <tr>
       <td>{{ log.timeIn | date: 'short' }}</td>
       <td>{{ log.timeOut ? (log.timeOut | date: 'short') : '—' }}</td>
+      <td>{{ log.breakMinutes ? (log.breakMinutes + 'm') : '—' }}</td>
       <td>{{ log.source }}</td>
       <td>{{ log.hoursWorked ? (log.hoursWorked | number: '1.1-1') : '—' }}</td>
+      <td>
+        <p-button icon="pi pi-trash" [text]="true" severity="danger" (onClick)="confirmDelete(log)" />
+      </td>
     </tr>
   </ng-template>
-  <ng-template pTemplate="emptymessage"><tr><td colspan="4">No attendance logs yet.</td></tr></ng-template>
+  <ng-template pTemplate="emptymessage"><tr><td colspan="6">No attendance logs yet.</td></tr></ng-template>
 </p-table>

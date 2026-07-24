@@ -1,6 +1,8 @@
 <div class="header-row">
   <h2>Employees</h2>
-  <p-button label="Add Employee" icon="pi pi-plus" (onClick)="openCreate()" />
+  @if (authService.currentRole() === 'HRAdmin') {
+    <p-button label="Add Employee" icon="pi pi-plus" (onClick)="openCreate()" />
+  }
 </div>
 
 <p-table [value]="employees()" [loading]="loading()" [paginator]="true" [rows]="10" responsiveLayout="scroll">
@@ -18,7 +20,11 @@
       <td><p-tag [value]="employee.role" [severity]="severityFor(employee.role)" /></td>
       <td>{{ employee.tenureMonths }} mo</td>
       <td><p-tag [value]="employee.isActive ? 'Active' : 'Inactive'" [severity]="employee.isActive ? 'success' : 'danger'" /></td>
-      <td><p-button icon="pi pi-pencil" [text]="true" (onClick)="openEdit(employee)" /></td>
+      <td>
+        @if (authService.currentRole() === 'HRAdmin') {
+          <p-button icon="pi pi-pencil" [text]="true" (onClick)="openEdit(employee)" />
+        }
+      </td>
     </tr>
   </ng-template>
   <ng-template pTemplate="emptymessage"><tr><td colspan="8">No employees yet.</td></tr></ng-template>

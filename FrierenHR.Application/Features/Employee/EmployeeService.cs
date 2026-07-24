@@ -15,6 +15,8 @@ public class EmployeeService : IEmployeeService
         var existing = await _employeeRepository.GetByEmailAsync(dto.Email, ct);
         if (existing is not null) throw new InvalidOperationException($"Email '{dto.Email}' is already registered.");
 
+        PasswordPolicy.Validate(dto.Password);
+
         var entity = new FrierenHR.Core.Entities.Employee
         {
             CompanyId = dto.CompanyId,

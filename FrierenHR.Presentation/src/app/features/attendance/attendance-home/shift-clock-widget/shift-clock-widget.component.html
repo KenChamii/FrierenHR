@@ -1,0 +1,51 @@
+<p-card header="Work Hours">
+  @if (loading()) {
+    <p>Loading…</p>
+  } @else {
+    <div class="dial-wrap">
+      <svg #dial viewBox="0 0 240 240" class="dial"
+           (pointermove)="onDialPointerMove($event)" (pointerup)="onDialPointerUp()" (pointerleave)="onDialPointerUp()">
+        <circle cx="120" cy="120" r="100" class="dial-face" />
+
+        <!-- hour ticks, every 3 hours labeled -->
+        @for (h of [0,3,6,9,12,15,18,21]; track h) {
+          <text [attr.x]="120 + 84 * sinDeg(h * 15)" [attr.y]="120 - 84 * cosDeg(h * 15) + 4" class="tick-label" text-anchor="middle">
+            {{ h === 0 ? '12a' : h === 12 ? '12p' : h < 12 ? h + 'a' : (h - 12) + 'p' }}
+          </text>
+        }
+
+        <path [attr.d]="arcPath()" class="shift-arc" />
+
+        <line [attr.x2]="startPoint().x" [attr.y2]="startPoint().y" x1="120" y1="120" class="spoke start-spoke" />
+        <line [attr.x2]="endPoint().x" [attr.y2]="endPoint().y" x1="120" y1="120" class="spoke end-spoke" />
+
+        <circle [attr.cx]="startPoint().x" [attr.cy]="startPoint().y" r="11" class="handle start-handle"
+                (pointerdown)="onHandlePointerDown('start', $event)" />
+        <circle [attr.cx]="endPoint().x" [attr.cy]="endPoint().y" r="11" class="handle end-handle"
+                (pointerdown)="onHandlePointerDown('end', $event)" />
+      </svg>
+
+      <div class="dial-readout">
+        <div class="time-chip start"><span class="dot"></span>Start: {{ startLabel() }}</div>
+        <div class="time-chip end"><span class="dot"></span>End: {{ endLabel() }}</div>
+        <div class="hours-total">{{ workedHoursLabel() }} hrs worked</div>
+      </div>
+    </div>
+
+    <div class="break-field">
+      <label for="breakMinutes">Break (minutes)</label>
+      <p-inputnumber inputId="breakMinutes" [ngModel]="breakMinutes()" (ngModelChange)="breakMinutes.set($event)" [min]="0" [max]="720" [step]="5" styleClass="w-full" />
+    </div>
+
+    @if (errorMessage()) {
+      <p class="error">{{ errorMessage() }}</p>
+    }
+
+    <div class="actions">
+      @if (existingLogId()) {
+        <p-button label="Delete" icon="pi pi-trash" severity="danger" [text]="true" [loading]="deleting()" (onClick)="deleteToday()" />
+      }
+      <p-button label="Save Shift" icon="pi pi-check" [loading]="saving()" (onClick)="submit()" styleClass="flex-1" />
+    </div>
+  }
+</p-card>

@@ -13,6 +13,7 @@
   @if (!employee) {
     <label for="password">Temporary password</label>
     <p-password formControlName="password" [feedback]="false" [toggleMask]="true" inputStyleClass="w-full" styleClass="w-full" />
+    <small class="field-hint">At least 8 characters, with at least one letter and one number.</small>
   }
 
   <label for="hireDate">Hire date</label>

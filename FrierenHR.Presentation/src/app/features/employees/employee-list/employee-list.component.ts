@@ -22,14 +22,13 @@ export class EmployeeListComponent implements OnInit {
   readonly dialogVisible = signal(false);
   readonly editingEmployee = signal<EmployeeDto | null>(null);
 
-  constructor(private employeeService: EmployeeService, private authService: AuthService) {}
+  constructor(private employeeService: EmployeeService, public authService: AuthService) {}
 
   ngOnInit(): void { this.load(); }
 
   load(): void {
-    // NOTE: companyId should come from the logged-in employee's own record (EmployeeDto.companyId),
-    // fetched once at login and cached — placeholder empty string here, wire it up once auth returns companyId.
-    const companyId = '';
+    const companyId = this.authService.currentCompanyId();
+    if (!companyId) { this.loading.set(false); return; }
     this.loading.set(true);
     this.employeeService.getByCompany(companyId).subscribe({
       next: (list) => { this.employees.set(list); this.loading.set(false); },

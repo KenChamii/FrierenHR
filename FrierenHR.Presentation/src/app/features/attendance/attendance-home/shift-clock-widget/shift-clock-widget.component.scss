@@ -1,0 +1,101 @@
+:host ::ng-deep .p-card { border-radius: var(--hr-radius); box-shadow: var(--hr-shadow); }
+
+.dial-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 0 1rem;
+}
+
+.dial {
+  width: 220px;
+  height: 220px;
+  touch-action: none;
+  user-select: none;
+}
+
+.dial-face {
+  fill: var(--hr-surface-alt);
+  stroke: var(--hr-border);
+  stroke-width: 1.5;
+}
+
+.tick-label {
+  font-size: 10px;
+  fill: var(--hr-text-muted);
+  font-family: var(--hr-font);
+}
+
+.shift-arc {
+  fill: var(--hr-accent-soft);
+  stroke: none;
+}
+
+.spoke {
+  stroke-width: 2;
+}
+
+.start-spoke { stroke: var(--hr-accent); }
+.end-spoke { stroke: var(--hr-danger); }
+
+.handle {
+  cursor: grab;
+  stroke: var(--hr-surface);
+  stroke-width: 2;
+}
+
+.handle:active { cursor: grabbing; }
+
+.start-handle { fill: var(--hr-accent); }
+.end-handle { fill: var(--hr-danger); }
+
+.dial-readout {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  font-size: 0.9rem;
+}
+
+.time-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--hr-text);
+}
+
+.time-chip .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.time-chip.start .dot { background: var(--hr-accent); }
+.time-chip.end .dot { background: var(--hr-danger); }
+
+.hours-total {
+  font-weight: 600;
+  color: var(--hr-accent-dark);
+}
+
+.break-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin-bottom: 1rem;
+}
+
+.error {
+  font-size: 0.85rem;
+  color: var(--hr-danger);
+  margin: 0 0 0.75rem;
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
