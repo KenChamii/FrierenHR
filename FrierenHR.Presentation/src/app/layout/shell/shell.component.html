@@ -1,6 +1,9 @@
 <div class="shell">
   <aside class="sidebar">
-    <div class="brand">FrierenHR</div>
+    <div class="brand">
+      <div class="brand-mark"><i class="pi pi-sitemap"></i></div>
+      <span>FrierenHR</span>
+    </div>
     <nav>
       @for (item of navItems; track item.path) {
         @if (visible(item)) {
@@ -19,8 +22,23 @@
 
   <div class="main">
     <header class="topbar">
-      <span class="welcome">Hi, {{ authService.currentFullName() }}</span>
-      <span class="role-badge">{{ authService.currentRole() }}</span>
+      <div class="search">
+        <i class="pi pi-search"></i>
+        <input type="text" placeholder="Search…" />
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" type="button" aria-label="Notifications">
+          <i class="pi pi-bell"></i>
+        </button>
+        <div class="divider"></div>
+        <div class="user">
+          <div class="avatar">{{ initials() }}</div>
+          <div class="user-meta">
+            <span class="welcome">{{ authService.currentFullName() }}</span>
+            <span class="role-badge">{{ authService.currentRole() }}</span>
+          </div>
+        </div>
+      </div>
     </header>
     <main class="content">
       <router-outlet />

@@ -1,2 +1,3 @@
 .attendance-grid { display: grid; grid-template-columns: 320px 1fr; gap: 1.5rem; align-items: start; }
+.attendance-side { display: flex; flex-direction: column; gap: 1.5rem; }
 @media (max-width: 800px) { .attendance-grid { grid-template-columns: 1fr; } }

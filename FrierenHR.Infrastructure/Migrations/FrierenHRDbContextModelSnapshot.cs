@@ -154,6 +154,9 @@ namespace FrierenHR.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("BreakMinutes")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -522,6 +525,50 @@ namespace FrierenHR.Infrastructure.Migrations
                     b.ToTable("Messages", (string)null);
                 });
 
+            modelBuilder.Entity("FrierenHR.Core.Entities.Timesheet", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DecidedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("DecidedByEmployeeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("EmployeeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("SubmittedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("WeekStartDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DecidedByEmployeeId");
+
+                    b.HasIndex("EmployeeId", "WeekStartDate")
+                        .IsUnique();
+
+                    b.ToTable("Timesheets", (string)null);
+                });
+
             modelBuilder.Entity("FrierenHR.Core.Entities.ApprovalChain", b =>
                 {
                     b.HasOne("FrierenHR.Core.Entities.Company", "Company")
@@ -689,6 +736,24 @@ namespace FrierenHR.Infrastructure.Migrations
                     b.Navigation("Conversation");
 
                     b.Navigation("SenderEmployee");
+                });
+
+            modelBuilder.Entity("FrierenHR.Core.Entities.Timesheet", b =>
+                {
+                    b.HasOne("FrierenHR.Core.Entities.Employee", "DecidedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("DecidedByEmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("FrierenHR.Core.Entities.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DecidedByEmployee");
+
+                    b.Navigation("Employee");
                 });
 
             modelBuilder.Entity("FrierenHR.Core.Entities.ApprovalChain", b =>

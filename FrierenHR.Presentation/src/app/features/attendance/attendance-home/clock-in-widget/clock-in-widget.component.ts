@@ -4,6 +4,7 @@ import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { AttendanceService } from '../../../../core/services/attendance.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { AttendanceRefreshService } from '../../../../core/services/attendance-refresh.service';
 import { AttendanceLogDto } from '../../../../core/models/attendance.model';
 
 @Component({
@@ -18,7 +19,11 @@ export class ClockInWidgetComponent implements OnInit {
   readonly loading = signal(true);
   readonly working = signal(false);
 
-  constructor(private attendanceService: AttendanceService, private authService: AuthService) {}
+  constructor(
+    private attendanceService: AttendanceService,
+    private authService: AuthService,
+    private refreshService: AttendanceRefreshService,
+  ) {}
 
   ngOnInit(): void { this.refresh(); }
 
@@ -38,7 +43,7 @@ export class ClockInWidgetComponent implements OnInit {
     if (!employeeId) return;
     this.working.set(true);
     this.attendanceService.clockIn({ employeeId, source: 'Web' }).subscribe({
-      next: () => { this.working.set(false); this.refresh(); },
+      next: () => { this.working.set(false); this.refresh(); this.refreshService.notifyChanged(); },
       error: () => this.working.set(false),
     });
   }
@@ -48,7 +53,7 @@ export class ClockInWidgetComponent implements OnInit {
     if (!employeeId) return;
     this.working.set(true);
     this.attendanceService.clockOut({ employeeId }).subscribe({
-      next: () => { this.working.set(false); this.refresh(); },
+      next: () => { this.working.set(false); this.refresh(); this.refreshService.notifyChanged(); },
       error: () => this.working.set(false),
     });
   }

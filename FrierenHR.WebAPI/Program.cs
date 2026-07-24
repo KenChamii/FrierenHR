@@ -5,9 +5,11 @@ using FrierenHR.Application.Features.Employee;
 using FrierenHR.Application.Features.Leave;
 using FrierenHR.Application.Features.Messaging;
 using FrierenHR.Application.Features.RulesConfig;
+using FrierenHR.Application.Features.Timesheet;
 using FrierenHR.Core.RulesEngine;
 using FrierenHR.Infrastructure.Data;
 using FrierenHR.Infrastructure.Repositories;
+using FrierenHR.WebAPI.Common;
 using FrierenHR.WebAPI.Hubs;
 using FrierenHR.WebAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -38,6 +40,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 builder.Services.AddAuthorization();
 
+// Global error handling: anything that isn't caught locally in a controller falls through
+// to GlobalExceptionHandler, which returns a consistent ProblemDetails response and never
+// leaks stack traces/connection details outside of Development.
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
         options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter()));
@@ -63,24 +71,34 @@ builder.Services.AddScoped<IApprovalRepository, ApprovalRepository>();
 builder.Services.AddScoped<IApprovalService, ApprovalService>();
 builder.Services.AddScoped<IMessagingRepository, MessagingRepository>();
 builder.Services.AddScoped<IMessagingService, MessagingService>();
+builder.Services.AddScoped<ITimesheetRepository, TimesheetRepository>();
+builder.Services.AddScoped<ITimesheetService, TimesheetService>();
 
-builder.Services.AddCors(o => o.AddPolicy("AngularDev", p => p
-    .WithOrigins("http://localhost:4200")
+// Allowed origins come from config (Cors:AllowedOrigins in appsettings.json / environment
+// variables), not a hardcoded value, so this doesn't need a code change + redeploy to point
+// at a different frontend URL per environment. Falls back to the Angular dev server if unset.
+var corsOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? new[] { "http://localhost:4200" };
+
+builder.Services.AddCors(o => o.AddPolicy("AngularApp", p => p
+    .WithOrigins(corsOrigins)
     .AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
 
 var app = builder.Build();
+app.UseExceptionHandler(); // must be early, so it wraps everything downstream
 if (app.Environment.IsDevelopment()) {
     app.UseSwagger();
     app.UseSwaggerUI();
 
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<FrierenHRDbContext>();
+    await db.Database.MigrateAsync(); // apply any pending EF migrations before seeding/serving
     await DbSeeder.SeedAsync(db);
 }
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseCors("AngularDev");
+app.UseCors("AngularApp");
 app.MapControllers();
 app.MapHub<ChatHub>("/hubs/chat");
 app.Run();

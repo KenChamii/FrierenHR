@@ -1,0 +1,12 @@
+.empty { color: var(--hr-text-muted); font-size: 0.85rem; margin: 0; }
+
+.row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.75rem 0; border-bottom: 1px solid var(--hr-border);
+  &:last-child { border-bottom: none; }
+}
+
+.info { display: flex; flex-direction: column; }
+.name { font-weight: 600; font-size: 0.9rem; }
+.week { font-size: 0.78rem; color: var(--hr-text-muted); }
+.actions { display: flex; gap: 0.25rem; }

@@ -1,18 +1,77 @@
-<h2>Dashboard</h2>
+<div class="dash-header">
+  <svg class="dash-scene" viewBox="0 0 1000 200" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs>
+      <radialGradient id="dashMoonGlow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.3"/>
+        <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="dashMoonBody" cx="35%" cy="35%" r="65%">
+        <stop offset="0%" stop-color="#eafff2"/>
+        <stop offset="100%" stop-color="#8fe0b4"/>
+      </radialGradient>
+      <symbol id="dash-pine" viewBox="0 0 40 90">
+        <rect x="17" y="72" width="6" height="16" fill="currentColor"/>
+        <polygon points="20,0 34,34 6,34" fill="currentColor"/>
+        <polygon points="20,16 36,52 4,52" fill="currentColor"/>
+        <polygon points="20,34 40,74 0,74" fill="currentColor"/>
+      </symbol>
+      <symbol id="dash-spark" viewBox="0 0 20 20">
+        <path d="M10 0 L12.5 7.5 L20 10 L12.5 12.5 L10 20 L7.5 12.5 L0 10 L7.5 7.5 Z" fill="currentColor"/>
+      </symbol>
+    </defs>
+
+    <g color="#ffffff">
+      <use href="#dash-spark" width="10" height="10" x="120" y="20" opacity="0.4"/>
+      <use href="#dash-spark" width="8" height="8" x="860" y="16" opacity="0.4"/>
+      <use href="#dash-spark" width="7" height="7" x="780" y="55" opacity="0.32"/>
+      <circle cx="930" cy="70" r="1.5" fill="#fff" opacity="0.4"/>
+      <circle cx="60" cy="60" r="1.5" fill="#fff" opacity="0.35"/>
+    </g>
+
+    <circle cx="880" cy="60" r="70" fill="url(#dashMoonGlow)"/>
+    <circle cx="880" cy="60" r="30" fill="url(#dashMoonBody)"/>
+
+    <path d="M0,130 C150,90 260,150 380,110 C520,65 640,140 800,100 C880,80 940,95 1000,85 L1000,200 L0,200 Z" fill="rgba(255,255,255,0.07)"/>
+    <g color="rgba(255,255,255,0.14)">
+      <use href="#dash-pine" width="40" height="90" transform="translate(760,110) scale(0.55)"/>
+      <use href="#dash-pine" width="40" height="90" transform="translate(900,95) scale(0.45)"/>
+    </g>
+
+    <path d="M0,160 C120,130 220,175 340,145 C460,115 560,165 680,140 C800,115 900,150 1000,130 L1000,200 L0,200 Z" fill="rgba(255,255,255,0.13)"/>
+    <g color="rgba(255,255,255,0.2)">
+      <use href="#dash-pine" width="40" height="90" transform="translate(60,145) scale(0.7)"/>
+      <use href="#dash-pine" width="40" height="90" transform="translate(110,135) scale(0.85)"/>
+      <use href="#dash-pine" width="40" height="90" transform="translate(640,150) scale(0.65)"/>
+    </g>
+  </svg>
+
+  <div class="dash-header-content">
+    <h2>Welcome back, {{ authService.currentFullName() }}</h2>
+    <p class="subtitle">Here's what's happening across your organization today.</p>
+  </div>
+</div>
+
 <div class="stat-grid">
   <p-card styleClass="stat-card accent">
+    <div class="stat-icon"><i class="pi pi-users"></i></div>
     <div class="stat-value">{{ stats().totalEmployees }}</div>
     <div class="stat-label">Total Employees</div>
   </p-card>
+
   <p-card styleClass="stat-card">
+    <div class="stat-icon warning"><i class="pi pi-hourglass"></i></div>
     <div class="stat-value">{{ stats().pendingLeaveRequests }}</div>
     <div class="stat-label">Pending Leave Requests</div>
   </p-card>
+
   <p-card styleClass="stat-card">
+    <div class="stat-icon info"><i class="pi pi-calendar-minus"></i></div>
     <div class="stat-value">{{ stats().onLeaveToday }}</div>
     <div class="stat-label">On Leave Today</div>
   </p-card>
+
   <p-card styleClass="stat-card">
+    <div class="stat-icon success"><i class="pi pi-check-square"></i></div>
     <div class="stat-value">{{ stats().openApprovals }}</div>
     <div class="stat-label">Open Approvals</div>
   </p-card>

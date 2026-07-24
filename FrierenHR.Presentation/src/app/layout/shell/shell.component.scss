@@ -1,34 +1,89 @@
 .shell { display: flex; min-height: 100vh; background: var(--hr-bg); }
 
 .sidebar {
-  width: 240px; background: var(--hr-sidebar); color: #e5f2ea;
-  display: flex; flex-direction: column; padding: 1.25rem 0.75rem;
+  width: 250px;
+  background: var(--hr-sidebar);
+  color: #e5f2ea;
+  display: flex;
+  flex-direction: column;
+  padding: 1.35rem 0.9rem;
 
-  .brand { font-weight: 700; font-size: 1.1rem; padding: 0 0.75rem 1.5rem; color: #fff; }
-  nav { display: flex; flex-direction: column; gap: 0.25rem; flex: 1; }
-  .sidebar-footer { border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.75rem; }
+  .brand {
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 0 0.4rem 1.75rem;
+    color: #fff; font-weight: 800; font-size: 1.05rem; letter-spacing: -0.01em;
+
+    .brand-mark {
+      width: 34px; height: 34px; border-radius: 10px;
+      background: var(--hr-accent-gradient);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.95rem;
+    }
+  }
+
+  nav { display: flex; flex-direction: column; gap: 0.3rem; flex: 1; }
+  .sidebar-footer { border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.75rem; margin-top: 0.75rem; }
 
   .nav-link {
-    display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.75rem;
-    border-radius: 999px; color: #cfe3d7; text-decoration: none; font-size: 0.9rem;
+    display: flex; align-items: center; gap: 0.65rem; padding: 0.65rem 0.85rem;
+    border-radius: 999px; color: #b9d0c3; text-decoration: none; font-size: 0.89rem; font-weight: 500;
     background: none; border: none; cursor: pointer; width: 100%; text-align: left;
+    transition: background 0.15s ease, color 0.15s ease;
 
-    &:hover { background: rgba(255,255,255,0.06); }
-    &.active { background: var(--hr-accent); color: #fff; }
+    i { width: 18px; text-align: center; font-size: 0.95rem; }
+
+    &:hover { background: rgba(255,255,255,0.07); color: #fff; }
+    &.active { background: var(--hr-accent-gradient); color: #fff; box-shadow: 0 4px 14px rgba(0,0,0,0.25); }
   }
 }
 
-.main { flex: 1; display: flex; flex-direction: column; }
+.main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 
 .topbar {
-  height: 64px; background: var(--hr-surface); border-bottom: 1px solid var(--hr-border);
-  display: flex; align-items: center; justify-content: flex-end; gap: 0.75rem; padding: 0 1.5rem;
+  height: 68px;
+  background: var(--hr-surface);
+  border-bottom: 1px solid var(--hr-border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 1.75rem;
 
-  .welcome { color: var(--hr-text); font-weight: 500; }
-  .role-badge {
-    background: var(--hr-bg); color: var(--hr-text-muted); font-size: 0.75rem;
-    padding: 0.25rem 0.6rem; border-radius: 999px;
+  .search {
+    display: flex; align-items: center; gap: 0.6rem;
+    background: var(--hr-surface-alt);
+    border-radius: 999px;
+    padding: 0.5rem 1rem;
+    width: 280px;
+    max-width: 40vw;
+    color: var(--hr-text-muted);
+
+    i { font-size: 0.85rem; }
+    input {
+      border: none; background: transparent; outline: none; width: 100%;
+      font-family: var(--hr-font); font-size: 0.85rem; color: var(--hr-text);
+    }
   }
+
+  .topbar-actions { display: flex; align-items: center; gap: 0.9rem; }
+
+  .icon-btn {
+    width: 38px; height: 38px; border-radius: 50%; border: none;
+    background: var(--hr-surface-alt); color: var(--hr-text-muted);
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    transition: background 0.15s ease;
+    &:hover { background: var(--hr-accent-soft); color: var(--hr-accent-dark); }
+  }
+
+  .divider { width: 1px; height: 26px; background: var(--hr-border); }
+
+  .user { display: flex; align-items: center; gap: 0.65rem; }
+  .avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--hr-accent-gradient); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.8rem;
+  }
+  .user-meta { display: flex; flex-direction: column; line-height: 1.2; }
+  .welcome { color: var(--hr-text); font-weight: 600; font-size: 0.85rem; }
+  .role-badge { color: var(--hr-text-muted); font-size: 0.72rem; }
 }
 
-.content { padding: 1.5rem; flex: 1; }
+.content { padding: 1.75rem; flex: 1; }

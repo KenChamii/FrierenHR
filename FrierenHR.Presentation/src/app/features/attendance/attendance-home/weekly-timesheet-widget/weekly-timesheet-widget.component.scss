@@ -1,0 +1,23 @@
+:host ::ng-deep .week-card {
+  .p-card-body { padding: 1.4rem; }
+  .p-card-content { padding: 0; }
+}
+
+.week-header {
+  display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1rem;
+  h3 { font-size: 1rem; font-weight: 700; }
+  .range { margin: 0.15rem 0 0; font-size: 0.8rem; color: var(--hr-text-muted); }
+}
+
+.total-hours {
+  display: flex; align-items: baseline; gap: 0.4rem; margin-bottom: 1.1rem;
+  .value { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; }
+  .unit { color: var(--hr-text-muted); font-size: 0.85rem; }
+}
+
+.locked-note {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 0.82rem; color: var(--hr-text-muted);
+  background: var(--hr-surface-alt); border-radius: var(--hr-radius-sm);
+  padding: 0.65rem 0.85rem; margin: 0;
+}

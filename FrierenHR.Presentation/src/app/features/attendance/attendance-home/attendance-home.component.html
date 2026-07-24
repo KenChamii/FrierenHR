@@ -1,5 +1,12 @@
 <h2>Attendance</h2>
 <div class="attendance-grid">
-  <app-clock-in-widget />
+  <div class="attendance-side">
+    <app-clock-in-widget />
+    <app-shift-clock-widget />
+    <app-weekly-timesheet-widget />
+    @if (authService.currentRole() === 'Manager' || authService.currentRole() === 'HRAdmin') {
+      <app-pending-timesheets-widget />
+    }
+  </div>
   <app-attendance-history />
 </div>

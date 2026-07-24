@@ -1,12 +1,154 @@
 .login-page {
-  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: var(--hr-bg);
+  padding: 1.5rem;
 }
-.login-card {
-  width: 360px; background: var(--hr-surface); border-radius: var(--hr-radius);
-  box-shadow: var(--hr-shadow); padding: 2rem; display: flex; flex-direction: column; gap: 0.5rem;
 
-  h1 { margin: 0; color: var(--hr-accent-dark); }
-  .subtitle { margin: 0 0 1rem; color: var(--hr-text-muted); }
-  label { font-size: 0.85rem; color: var(--hr-text-muted); margin-top: 0.5rem; }
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--hr-surface);
+  border-radius: var(--hr-radius-lg);
+  box-shadow: var(--hr-shadow-lg);
+  overflow: hidden;
+}
+
+.hero {
+  position: relative;
+  min-height: 260px;
+  padding: 2.75rem 2rem 2.25rem;
+  background: var(--hr-hero-gradient);
+  color: var(--hr-text-inverse);
+  text-align: center;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .hero-glow {
+    position: absolute;
+    top: -60px;
+    right: -40px;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 70%);
+  }
+
+  .hero-scene {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+
+  .hero-content { position: relative; z-index: 2; }
+
+  .brand-mark {
+    width: 52px; height: 52px; margin: 0 auto 0.85rem;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 14px;
+    font-size: 1.4rem;
+  }
+
+  h1 { margin: 0 0 0.4rem; font-size: 1.6rem; font-weight: 800; color: #fff; letter-spacing: -0.01em; }
+  p { margin: 0; font-size: 0.88rem; color: rgba(234,244,238,0.85); line-height: 1.4; }
+
+}
+
+.form-panel {
+  padding: 2rem 2rem 2.25rem;
+  display: flex;
+  flex-direction: column;
+
+  h2 { font-size: 1.15rem; font-weight: 700; text-align: center; }
+  .form-subtitle {
+    margin: 0 0 1.5rem; text-align: center; color: var(--hr-text-muted); font-size: 0.85rem;
+  }
+
+  .field {
+    margin-bottom: 1.1rem;
+
+    label {
+      display: block; font-size: 0.78rem; font-weight: 600; color: var(--hr-text-muted);
+      margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.02em;
+    }
+  }
+
+  // Wrapper that owns the icon's positioning context — icon is absolutely
+  // placed against THIS box, not against the field/label, which is what was
+  // causing the lock icon to float above the password input before.
+  .input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    > i.pi {
+      position: absolute;
+      left: 1.1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--hr-text-muted);
+      font-size: 0.95rem;
+      z-index: 2;
+      pointer-events: none;
+    }
+  }
+
+  .row-between {
+    display: flex; align-items: center; justify-content: space-between;
+    margin: 0.1rem 0 1.35rem; font-size: 0.85rem;
+
+    .remember { display: flex; align-items: center; gap: 0.5rem; color: var(--hr-text-muted); cursor: pointer; }
+    .forgot { color: var(--hr-accent); text-decoration: none; font-weight: 600; }
+    .forgot:hover { text-decoration: underline; }
+  }
+}
+
+:host ::ng-deep {
+  .login-btn {
+    height: 46px;
+    border-radius: 999px !important;
+    font-weight: 700;
+    background: var(--hr-accent-gradient) !important;
+    border: none !important;
+  }
+
+  // Both the plain email input and PrimeNG's inner password input
+  // share the same pill shape, height and left padding for the icon.
+  .input-wrap {
+    .p-inputtext,
+    .p-password,
+    .p-password-input {
+      width: 100%;
+    }
+
+    .p-inputtext,
+    .p-password-input {
+      border-radius: 999px !important;
+      padding-left: 2.6rem !important;
+      height: 46px;
+      background: var(--hr-surface) !important;
+      box-shadow: none;
+    }
+  }
+
+  // Kill the browser's blue/yellow autofill tint so fields stay white.
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--hr-text);
+    -webkit-box-shadow: 0 0 0 1000px var(--hr-surface) inset;
+    box-shadow: 0 0 0 1000px var(--hr-surface) inset;
+    transition: background-color 9999s ease-in-out 0s;
+    caret-color: var(--hr-text);
+  }
+
+  .p-checkbox .p-checkbox-box { border-radius: 6px; }
 }

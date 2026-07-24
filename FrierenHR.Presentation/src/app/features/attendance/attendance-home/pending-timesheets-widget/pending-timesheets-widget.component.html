@@ -1,0 +1,22 @@
+<p-card header="Pending Timesheet Approvals">
+  @if (errorMessage()) {
+    <p-message severity="error" [text]="errorMessage()!" styleClass="w-full mb-2" />
+  }
+
+  @if (!loading() && items().length === 0) {
+    <p class="empty">Nothing waiting on you right now.</p>
+  }
+
+  @for (item of items(); track item.id) {
+    <div class="row">
+      <div class="info">
+        <span class="name">{{ item.employeeName }}</span>
+        <span class="week">Week of {{ item.weekStartDate | date: 'MMM d' }} · {{ item.totalHours | number: '1.1-1' }}h</span>
+      </div>
+      <div class="actions">
+        <p-button icon="pi pi-check" severity="success" [text]="true" [loading]="decidingId() === item.id" (onClick)="decide(item, true)" />
+        <p-button icon="pi pi-times" severity="danger" [text]="true" [loading]="decidingId() === item.id" (onClick)="decide(item, false)" />
+      </div>
+    </div>
+  }
+</p-card>
