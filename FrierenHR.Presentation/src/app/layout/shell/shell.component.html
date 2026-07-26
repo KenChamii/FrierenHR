@@ -31,13 +31,13 @@
           <i class="pi pi-bell"></i>
         </button>
         <div class="divider"></div>
-        <div class="user">
+        <a class="user" routerLink="/profile">
           <div class="avatar">{{ initials() }}</div>
           <div class="user-meta">
             <span class="welcome">{{ authService.currentFullName() }}</span>
             <span class="role-badge">{{ authService.currentRole() }}</span>
           </div>
-        </div>
+        </a>
       </div>
     </header>
     <main class="content">

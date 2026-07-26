@@ -1,0 +1,13 @@
+.profile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; align-items: start; }
+
+.info-row {
+  display: flex; justify-content: space-between; padding: 0.5rem 0;
+  border-bottom: 1px solid var(--hr-border);
+  &:last-child { border-bottom: none; }
+  .label { color: var(--hr-text-muted); font-size: 0.85rem; }
+}
+
+.password-form { display: flex; flex-direction: column; gap: 0.4rem; }
+.password-form label { font-size: 0.85rem; color: var(--hr-text-muted); margin-top: 0.5rem; }
+.field-hint { font-size: 0.75rem; color: var(--hr-text-muted); margin-top: -0.15rem; }
+.field-error { font-size: 0.75rem; color: var(--hr-danger); margin-top: -0.15rem; }

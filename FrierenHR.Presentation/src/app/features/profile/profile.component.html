@@ -1,0 +1,30 @@
+<h2>My Profile</h2>
+
+<div class="profile-grid">
+  <p-card header="Account">
+    <div class="info-row"><span class="label">Name</span><span>{{ authService.currentFullName() }}</span></div>
+    <div class="info-row"><span class="label">Role</span><span>{{ authService.currentRole() }}</span></div>
+  </p-card>
+
+  <p-card header="Change Password">
+    <form [formGroup]="form" (ngSubmit)="submit()" class="password-form">
+      @if (errorMessage()) { <p-message severity="error" [text]="errorMessage()!" styleClass="w-full mb-2" /> }
+      @if (successMessage()) { <p-message severity="success" [text]="successMessage()!" styleClass="w-full mb-2" /> }
+
+      <label for="currentPassword">Current password</label>
+      <p-password formControlName="currentPassword" [feedback]="false" [toggleMask]="true" styleClass="w-full" inputStyleClass="w-full" />
+
+      <label for="newPassword">New password</label>
+      <p-password formControlName="newPassword" [feedback]="false" [toggleMask]="true" styleClass="w-full" inputStyleClass="w-full" />
+      <small class="field-hint">At least 8 characters, with at least one letter and one number.</small>
+
+      <label for="confirmPassword">Confirm new password</label>
+      <p-password formControlName="confirmPassword" [feedback]="false" [toggleMask]="true" styleClass="w-full" inputStyleClass="w-full" />
+      @if (form.get('confirmPassword')?.errors?.['mismatch'] && form.get('confirmPassword')?.touched) {
+        <small class="field-error">Passwords don't match.</small>
+      }
+
+      <p-button label="Update Password" type="submit" [loading]="saving()" [disabled]="form.invalid" styleClass="mt-2" />
+    </form>
+  </p-card>
+</div>

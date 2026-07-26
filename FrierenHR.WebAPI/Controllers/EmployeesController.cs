@@ -63,4 +63,15 @@ public class EmployeesController : ControllerBase
         try { return Ok(await _employeeService.UpdateAsync(id, dto, ct)); }
         catch (InvalidOperationException ex) { return NotFound(new { message = ex.Message }); }
     }
+
+    // Self-service only — you change your own password by proving you know the current one.
+    // An HRAdmin-triggered "reset someone's password" flow (for forgotten passwords) is a
+    // different, separate feature and isn't what this endpoint is for.
+    [HttpPost("{id:guid}/change-password")]
+    public async Task<IActionResult> ChangePassword(Guid id, ChangePasswordDto dto, CancellationToken ct)
+    {
+        if (User.GetEmployeeId() != id) return Forbid();
+        try { await _employeeService.ChangePasswordAsync(id, dto, ct); return NoContent(); }
+        catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
+    }
 }

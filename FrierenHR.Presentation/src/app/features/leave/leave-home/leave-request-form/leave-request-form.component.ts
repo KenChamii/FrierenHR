@@ -8,6 +8,7 @@ import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
 import { LeaveService } from '../../../../core/services/leave.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { LeaveRefreshService } from '../../../../core/services/leave-refresh.service';
 import { LEAVE_TYPES } from '../../../../core/models/enums.model';
 import { LeaveRequestDto } from '../../../../core/models/leave.model';
 
@@ -22,6 +23,7 @@ export class LeaveRequestFormComponent {
   private readonly fb = inject(FormBuilder);
   private readonly leaveService = inject(LeaveService);
   private readonly authService = inject(AuthService);
+  private readonly refreshService = inject(LeaveRefreshService);
 
   readonly leaveTypes = LEAVE_TYPES;
   readonly submitting = signal(false);
@@ -50,7 +52,12 @@ export class LeaveRequestFormComponent {
       startDate: (raw.startDate as Date).toISOString(), endDate: (raw.endDate as Date).toISOString(),
       reason: raw.reason || undefined,
     }).subscribe({
-      next: (created) => { this.submitting.set(false); this.result.set(created); this.form.reset({ leaveType: 'Vacation', startDate: new Date(), endDate: new Date() }); },
+      next: (created) => {
+        this.submitting.set(false);
+        this.result.set(created);
+        this.form.reset({ leaveType: 'Vacation', startDate: new Date(), endDate: new Date() });
+        this.refreshService.notifyChanged();
+      },
       error: (err) => { this.submitting.set(false); this.errorMessage.set(err?.error?.message ?? 'Request failed.'); },
     });
   }

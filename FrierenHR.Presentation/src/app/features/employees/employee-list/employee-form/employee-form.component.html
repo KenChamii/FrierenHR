@@ -19,6 +19,15 @@
   <label for="hireDate">Hire date</label>
   <p-datepicker formControlName="hireDate" dateFormat="yy-mm-dd" styleClass="w-full" />
 
+  <label for="department">Department</label>
+  <p-dropdown [options]="departments()" optionLabel="name" optionValue="id" formControlName="departmentId" placeholder="None" [showClear]="true" styleClass="w-full" />
+
+  <label for="manager">Manager</label>
+  <p-dropdown [options]="managers()" optionLabel="firstName" optionValue="id" formControlName="managerId" placeholder="None" [showClear]="true" styleClass="w-full">
+    <ng-template let-mgr pTemplate="item">{{ mgr.firstName }} {{ mgr.lastName }}</ng-template>
+    <ng-template let-mgr pTemplate="selectedItem">{{ mgr.firstName }} {{ mgr.lastName }}</ng-template>
+  </p-dropdown>
+
   <label for="role">Role</label>
   <p-dropdown [options]="roles" formControlName="role" styleClass="w-full" />
 

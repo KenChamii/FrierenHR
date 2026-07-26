@@ -14,6 +14,12 @@ public class RuleConfigRepository : IRuleConfigRepository
             .OrderBy(r => r.Priority)
             .ToListAsync(ct);
 
+    public async Task<List<CompanyRuleConfig>> GetByCompanyAsync(Guid companyId, CancellationToken ct = default) =>
+        await _context.Set<CompanyRuleConfig>().AsNoTracking()
+            .Where(r => r.CompanyId == companyId)
+            .OrderBy(r => r.RuleType).ThenBy(r => r.Priority)
+            .ToListAsync(ct);
+
     public async Task AddAsync(CompanyRuleConfig config, CancellationToken ct = default) =>
         await _context.Set<CompanyRuleConfig>().AddAsync(config, ct);
 

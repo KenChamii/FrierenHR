@@ -1,4 +1,6 @@
 .hint { color: var(--hr-text-muted); margin-top: -0.5rem; }
+.empty { color: var(--hr-text-muted); font-size: 0.9rem; margin: 0 0 0.85rem; }
+.template-row { display: flex; gap: 0.5rem; margin: 0.35rem 0 0.5rem; }
 .rule-config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start; }
 label { font-size: 0.85rem; color: var(--hr-text-muted); margin-top: 0.5rem; display: block; }
 .code-area { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; }

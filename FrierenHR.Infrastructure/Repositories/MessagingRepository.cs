@@ -40,6 +40,7 @@ public class MessagingRepository : IMessagingRepository
             .ToListAsync(ct);
 
         var conversations = await _context.Conversations.AsNoTracking()
+            .Include(c => c.Participants).ThenInclude(p => p.Employee)
             .Where(c => conversationIds.Select(x => x.ConversationId).Contains(c.Id))
             .ToListAsync(ct);
 
@@ -49,7 +50,18 @@ public class MessagingRepository : IMessagingRepository
             var participant = conversationIds.First(p => p.ConversationId == c.Id);
             var unread = last is not null && (participant.LastReadAt is null || last.Last.SentAt > participant.LastReadAt)
                 ? 1 : 0; // simplified to a boolean-ish flag; swap for a real COUNT query if you need exact numbers
-            return new ConversationDto(c.Id, c.Type, c.Name, last?.Last.Body, last?.Last.SentAt, unread);
+
+            // Direct conversations have no Name on the entity (that's only set for Group/Broadcast) —
+            // show the OTHER participant's name instead, so the list doesn't just say "Direct chat"
+            // for every single one with no way to tell them apart.
+            var displayName = c.Name;
+            if (displayName is null && c.Type == ConversationType.Direct)
+            {
+                var other = c.Participants.FirstOrDefault(p => p.EmployeeId != employeeId)?.Employee;
+                displayName = other is null ? null : $"{other.FirstName} {other.LastName}";
+            }
+
+            return new ConversationDto(c.Id, c.Type, displayName, last?.Last.Body, last?.Last.SentAt, unread);
         }).OrderByDescending(c => c.LastMessageAt).ToList();
     }
 

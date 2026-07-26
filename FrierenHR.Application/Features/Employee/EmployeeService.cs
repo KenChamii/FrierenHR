@@ -73,4 +73,20 @@ public class EmployeeService : IEmployeeService
     private static EmployeeDto ToDto(FrierenHR.Core.Entities.Employee e) => new(e.Id, e.CompanyId, e.DepartmentId, e.Department?.Name,
         e.ManagerId, e.Manager is null ? null : $"{e.Manager.FirstName} {e.Manager.LastName}",
         e.FirstName, e.LastName, e.Email, e.HireDate, e.TenureMonths(), e.Role, e.IsActive);
+
+    public async Task ChangePasswordAsync(Guid id, ChangePasswordDto dto, CancellationToken ct = default)
+    {
+        var entity = await _employeeRepository.GetByIdAsync(id, ct)
+            ?? throw new InvalidOperationException($"Employee '{id}' not found.");
+
+        if (!PasswordHasher.Verify(dto.CurrentPassword, entity.PasswordHash))
+            throw new InvalidOperationException("Current password is incorrect.");
+
+        PasswordPolicy.Validate(dto.NewPassword);
+
+        entity.PasswordHash = PasswordHasher.Hash(dto.NewPassword);
+        entity.UpdatedAt = DateTime.UtcNow;
+        _employeeRepository.Update(entity);
+        await _employeeRepository.SaveChangesAsync(ct);
+    }
 }

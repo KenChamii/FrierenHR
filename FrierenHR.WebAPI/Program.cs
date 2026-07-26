@@ -37,6 +37,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
             ValidateLifetime = true
         };
+
+        // SignalR can't attach an Authorization header on the transports it falls back to
+        // (WebSockets/SSE), so the client sends the token as ?access_token=... instead (see
+        // MessagingService.connect() on the frontend). The JWT Bearer handler only reads the
+        // header by default, so without this, every hub connection is anonymous no matter
+        // what token the client sends — this is what actually makes ChatHub's [Authorize] work.
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+                    context.Token = accessToken;
+                return Task.CompletedTask;
+            },
+        };
     });
 builder.Services.AddAuthorization();
 
@@ -100,5 +117,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseCors("AngularApp");
 app.MapControllers();
-app.MapHub<ChatHub>("/hubs/chat");
+app.MapHub<ChatHub>("/hubs/chat").RequireAuthorization();
 app.Run();

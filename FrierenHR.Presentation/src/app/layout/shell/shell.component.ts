@@ -17,9 +17,11 @@ export class ShellComponent {
   readonly navItems: NavItem[] = [
     { label: 'Dashboard', icon: 'pi pi-th-large', path: '/dashboard' },
     { label: 'Employees', icon: 'pi pi-users', path: '/employees' },
+    { label: 'Departments', icon: 'pi pi-building', path: '/departments', roles: ['HRAdmin'] },
     { label: 'Leave', icon: 'pi pi-calendar', path: '/leave' },
     { label: 'Attendance', icon: 'pi pi-clock', path: '/attendance' },
     { label: 'Approvals', icon: 'pi pi-check-square', path: '/approvals' },
+    { label: 'My Team', icon: 'pi pi-sitemap', path: '/my-team', roles: ['Manager', 'HRAdmin'] },
     { label: 'Messages', icon: 'pi pi-comments', path: '/messages' },
     { label: 'Rules Config', icon: 'pi pi-sliders-h', path: '/rules-config', roles: ['HRAdmin'] },
   ];

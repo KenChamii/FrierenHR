@@ -6,4 +6,6 @@ public interface IRuleConfigService
 {
     Task<RuleConfigDto> SaveAsync(SaveRuleConfigDto dto, CancellationToken ct = default);
     Task<RuleEvaluationResultDto> TestEvaluateAsync(TestEvaluateRequestDto dto, CancellationToken ct = default);
+    Task<List<RuleConfigDto>> GetByCompanyAsync(Guid companyId, CancellationToken ct = default);
+    Task<List<RuleConfigDto>> SeedDefaultsAsync(Guid companyId, CancellationToken ct = default);
 }
