@@ -1,0 +1,22 @@
+<h2>Departments</h2>
+<p class="subtitle">Add the teams your employees belong to. You can pick these when adding or editing an employee.</p>
+
+@if (errorMessage()) {
+  <p-message severity="error" [text]="errorMessage()!" styleClass="w-full mb-3" />
+}
+
+<form [formGroup]="form" (ngSubmit)="add()" class="add-row">
+  <input pInputText formControlName="name" placeholder="e.g. Engineering" class="flex-1" />
+  <p-button label="Add Department" icon="pi pi-plus" type="submit" [loading]="saving()" [disabled]="form.invalid" />
+</form>
+
+<p-table [value]="departments()" [loading]="loading()" responsiveLayout="scroll">
+  <ng-template pTemplate="header"><tr><th>Name</th><th>Employees</th></tr></ng-template>
+  <ng-template pTemplate="body" let-dept>
+    <tr>
+      <td>{{ dept.name }}</td>
+      <td>{{ dept.employeeCount }}</td>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="emptymessage"><tr><td colspan="2">No departments yet.</td></tr></ng-template>
+</p-table>

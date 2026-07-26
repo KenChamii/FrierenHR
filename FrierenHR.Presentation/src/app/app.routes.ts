@@ -16,9 +16,22 @@ export const routes: Routes = [
       { path: 'attendance', loadComponent: () => import('./features/attendance/attendance-home/attendance-home.component').then(m => m.AttendanceHomeComponent) },
       { path: 'approvals', loadComponent: () => import('./features/approval/approval-home/approval-home.component').then(m => m.ApprovalHomeComponent) },
       { path: 'messages', loadComponent: () => import('./features/messaging/chat-ui/chat-ui.component').then(m => m.ChatUiComponent) },
+      { path: 'profile', loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent) },
+      {
+        path: 'my-team',
+        loadComponent: () => import('./features/team/my-team.component').then(m => m.MyTeamComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['Manager', 'HRAdmin'] },
+      },
       {
         path: 'rules-config',
         loadComponent: () => import('./features/company/rule-config/rule-config.component').then(m => m.RuleConfigComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['HRAdmin'] },
+      },
+      {
+        path: 'departments',
+        loadComponent: () => import('./features/company/departments/departments.component').then(m => m.DepartmentsComponent),
         canActivate: [roleGuard],
         data: { roles: ['HRAdmin'] },
       },

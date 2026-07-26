@@ -1,0 +1,13 @@
+<p-table [value]="requests()" [loading]="loading()" [paginator]="true" [rows]="10" responsiveLayout="scroll">
+  <ng-template pTemplate="header"><tr><th>Type</th><th>Dates</th><th>Days</th><th>Reason</th><th>Status</th></tr></ng-template>
+  <ng-template pTemplate="body" let-req>
+    <tr>
+      <td>{{ req.leaveType }}</td>
+      <td>{{ req.startDate | date: 'MMM d' }} – {{ req.endDate | date: 'MMM d, y' }}</td>
+      <td>{{ req.days }}</td>
+      <td>{{ req.reason ?? '—' }}</td>
+      <td><p-tag [value]="req.status" [severity]="severityFor(req.status)" /></td>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="emptymessage"><tr><td colspan="5">No leave requests yet.</td></tr></ng-template>
+</p-table>

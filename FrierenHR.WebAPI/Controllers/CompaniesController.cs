@@ -1,6 +1,6 @@
 ﻿using FrierenHR.Application.Common.DTOs;
 using FrierenHR.Application.Features.Company;
-using FrierenHR.Application.Features.Employee;
+using FrierenHR.WebAPI.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,15 +13,9 @@ public class CompaniesController : ControllerBase
     private readonly ICompanyService _companyService;
     public CompaniesController(ICompanyService companyService) => _companyService = companyService;
 
+    // Company sign-up — there's no logged-in user yet at this point, so this has to stay open.
     [HttpGet, AllowAnonymous]
     public async Task<ActionResult<List<CompanyDto>>> GetAll(CancellationToken ct) => Ok(await _companyService.GetAllAsync(ct));
-
-    [HttpGet("{id:guid}")]
-    public async Task<ActionResult<CompanyDto>> GetById(Guid id, CancellationToken ct)
-    {
-        var company = await _companyService.GetByIdAsync(id, ct);
-        return company is null ? NotFound() : Ok(company);
-    }
 
     [HttpPost, AllowAnonymous]
     public async Task<ActionResult<CompanyDto>> Create(CreateCompanyDto dto, CancellationToken ct)
@@ -30,11 +24,29 @@ public class CompaniesController : ControllerBase
         catch (InvalidOperationException ex) { return Conflict(new { message = ex.Message }); }
     }
 
-    [HttpGet("{companyId:guid}/departments")]
-    public async Task<ActionResult<List<DepartmentDto>>> GetDepartments(Guid companyId, CancellationToken ct) =>
-        Ok(await _companyService.GetDepartmentsAsync(companyId, ct));
+    [HttpGet("{id:guid}"), Authorize]
+    public async Task<ActionResult<CompanyDto>> GetById(Guid id, CancellationToken ct)
+    {
+        if (id != User.GetCompanyId()) return Forbid();
+        var company = await _companyService.GetByIdAsync(id, ct);
+        return company is null ? NotFound() : Ok(company);
+    }
 
-    [HttpPost("{companyId:guid}/departments")]
-    public async Task<ActionResult<DepartmentDto>> CreateDepartment(Guid companyId, CreateDepartmentDto dto, CancellationToken ct) =>
-        Ok(await _companyService.CreateDepartmentAsync(companyId, dto, ct));
+    [HttpGet("{companyId:guid}/departments"), Authorize]
+    public async Task<ActionResult<List<DepartmentDto>>> GetDepartments(Guid companyId, CancellationToken ct)
+    {
+        // Same pattern as Employees: ignore whatever companyId is in the URL and use the
+        // caller's own, so nobody can browse another company's department list.
+        var callerCompanyId = User.GetCompanyId();
+        if (callerCompanyId is null) return Forbid();
+        return Ok(await _companyService.GetDepartmentsAsync(callerCompanyId.Value, ct));
+    }
+
+    [HttpPost("{companyId:guid}/departments"), Authorize(Roles = "HRAdmin")]
+    public async Task<ActionResult<DepartmentDto>> CreateDepartment(Guid companyId, CreateDepartmentDto dto, CancellationToken ct)
+    {
+        var callerCompanyId = User.GetCompanyId();
+        if (callerCompanyId is null) return Forbid();
+        return Ok(await _companyService.CreateDepartmentAsync(callerCompanyId.Value, dto, ct));
+    }
 }

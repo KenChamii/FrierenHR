@@ -1,0 +1,17 @@
+<h2>My Team</h2>
+<p class="subtitle">People who report directly to you.</p>
+
+<p-table [value]="reports()" [loading]="loading()" responsiveLayout="scroll">
+  <ng-template pTemplate="header"><tr><th>Name</th><th>Email</th><th>Department</th><th>Role</th><th>Tenure</th><th>Status</th></tr></ng-template>
+  <ng-template pTemplate="body" let-employee>
+    <tr>
+      <td>{{ employee.firstName }} {{ employee.lastName }}</td>
+      <td>{{ employee.email }}</td>
+      <td>{{ employee.departmentName ?? '—' }}</td>
+      <td>{{ employee.role }}</td>
+      <td>{{ employee.tenureMonths }} mo</td>
+      <td><p-tag [value]="employee.isActive ? 'Active' : 'Inactive'" [severity]="employee.isActive ? 'success' : 'danger'" /></td>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="emptymessage"><tr><td colspan="6">Nobody reports to you yet.</td></tr></ng-template>
+</p-table>

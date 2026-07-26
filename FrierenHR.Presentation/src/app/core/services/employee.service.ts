@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { EmployeeDto, CreateEmployeeDto, UpdateEmployeeDto } from '../models/employee.model';
+import { EmployeeDto, CreateEmployeeDto, UpdateEmployeeDto, ChangePasswordDto } from '../models/employee.model';
 
 @Injectable({ providedIn: 'root' })
 export class EmployeeService {
@@ -13,4 +13,5 @@ export class EmployeeService {
   getDirectReports(id: string) { return this.http.get<EmployeeDto[]>(`${this.baseUrl}/${id}/direct-reports`); }
   create(dto: CreateEmployeeDto) { return this.http.post<EmployeeDto>(this.baseUrl, dto); }
   update(id: string, dto: UpdateEmployeeDto) { return this.http.put<EmployeeDto>(`${this.baseUrl}/${id}`, dto); }
+  changePassword(id: string, dto: ChangePasswordDto) { return this.http.post<void>(`${this.baseUrl}/${id}/change-password`, dto); }
 }

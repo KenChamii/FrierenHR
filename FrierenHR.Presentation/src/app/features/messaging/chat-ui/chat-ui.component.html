@@ -1,6 +1,27 @@
 <div class="chat-shell">
   <aside class="conversation-list">
-    <h3>Conversations</h3>
+    <div class="list-header">
+      <h3>Conversations</h3>
+      <p-button icon="pi pi-plus" [text]="true" (onClick)="openNewMessage()" />
+    </div>
+
+    @if (showNewMessage()) {
+      <div class="new-message-box">
+        <p-dropdown
+          [options]="coworkers()" optionLabel="firstName" optionValue="id"
+          [ngModel]="selectedCoworkerId()" (ngModelChange)="selectedCoworkerId.set($event)"
+          placeholder="Pick a coworker" styleClass="w-full"
+        >
+          <ng-template let-person pTemplate="item">{{ person.firstName }} {{ person.lastName }}</ng-template>
+          <ng-template let-person pTemplate="selectedItem">{{ person.firstName }} {{ person.lastName }}</ng-template>
+        </p-dropdown>
+        <div class="new-message-actions">
+          <p-button label="Start Chat" [loading]="startingConversation()" [disabled]="!selectedCoworkerId()" (onClick)="startDirectConversation()" />
+          <p-button label="Cancel" [text]="true" severity="secondary" (onClick)="showNewMessage.set(false)" />
+        </div>
+      </div>
+    }
+
     @if (loadingConversations()) {
       <p>Loading…</p>
     } @else {
@@ -10,7 +31,7 @@
           @if (conversation.lastMessagePreview) { <span class="preview">{{ conversation.lastMessagePreview }}</span> }
         </button>
       } @empty {
-        <p class="empty">No conversations yet.</p>
+        <p class="empty">No conversations yet — click + to message a coworker.</p>
       }
     }
   </aside>

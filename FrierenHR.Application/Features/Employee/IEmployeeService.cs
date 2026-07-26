@@ -9,4 +9,5 @@ public interface IEmployeeService
     Task<List<EmployeeDto>> GetDirectReportsAsync(Guid managerId, CancellationToken ct = default);
     Task<EmployeeDto> CreateAsync(CreateEmployeeDto dto, CancellationToken ct = default);
     Task<EmployeeDto> UpdateAsync(Guid id, UpdateEmployeeDto dto, CancellationToken ct = default);
+    Task ChangePasswordAsync(Guid id, ChangePasswordDto dto, CancellationToken ct = default);
 }

@@ -17,7 +17,10 @@ public class MessagingService : IMessagingService
     public async Task<ConversationDto> GetOrCreateDirectAsync(CreateDirectConversationDto dto, CancellationToken ct = default)
     {
         var existing = await _messagingRepository.GetDirectConversationAsync(dto.EmployeeAId, dto.EmployeeBId, ct);
-        if (existing is not null) return new ConversationDto(existing.Id, existing.Type, existing.Name, null, null, 0);
+        var employeeB = await _employeeRepository.GetByIdAsync(dto.EmployeeBId, ct);
+        var otherName = employeeB is null ? null : $"{employeeB.FirstName} {employeeB.LastName}";
+
+        if (existing is not null) return new ConversationDto(existing.Id, existing.Type, otherName, null, null, 0);
 
         var employeeA = await _employeeRepository.GetByIdAsync(dto.EmployeeAId, ct)
             ?? throw new InvalidOperationException("Employee A not found.");
@@ -33,7 +36,10 @@ public class MessagingService : IMessagingService
             }
         };
         var created = await _messagingRepository.CreateConversationAsync(conversation, ct);
-        return new ConversationDto(created.Id, created.Type, created.Name, null, null, 0);
+        // Direct conversations have no Name on the entity itself — show the other person's
+        // name in the immediate response, same as GetConversationsForEmployeeAsync does for
+        // the list view, so a freshly-started chat doesn't show up as "Direct chat".
+        return new ConversationDto(created.Id, created.Type, otherName, null, null, 0);
     }
 
     public async Task<ConversationDto> CreateGroupAsync(CreateGroupConversationDto dto, CancellationToken ct = default)

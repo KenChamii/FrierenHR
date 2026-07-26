@@ -12,3 +12,4 @@ export interface CreateEmployeeDto {
 export interface UpdateEmployeeDto {
   departmentId?: string; managerId?: string; firstName: string; lastName: string; role: EmployeeRole; isActive: boolean;
 }
+export interface ChangePasswordDto { currentPassword: string; newPassword: string; }

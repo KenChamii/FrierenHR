@@ -1,17 +1,39 @@
 <h2>Rules Config</h2>
 <p class="hint">Edit a rule as JSON, save it, then test it against sample facts — no redeploy needed.</p>
 
+<p-panel header="Configured Rules" styleClass="mb-4">
+  @if (!loading() && configs().length === 0) {
+    <p class="empty">Nothing configured yet for your company.</p>
+    <p-button label="Seed Default Rules" icon="pi pi-sparkles" [loading]="seeding()" (onClick)="seedDefaults()" />
+  } @else {
+    <p-table [value]="configs()" [loading]="loading()" responsiveLayout="scroll">
+      <ng-template pTemplate="header"><tr><th>Rule Type</th><th>Priority</th><th>Status</th><th></th></tr></ng-template>
+      <ng-template pTemplate="body" let-config>
+        <tr>
+          <td>{{ config.ruleType }}</td>
+          <td>{{ config.priority }}</td>
+          <td><p-tag [value]="config.isActive ? 'Active' : 'Inactive'" [severity]="config.isActive ? 'success' : 'secondary'" /></td>
+          <td><p-button label="Edit" icon="pi pi-pencil" [text]="true" (onClick)="edit(config)" /></td>
+        </tr>
+      </ng-template>
+    </p-table>
+    <p-button label="Seed Any Missing Defaults" icon="pi pi-sparkles" [text]="true" [loading]="seeding()" (onClick)="seedDefaults()" styleClass="mt-2" />
+  }
+</p-panel>
+
 <div class="rule-config-grid">
-  <p-panel header="Rule Definition" [formGroup]="form">
+  <p-panel [header]="editingId() ? 'Edit Rule' : 'New Rule'">
     @if (saveError()) { <p-message severity="error" [text]="saveError()!" styleClass="w-full mb-2" /> }
     @if (saveSuccess()) { <p-message severity="success" text="Saved." styleClass="w-full mb-2" /> }
 
     <form [formGroup]="form" (ngSubmit)="save()">
-      <label for="companyId">Company ID</label>
-      <input pInputText id="companyId" formControlName="companyId" placeholder="paste a company guid" class="w-full" />
-
       <label for="ruleType">Rule type</label>
       <p-dropdown [options]="ruleTypes" formControlName="ruleType" styleClass="w-full" />
+
+      <div class="template-row">
+        <p-button label="Load Default Template" icon="pi pi-refresh" [text]="true" type="button" (onClick)="loadDefaultTemplate()" />
+        <p-button label="Start Blank Instead" icon="pi pi-file" [text]="true" severity="secondary" type="button" (onClick)="startBlank()" />
+      </div>
 
       <label for="ruleJson">Rule JSON</label>
       <textarea pTextarea formControlName="ruleJson" rows="10" class="w-full code-area"></textarea>
@@ -27,7 +49,7 @@
         </div>
       </div>
 
-      <p-button label="Save Rule" type="submit" [loading]="saving()" [disabled]="form.invalid" styleClass="mt-3" />
+      <p-button [label]="editingId() ? 'Update Rule' : 'Save Rule'" type="submit" [loading]="saving()" [disabled]="form.invalid" styleClass="mt-3" />
     </form>
   </p-panel>
 
