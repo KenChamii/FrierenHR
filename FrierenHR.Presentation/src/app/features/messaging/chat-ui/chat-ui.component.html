@@ -1,7 +1,7 @@
-<div class="chat-shell">
+<div class="chat-shell" [class.chat-open]="!!activeConversationId()">
   <aside class="conversation-list">
     <div class="list-header">
-      <h3>Conversations</h3>
+      <h3>Chats @if (totalUnread() > 0) { <span class="header-badge">{{ totalUnread() }}</span> }</h3>
       <p-button icon="pi pi-plus" [text]="true" (onClick)="openNewMessage()" />
     </div>
 
@@ -27,8 +27,17 @@
     } @else {
       @for (conversation of conversations(); track conversation.id) {
         <button type="button" class="conversation-item" [class.active]="conversation.id === activeConversationId()" (click)="selectConversation(conversation)">
-          <span class="name">{{ conversation.name ?? (conversation.type + ' chat') }}</span>
-          @if (conversation.lastMessagePreview) { <span class="preview">{{ conversation.lastMessagePreview }}</span> }
+          <span class="avatar" [style.background]="avatarColor(conversation.name)">{{ initials(conversation.name) }}</span>
+          <span class="conversation-text">
+            <span class="row-1">
+              <span class="name">{{ conversation.name ?? (conversation.type + ' chat') }}</span>
+              @if (conversation.lastMessageAt) { <span class="time">{{ conversation.lastMessageAt | date: 'shortTime' }}</span> }
+            </span>
+            <span class="row-2">
+              <span class="preview">{{ conversation.lastMessagePreview ?? 'No messages yet' }}</span>
+              @if (conversation.unreadCount > 0) { <span class="unread-badge">{{ conversation.unreadCount }}</span> }
+            </span>
+          </span>
         </button>
       } @empty {
         <p class="empty">No conversations yet — click + to message a coworker.</p>
@@ -40,19 +49,73 @@
     @if (!activeConversationId()) {
       <p class="placeholder">Select a conversation to start chatting.</p>
     } @else {
+      <div class="chat-header">
+        <button type="button" class="back-btn" (click)="goBack()" aria-label="Back to chats">
+          <i class="pi pi-arrow-left"></i>
+        </button>
+        <span class="avatar" [style.background]="avatarColor(activeConversation()?.name)">{{ initials(activeConversation()?.name) }}</span>
+        <span class="contact-name">{{ activeConversation()?.name ?? 'Chat' }}</span>
+      </div>
+
       <div class="messages">
         @if (loadingHistory()) { <p>Loading history…</p> }
-        @for (message of allMessages(); track message.id) {
-          <div class="bubble" [class.mine]="isMine(message)">
-            <div class="sender">{{ message.senderName }}</div>
-            <div class="body">{{ message.body }}</div>
-            <div class="time">{{ message.sentAt | date: 'shortTime' }}</div>
-          </div>
+        @for (group of groupedMessages(); track group.label) {
+          <div class="date-divider"><span>{{ group.label }}</span></div>
+          @for (message of group.messages; track message.id) {
+            <div class="bubble" [class.mine]="isMine(message)">
+              @if (!isMine(message)) { <div class="sender">{{ message.senderName }}</div> }
+              @if (message.attachmentUrl) {
+                <div class="attachment">
+                  @if (isImageAttachment(message.attachmentContentType)) {
+                    <a [href]="attachmentAbsoluteUrl(message.attachmentUrl)" target="_blank" rel="noopener">
+                      <img [src]="attachmentAbsoluteUrl(message.attachmentUrl)" [alt]="message.attachmentFileName ?? 'attachment'" class="attachment-image" />
+                    </a>
+                  } @else {
+                    <a [href]="attachmentAbsoluteUrl(message.attachmentUrl)" target="_blank" rel="noopener" class="attachment-file">
+                      <i class="pi pi-file"></i>
+                      <span class="attachment-name">{{ message.attachmentFileName }}</span>
+                      @if (message.attachmentSizeBytes) { <span class="attachment-size">{{ formatBytes(message.attachmentSizeBytes) }}</span> }
+                    </a>
+                  }
+                </div>
+              }
+              @if (message.body) { <div class="body">{{ message.body }}</div> }
+              <div class="time">{{ message.sentAt | date: 'shortTime' }}</div>
+            </div>
+          }
         }
       </div>
+
+      @if (uploadingAttachment()) {
+        <div class="attachment-preview">
+          <i class="pi pi-spin pi-spinner"></i>
+          <span class="preview-name">Uploading…</span>
+        </div>
+      } @else if (pendingAttachment()) {
+        <div class="attachment-preview">
+          @if (isImageAttachment(pendingAttachment()?.contentType)) {
+            <img [src]="attachmentAbsoluteUrl(pendingAttachment()?.url)" class="preview-thumb" alt="" />
+          } @else {
+            <i class="pi pi-file"></i>
+          }
+          <span class="preview-name">{{ pendingAttachment()?.fileName }}</span>
+          <span class="preview-size">{{ formatBytes(pendingAttachment()?.sizeBytes ?? 0) }}</span>
+          <button type="button" class="remove-attachment" (click)="removeAttachment()" aria-label="Remove attachment">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+      }
+      @if (attachmentError()) {
+        <div class="attachment-error-banner">{{ attachmentError() }}</div>
+      }
+
       <div class="composer">
+        <input #fileInput type="file" class="hidden-file-input" (change)="onFileSelected($event)" />
+        <button type="button" class="attach-btn" aria-label="Attach a file" [disabled]="uploadingAttachment()" (click)="fileInput.click()">
+          <i class="pi pi-paperclip"></i>
+        </button>
         <input pInputText [ngModel]="draft()" (ngModelChange)="draft.set($event)" (keyup.enter)="send()" placeholder="Type a message…" class="w-full" />
-        <p-button icon="pi pi-send" (onClick)="send()" [disabled]="!draft().trim()" />
+        <p-button icon="pi pi-send" (onClick)="send()" [disabled]="(!draft().trim() && !pendingAttachment()) || uploadingAttachment()" />
       </div>
     }
   </section>

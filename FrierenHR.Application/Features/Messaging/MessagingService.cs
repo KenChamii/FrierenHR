@@ -80,9 +80,19 @@ public class MessagingService : IMessagingService
         var employee = await _employeeRepository.GetByIdAsync(dto.SenderEmployeeId, ct)
             ?? throw new InvalidOperationException("Sender not found.");
 
-        var message = new Message { ConversationId = dto.ConversationId, SenderEmployeeId = dto.SenderEmployeeId, Body = dto.Body };
+        var message = new Message
+        {
+            ConversationId = dto.ConversationId,
+            SenderEmployeeId = dto.SenderEmployeeId,
+            Body = dto.Body,
+            AttachmentUrl = dto.AttachmentUrl,
+            AttachmentFileName = dto.AttachmentFileName,
+            AttachmentContentType = dto.AttachmentContentType,
+            AttachmentSizeBytes = dto.AttachmentSizeBytes,
+        };
         var saved = await _messagingRepository.AddMessageAsync(message, ct);
-        return new MessageDto(saved.Id, saved.ConversationId, saved.SenderEmployeeId, $"{employee.FirstName} {employee.LastName}", saved.Body, saved.SentAt);
+        return new MessageDto(saved.Id, saved.ConversationId, saved.SenderEmployeeId, $"{employee.FirstName} {employee.LastName}", saved.Body, saved.SentAt,
+            saved.AttachmentUrl, saved.AttachmentFileName, saved.AttachmentContentType, saved.AttachmentSizeBytes);
     }
 
     public Task<List<MessageDto>> GetHistoryAsync(Guid conversationId, int skip, int take, CancellationToken ct = default) =>
