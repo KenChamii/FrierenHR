@@ -79,6 +79,7 @@ public class MessagingRepository : IMessagingRepository
             .OrderByDescending(m => m.SentAt)
             .Skip(skip).Take(take)
             .Select(m => new MessageDto(m.Id, m.ConversationId, m.SenderEmployeeId,
-                m.SenderEmployee == null ? "" : $"{m.SenderEmployee.FirstName} {m.SenderEmployee.LastName}", m.Body, m.SentAt))
+                m.SenderEmployee == null ? "" : $"{m.SenderEmployee.FirstName} {m.SenderEmployee.LastName}", m.Body, m.SentAt,
+                m.AttachmentUrl, m.AttachmentFileName, m.AttachmentContentType, m.AttachmentSizeBytes))
             .ToListAsync(ct);
 }

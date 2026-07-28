@@ -39,6 +39,9 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
         builder.ToTable("Messages");
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Body).IsRequired();
+        builder.Property(x => x.AttachmentUrl).HasMaxLength(500);
+        builder.Property(x => x.AttachmentFileName).HasMaxLength(260);
+        builder.Property(x => x.AttachmentContentType).HasMaxLength(150);
         builder.HasIndex(x => new { x.ConversationId, x.SentAt });
 
         builder.HasOne(x => x.Conversation).WithMany(c => c.Messages)

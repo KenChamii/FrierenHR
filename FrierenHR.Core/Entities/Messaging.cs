@@ -31,4 +31,10 @@ public class Message : BaseEntity
     public Employee? SenderEmployee { get; set; }
     public string Body { get; set; } = string.Empty;
     public DateTime SentAt { get; set; } = DateTime.UtcNow;
+
+    // Attachment fields are all nullable — a message is either text, an attachment, or both.
+    public string? AttachmentUrl { get; set; }
+    public string? AttachmentFileName { get; set; }
+    public string? AttachmentContentType { get; set; }
+    public long? AttachmentSizeBytes { get; set; }
 }

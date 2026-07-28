@@ -29,7 +29,8 @@ public class ChatHub : Hub
     public async Task LeaveConversation(string conversationId) =>
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, conversationId);
 
-    public async Task SendMessage(string conversationId, string senderEmployeeId, string body)
+    public async Task SendMessage(string conversationId, string senderEmployeeId, string body,
+        string? attachmentUrl = null, string? attachmentFileName = null, string? attachmentContentType = null, long? attachmentSizeBytes = null)
     {
         var callerId = Context.User?.GetEmployeeId();
         // You can only send as yourself — the client still passes senderEmployeeId explicitly
@@ -37,7 +38,11 @@ public class ChatHub : Hub
         // matches who's actually authenticated on this connection, instead of trusting it blindly.
         if (callerId is null || !Guid.TryParse(senderEmployeeId, out var claimedId) || claimedId != callerId.Value) return;
 
-        var dto = new SendMessageDto(Guid.Parse(conversationId), callerId.Value, body);
+        // A message needs text or an attachment (or both) — reject the fully-empty case rather
+        // than persisting a blank bubble.
+        if (string.IsNullOrWhiteSpace(body) && string.IsNullOrWhiteSpace(attachmentUrl)) return;
+
+        var dto = new SendMessageDto(Guid.Parse(conversationId), callerId.Value, body, attachmentUrl, attachmentFileName, attachmentContentType, attachmentSizeBytes);
         var saved = await _messagingService.SendMessageAsync(dto); // persist FIRST
         await Clients.Group(conversationId).SendAsync("ReceiveMessage", saved); // then broadcast the saved DTO (has real Id/SentAt)
     }

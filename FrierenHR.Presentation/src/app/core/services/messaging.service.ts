@@ -4,8 +4,12 @@ import * as signalR from '@microsoft/signalr';
 import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
 import {
-  ConversationDto, MessageDto, CreateDirectConversationDto, CreateGroupConversationDto,
+  ConversationDto, MessageDto, CreateDirectConversationDto, CreateGroupConversationDto, AttachmentUploadResultDto,
 } from '../models/messaging.model';
+
+// Kept in sync with Messaging:MaxAttachmentSizeBytes in the backend's appsettings.json —
+// this is just for instant client-side feedback; the server enforces the real limit.
+export const MAX_ATTACHMENT_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 
 @Injectable({ providedIn: 'root' })
 export class MessagingService {
@@ -23,6 +27,14 @@ export class MessagingService {
   }
   getOrCreateDirect(dto: CreateDirectConversationDto) { return this.http.post<ConversationDto>(`${this.baseUrl}/conversations/direct`, dto); }
   createGroup(dto: CreateGroupConversationDto) { return this.http.post<ConversationDto>(`${this.baseUrl}/conversations/group`, dto); }
+
+  // Uploads the file over plain HTTP (not the hub — SignalR isn't built for binary payloads
+  // like this) and gets back the stored URL/metadata to hand to sendMessage().
+  uploadAttachment(file: File) {
+    const form = new FormData();
+    form.append('file', file, file.name);
+    return this.http.post<AttachmentUploadResultDto>(`${this.baseUrl}/attachments`, form);
+  }
 
   async connect(): Promise<void> {
     if (this.hubConnection) return;
@@ -49,8 +61,14 @@ export class MessagingService {
     await this.hubConnection?.invoke('LeaveConversation', conversationId);
   }
 
-  async sendMessage(conversationId: string, senderEmployeeId: string, body: string): Promise<void> {
-    await this.hubConnection?.invoke('SendMessage', conversationId, senderEmployeeId, body);
+  async sendMessage(
+    conversationId: string, senderEmployeeId: string, body: string,
+    attachment?: AttachmentUploadResultDto | null,
+  ): Promise<void> {
+    await this.hubConnection?.invoke(
+      'SendMessage', conversationId, senderEmployeeId, body,
+      attachment?.url ?? null, attachment?.fileName ?? null, attachment?.contentType ?? null, attachment?.sizeBytes ?? null,
+    );
   }
 
   async disconnect(): Promise<void> {

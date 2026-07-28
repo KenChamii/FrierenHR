@@ -113,6 +113,7 @@ if (app.Environment.IsDevelopment()) {
     await DbSeeder.SeedAsync(db);
 }
 app.UseHttpsRedirection();
+app.UseStaticFiles(); // serves wwwroot/uploads/messaging/* for chat attachments (see MessagingController.UploadAttachment)
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseCors("AngularApp");

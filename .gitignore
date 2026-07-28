@@ -38,6 +38,10 @@ bld/
 # Uncomment if you have tasks that create the project's static files in wwwroot
 #wwwroot/
 
+# Chat attachments uploaded at runtime — keep the folder, not the files
+FrierenHR.WebAPI/wwwroot/uploads/messaging/*
+!FrierenHR.WebAPI/wwwroot/uploads/messaging/.gitkeep
+
 # Visual Studio 2017 auto generated files
 Generated\ Files/
 
