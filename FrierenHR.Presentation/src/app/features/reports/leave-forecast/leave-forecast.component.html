@@ -1,0 +1,77 @@
+<div class="page">
+  <header class="page-head">
+    <div>
+      <span class="exhibit">Planning</span>
+      <h2>Projected balance</h2>
+      <p class="sub">Your balance carried forward at your company's own accrual rate, and how
+        much of it the cap would turn away if you do not book it.</p>
+    </div>
+    <div class="head-actions">
+      <p-dropdown [options]="horizonOptions" optionLabel="label" optionValue="value"
+                  [ngModel]="months()" (ngModelChange)="onHorizonChange($event)"
+                  [ngModelOptions]="{ standalone: true }"></p-dropdown>
+    </div>
+  </header>
+
+  @if (error()) { <p-message severity="error" [text]="error()!"></p-message> }
+
+  @if (atRisk().length) {
+    <p class="warn">
+      <span class="exhibit">Worth booking</span>
+      @for (p of atRisk(); track p.leaveType) {
+        {{ p.forfeited }} {{ p.leaveType | lowercase }} day(s) would be forfeited
+        @if (p.forfeitsFrom) { from {{ p.forfeitsFrom | date: 'MMM yyyy' }} }.
+      }
+    </p>
+  }
+
+  @if (loading()) {
+    <p class="empty">Loading.</p>
+  } @else if (!data()?.projections?.length) {
+    <p class="empty">No leave balances to project yet. One appears after your first accrual run.</p>
+  }
+
+  <div class="cards">
+    @for (p of data()?.projections ?? []; track p.leaveType) {
+      <section class="box card">
+        <div class="box-h">
+          <span class="exhibit">{{ p.leaveType }}</span>
+          @if (p.forfeited > 0) {
+            <p-tag value="At cap" severity="warn"></p-tag>
+          }
+        </div>
+
+        <div class="figures">
+          <div class="figure">
+            <span class="n mono">{{ p.currentBalance }}</span>
+            <span class="l">Today</span>
+          </div>
+          <span class="arrow mono" aria-hidden="true">&rarr;</span>
+          <div class="figure lead">
+            <span class="n mono">{{ p.projectedBalance }}</span>
+            <span class="l">By {{ data()!.horizon | date: 'MMM yyyy' }}</span>
+          </div>
+        </div>
+
+        @if (p.note) {
+          <p class="hint">{{ p.note }}</p>
+        } @else {
+          <dl class="detail">
+            <div><dt>Accrual</dt><dd class="mono">{{ p.monthlyAccrual }} / month</dd></div>
+            <div><dt>Cap</dt><dd class="mono">{{ p.cap ?? 'None' }}</dd></div>
+            <div><dt>Gains</dt><dd class="mono">+{{ gained(p) }} over {{ p.monthsProjected }} months</dd></div>
+            @if (p.forfeited > 0) {
+              <div><dt>Forfeited</dt><dd class="mono loss">&minus;{{ p.forfeited }}</dd></div>
+            }
+          </dl>
+
+          @if (p.cap) {
+            <div class="bar" [attr.aria-label]="'Projected ' + p.projectedBalance + ' of a ' + p.cap + ' day cap'">
+              <span class="fill" [style.width.%]="fillPercent(p)"></span>
+            </div>
+          }
+        }
+      </section>
+    }
+  </div>
+</div>

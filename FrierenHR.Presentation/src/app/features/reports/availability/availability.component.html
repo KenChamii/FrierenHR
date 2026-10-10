@@ -1,0 +1,108 @@
+<div class="page">
+  <header class="page-head">
+    <div>
+      <span class="exhibit">Coverage</span>
+      <h2>Who is out</h2>
+      <p class="sub">Approved leave read against each person's own calendar, so a rest day and a
+        public holiday show as themselves rather than as absence.</p>
+    </div>
+    <div class="head-actions">
+      <p-dropdown [options]="departmentOptions()" optionLabel="label" optionValue="value"
+                  [ngModel]="departmentId()" (ngModelChange)="onDepartmentChange($event)"
+                  [ngModelOptions]="{ standalone: true }"></p-dropdown>
+      <p-dropdown [options]="spanOptions" optionLabel="label" optionValue="value"
+                  [ngModel]="spanDays()" (ngModelChange)="onSpanChange($event)"
+                  [ngModelOptions]="{ standalone: true }"></p-dropdown>
+    </div>
+  </header>
+
+  @if (error()) { <p-message severity="error" [text]="error()!"></p-message> }
+
+  @if (outToday().length) {
+    <p class="out-today">
+      <span class="exhibit">Out today</span>
+      {{ outToday().join(', ') }}
+    </p>
+  }
+
+  @if (data()?.thinnestDays?.length) {
+    <section class="box thin">
+      <div class="box-h">
+        <span class="exhibit">Thinnest cover</span>
+      </div>
+      <ul class="thin-list">
+        @for (day of data()!.thinnestDays; track day.date + day.departmentName) {
+          <li>
+            <span class="mono when">{{ day.date | date: 'EEE dd MMM' }}</span>
+            <span class="dept">{{ day.departmentName }}</span>
+            <span class="ratio mono">{{ day.working }} of {{ day.total }}</span>
+            <span class="pct mono" [class.low]="day.percentWorking < 60">{{ day.percentWorking }}%</span>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
+  <section class="box">
+    <div class="box-h">
+      <span class="exhibit">
+        @if (loading()) { Loading }
+        @else { {{ data()?.from | date: 'dd MMM' }} to {{ data()?.to | date: 'dd MMM yyyy' }} }
+      </span>
+      <div class="nav">
+        <button pButton type="button" severity="secondary" [outlined]="true" label="Back"
+                (click)="shift(-1)"></button>
+        <button pButton type="button" severity="secondary" [outlined]="true" label="Today"
+                (click)="today()"></button>
+        <button pButton type="button" severity="secondary" [outlined]="true" label="Forward"
+                (click)="shift(1)"></button>
+      </div>
+    </div>
+
+    @if (!loading() && !data()?.rows?.length) {
+      <p class="empty">No active employees match this filter.</p>
+    }
+
+    @if (data()?.rows?.length) {
+      <div class="grid-scroll">
+        <table class="grid">
+          <thead>
+            <tr>
+              <th class="who">Employee</th>
+              @for (date of dates(); track date) {
+                <th class="day mono">
+                  <span class="wd">{{ headerFor(date).weekday }}</span>
+                  <span class="dd">{{ headerFor(date).day }}</span>
+                </th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of data()!.rows; track row.employeeId) {
+              <tr>
+                <th class="who" scope="row">
+                  <span class="name">{{ row.employeeName }}</span>
+                  <span class="dept mono">{{ row.departmentName }}</span>
+                </th>
+                @for (day of row.days; track day.date) {
+                  <td [class]="classFor(day)" [attr.title]="titleFor(day)">
+                    <span class="sr-only">{{ titleFor(day) }}</span>
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <ul class="legend">
+        @for (item of legend; track item.value) {
+          <li>
+            <span [class]="legendClass(item.value)" aria-hidden="true"></span>
+            <span class="mono">{{ item.label }}</span>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+</div>

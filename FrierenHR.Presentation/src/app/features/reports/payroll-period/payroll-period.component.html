@@ -1,0 +1,85 @@
+<div class="page">
+  <header class="page-head">
+    <div>
+      <span class="exhibit">Handover</span>
+      <h2>Payroll period</h2>
+      <p class="sub">Hours, overtime at the company's own multiplier, minutes late after grace,
+        and leave taken. Derived from the logs each time, so a corrected entry changes the file.</p>
+    </div>
+  </header>
+
+  <section class="controls">
+    <label>
+      <span class="exhibit">From</span>
+      <input pInputText type="date" [(ngModel)]="from" name="from" />
+    </label>
+    <label>
+      <span class="exhibit">To</span>
+      <input pInputText type="date" [(ngModel)]="to" name="to" />
+    </label>
+    <button pButton type="button" label="Build" [loading]="loading()" (click)="load()"></button>
+    <button pButton type="button" severity="secondary" [outlined]="true" label="Download CSV"
+            [loading]="exporting()" [disabled]="!data()?.rows?.length" (click)="download()"></button>
+  </section>
+
+  @if (error()) { <p-message severity="error" [text]="error()!"></p-message> }
+
+  @if (data()?.rows?.length) {
+    <section class="box">
+      <div class="box-h">
+        <span class="exhibit">
+          {{ data()!.from | date: 'dd MMM' }} to {{ data()!.to | date: 'dd MMM yyyy' }}
+        </span>
+        <span class="count mono">{{ totals().people }} employee(s)</span>
+      </div>
+
+      <p-table [value]="data()!.rows" [scrollable]="true" styleClass="p-datatable-sm">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Employee</th>
+            <th>Department</th>
+            <th class="num">Regular</th>
+            <th class="num">OT</th>
+            <th class="num">&times;</th>
+            <th class="num">Payable OT</th>
+            <th class="num">Late (min)</th>
+            <th class="num">Leave</th>
+            <th class="num">Days</th>
+            <th class="num">Holidays</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td>{{ row.employeeName }}</td>
+            <td class="muted">{{ row.departmentName ?? '&mdash;' }}</td>
+            <td class="num mono">{{ row.regularHours }}</td>
+            <td class="num mono">{{ row.overtimeHours }}</td>
+            <td class="num mono muted">{{ row.overtimeMultiplier }}</td>
+            <td class="num mono">{{ row.payableOvertimeHours }}</td>
+            <td class="num mono" [class.flag]="row.lateMinutes > 0">{{ row.lateMinutes }}</td>
+            <td class="num mono">{{ row.leaveDaysTaken }}</td>
+            <td class="num mono muted">{{ row.daysWorked }}</td>
+            <td class="num mono muted">{{ row.holidaysWorked }}</td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="footer">
+          <tr class="totals">
+            <td colspan="2">Total</td>
+            <td class="num mono">{{ totals().regular }}</td>
+            <td class="num mono">{{ totals().overtime }}</td>
+            <td></td>
+            <td class="num mono">{{ totals().payable }}</td>
+            <td class="num mono">{{ totals().late }}</td>
+            <td class="num mono">{{ totals().leave }}</td>
+            <td colspan="2"></td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </section>
+  } @else if (!loading()) {
+    <p class="empty">
+      Nothing to show for this period. Only employees with attendance or approved leave appear,
+      so an empty result means neither was recorded.
+    </p>
+  }
+</div>

@@ -1,0 +1,97 @@
+@use '../../../../styles/admin-page';
+
+.warn {
+  margin: 0 0 1.25rem;
+  padding: 0.75rem 1rem;
+  border-left: 2px solid var(--hr-accent);
+  background: var(--hr-accent-soft);
+  font-size: 0.9rem;
+
+  .exhibit { margin-right: 0.625rem; }
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: 1.25rem;
+}
+
+.card { margin: 0; }
+
+.figures {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-bottom: 1px solid var(--hr-border);
+
+  .figure {
+    display: flex;
+    flex-direction: column;
+
+    .n {
+      font-size: 1.5rem;
+      line-height: 1.1;
+      color: var(--hr-text-muted);
+    }
+
+    .l {
+      margin-top: 0.25rem;
+      font-family: var(--hr-font-mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--hr-text-muted);
+    }
+  }
+
+  // The projected figure is the one being read, so it carries the weight.
+  .figure.lead .n {
+    font-size: 2.25rem;
+    color: var(--hr-text);
+  }
+
+  .arrow {
+    padding-bottom: 1.25rem;
+    color: var(--hr-accent);
+  }
+}
+
+.detail {
+  margin: 0;
+  padding: 1rem 1.25rem;
+
+  > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.3rem 0;
+  }
+
+  dt {
+    font-family: var(--hr-font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--hr-text-muted);
+  }
+
+  dd {
+    margin: 0;
+    font-size: 0.8rem;
+  }
+
+  .loss { color: var(--hr-danger, #8c3b2e); }
+}
+
+.bar {
+  height: 2px;
+  margin: 0 1.25rem 1.25rem;
+  background: var(--hr-border);
+
+  .fill {
+    display: block;
+    height: 100%;
+    background: var(--hr-accent);
+  }
+}
