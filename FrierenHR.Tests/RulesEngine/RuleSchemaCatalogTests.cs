@@ -42,6 +42,7 @@ public class RuleSchemaCatalogTests
     {
         string[] supported = [">=", "<=", "==", "!=", "in"];
 
+
         foreach (var field in RuleSchemaCatalog.For(ruleType).Fields)
             Assert.All(field.Operators, op => Assert.Contains(op, supported));
     }
@@ -87,6 +88,66 @@ public class RuleSchemaCatalogTests
         var result = new RuleEvaluator().Evaluate(schema.Starter, context);
 
         Assert.True(result.Success, result.Message);
+    }
+
+    [Fact]
+    public void A_boolean_field_only_accepts_true_or_false()
+    {
+        var rule = new RuleDefinition
+        {
+            RuleType = nameof(RuleType.OTMultiplier),
+            Conditions = [new RuleCondition { Field = "isHoliday", Op = "==", Value = "maybe" }],
+            Action = new RuleAction { Type = "OTMultiplier", Amount = 2m }
+        };
+
+        var problem = RuleSchemaCatalog.Validate(RuleType.OTMultiplier, rule);
+
+        Assert.NotNull(problem);
+        Assert.Contains("true or false", problem);
+    }
+
+    [Fact]
+    public void Holiday_overtime_can_be_expressed_without_changing_the_engine()
+    {
+        // The reason the holiday facts were added: a company sets a premium for overtime on a
+        // regular holiday as configuration, not code.
+        var rule = new RuleDefinition
+        {
+            RuleType = nameof(RuleType.OTMultiplier),
+            Conditions =
+            [
+                new RuleCondition { Field = "isHoliday", Op = "==", Value = true },
+                new RuleCondition { Field = "holidayType", Op = "==", Value = nameof(HolidayType.Regular) },
+            ],
+            Action = new RuleAction { Type = "OTMultiplier", Amount = 2m }
+        };
+
+        Assert.Null(RuleSchemaCatalog.Validate(RuleType.OTMultiplier, rule));
+
+        var context = new RuleContext()
+            .Set("otHours", 3m)
+            .Set("isHoliday", true)
+            .Set("holidayType", nameof(HolidayType.Regular));
+
+        var result = new RuleEvaluator().Evaluate(rule, context);
+
+        Assert.True(result.Matched);
+        Assert.Equal(6m, result.ResultValue);
+    }
+
+    [Fact]
+    public void An_ordinary_day_does_not_match_a_holiday_rule()
+    {
+        var rule = new RuleDefinition
+        {
+            RuleType = nameof(RuleType.OTMultiplier),
+            Conditions = [new RuleCondition { Field = "isHoliday", Op = "==", Value = true }],
+            Action = new RuleAction { Type = "OTMultiplier", Amount = 2m }
+        };
+
+        var context = new RuleContext().Set("otHours", 3m).Set("isHoliday", false);
+
+        Assert.False(new RuleEvaluator().Evaluate(rule, context).Matched);
     }
 
     [Fact]
@@ -212,6 +273,7 @@ public class RuleSchemaCatalogTests
     {
         { Kind: RuleValueKind.Enum, Options: { Length: > 0 } options } => options[0],
         { Kind: RuleValueKind.Text } => "sample",
+        { Kind: RuleValueKind.Boolean } => false,
         _ => 99m
     };
 }
