@@ -4,12 +4,15 @@ using FrierenHR.Core.Enums;
 
 namespace FrierenHR.Core.Entities;
 
-public class Employee : BaseEntity
+public class Employee : BaseEntity, ICompanyScoped
 {
     public Guid CompanyId { get; set; }
     public Company? Company { get; set; }
     public Guid? DepartmentId { get; set; }
     public Department? Department { get; set; }
+    /// <summary>Overrides the department's shift. Null falls back to the department, then the company default.</summary>
+    public Guid? ShiftId { get; set; }
+    public Shift? Shift { get; set; }
     public Guid? ManagerId { get; set; }
     public Employee? Manager { get; set; }
     public string FirstName { get; set; } = string.Empty;
