@@ -13,6 +13,8 @@ export const routes: Routes = [
   // Kept so existing links to /welcome still work.
   { path: 'welcome', pathMatch: 'full', redirectTo: '' },
   { path: 'login', loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent) },
+  // Sign-up creates a company and its first HRAdmin together, so it needs no account.
+  { path: 'register', loadComponent: () => import('./features/auth/register/register.component').then(m => m.RegisterComponent) },
   {
     path: '',
     loadComponent: () => import('./layout/shell/shell.component').then(m => m.ShellComponent),
@@ -54,6 +56,30 @@ export const routes: Routes = [
       {
         path: 'shifts',
         loadComponent: () => import('./features/company/shifts/shifts.component').then(m => m.ShiftsComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['HRAdmin'] },
+      },
+      // Reports. The forecast is a person's own balance, so it needs no role; the other three
+      // read across the company and are gated here as well as at the API.
+      {
+        path: 'reports/leave-forecast',
+        loadComponent: () => import('./features/reports/leave-forecast/leave-forecast.component').then(m => m.LeaveForecastComponent),
+      },
+      {
+        path: 'reports/availability',
+        loadComponent: () => import('./features/reports/availability/availability.component').then(m => m.AvailabilityComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['Manager', 'HRAdmin'] },
+      },
+      {
+        path: 'reports/payroll-period',
+        loadComponent: () => import('./features/reports/payroll-period/payroll-period.component').then(m => m.PayrollPeriodComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['HRAdmin'] },
+      },
+      {
+        path: 'reports/leave-liability',
+        loadComponent: () => import('./features/reports/leave-liability/leave-liability.component').then(m => m.LeaveLiabilityComponent),
         canActivate: [roleGuard],
         data: { roles: ['HRAdmin'] },
       },

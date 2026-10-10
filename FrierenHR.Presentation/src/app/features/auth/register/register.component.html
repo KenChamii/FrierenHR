@@ -1,0 +1,91 @@
+<div class="login-page">
+  <div class="login-card">
+    <div class="hero">
+      <div class="hero-content">
+        <div class="brand-mark">
+          <i class="pi pi-sitemap"></i>
+        </div>
+        <h1>FrierenHR</h1>
+        <p>Set up your company in one step. You become its administrator, and the account is
+          ready to use straight away.</p>
+
+        <ul class="included">
+          <li>A standard 9 to 6 shift, resting weekends</li>
+          <li>Leave accruing 1.25 days a month, capped at 15</li>
+          <li>Single days auto-approved, longer requests routed to a manager</li>
+          <li>Overtime at 1.25, with 15 minutes of grace on lateness</li>
+        </ul>
+        <p class="included-note">All of it editable afterwards, on the Shifts and Rules screens.</p>
+      </div>
+    </div>
+
+    <form class="form-panel" [formGroup]="form" (ngSubmit)="submit()">
+      <h2>Create a company</h2>
+      <p class="form-subtitle">You will be signed in as its HR administrator</p>
+
+      @if (errorMessage()) {
+        <p-message severity="error" [text]="errorMessage()!" styleClass="w-full mb-3" />
+      }
+
+      <div class="field">
+        <label for="companyName">Company name</label>
+        <div class="input-wrap">
+          <i class="pi pi-building"></i>
+          <input pInputText id="companyName" formControlName="companyName"
+                 placeholder="Acme Corporation" class="w-full" autocomplete="organization" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="companyCode">Company code</label>
+        <div class="input-wrap">
+          <i class="pi pi-tag"></i>
+          <input pInputText id="companyCode" formControlName="companyCode"
+                 placeholder="ACME" class="w-full" />
+        </div>
+        <small class="field-hint">A short identifier, unique across FrierenHR.</small>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="firstName">First name</label>
+          <input pInputText id="firstName" formControlName="firstName" class="w-full"
+                 autocomplete="given-name" />
+        </div>
+        <div class="field">
+          <label for="lastName">Last name</label>
+          <input pInputText id="lastName" formControlName="lastName" class="w-full"
+                 autocomplete="family-name" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="email">Email</label>
+        <div class="input-wrap">
+          <i class="pi pi-user"></i>
+          <input pInputText id="email" formControlName="email" placeholder="you@company.com"
+                 class="w-full" autocomplete="email" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <div class="input-wrap">
+          <i class="pi pi-lock"></i>
+          <p-password formControlName="password" [feedback]="false" [toggleMask]="true"
+                      inputStyleClass="w-full" styleClass="w-full" autocomplete="new-password" />
+        </div>
+        @if (passwordHint) {
+          <small class="field-hint error">{{ passwordHint }}</small>
+        } @else {
+          <small class="field-hint">At least 8 characters, with a letter and a number.</small>
+        }
+      </div>
+
+      <p-button label="Create company" type="submit" [loading]="loading()"
+                styleClass="w-full login-btn" />
+
+      <p class="alt">Already have an account? <a routerLink="/login">Sign in</a></p>
+    </form>
+  </div>
+</div>

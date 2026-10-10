@@ -28,6 +28,10 @@ export class ShellComponent {
     { label: 'Holidays', icon: 'pi pi-calendar-times', path: '/holidays', roles: ['HRAdmin'] },
     { label: 'Shifts', icon: 'pi pi-stopwatch', path: '/shifts', roles: ['HRAdmin'] },
     { label: 'Audit Trail', icon: 'pi pi-history', path: '/audit', roles: ['HRAdmin'] },
+    { label: 'Who is Out', icon: 'pi pi-user-minus', path: '/reports/availability', roles: ['Manager', 'HRAdmin'] },
+    { label: 'My Forecast', icon: 'pi pi-chart-line', path: '/reports/leave-forecast' },
+    { label: 'Payroll Period', icon: 'pi pi-file-export', path: '/reports/payroll-period', roles: ['HRAdmin'] },
+    { label: 'Leave Liability', icon: 'pi pi-wallet', path: '/reports/leave-liability', roles: ['HRAdmin'] },
   ];
 
   constructor(public authService: AuthService) {}

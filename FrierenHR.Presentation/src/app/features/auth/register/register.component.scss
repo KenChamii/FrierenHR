@@ -1,0 +1,54 @@
+// The sign-up card is the login card with a longer form, so the layout and the Ledger
+// palette come from one place rather than being restated here.
+@use '../login/login.component.scss';
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.field-hint {
+  display: block;
+  margin-top: 0.3rem;
+  font-family: var(--hr-font-mono, monospace);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(242, 237, 225, 0.5);
+
+  &.error { color: #d9a08f; }
+}
+
+// What a new company starts with, so sign-up is not a leap of faith.
+.included {
+  margin: 1.5rem 0 0.75rem;
+  padding: 0;
+  list-style: none;
+
+  li {
+    position: relative;
+    padding: 0.3rem 0 0.3rem 1.1rem;
+    font-size: 0.85rem;
+    line-height: 1.45;
+    color: rgba(242, 237, 225, 0.8);
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0.85rem;
+      left: 0;
+      width: 0.4rem;
+      height: 1px;
+      background: #c9a96e;
+    }
+  }
+}
+
+.included-note {
+  font-family: var(--hr-font-mono, monospace);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(242, 237, 225, 0.45);
+}
