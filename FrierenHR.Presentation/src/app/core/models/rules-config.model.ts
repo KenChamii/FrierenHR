@@ -19,7 +19,13 @@ export interface RuleEvaluationResultDto {
 // Mirrors FrierenHR.Core.RulesEngine.Schema. The rules form is built from this rather than
 // from anything hardcoded here, so it cannot offer a field or operator the engine lacks.
 
-export type RuleValueKind = 'Integer' | 'Decimal' | 'Text' | 'Enum';
+export type RuleValueKind = 'Integer' | 'Decimal' | 'Text' | 'Enum' | 'Boolean';
+
+/** A Boolean field is a two-option dropdown rather than a checkbox, so it reads as a value. */
+export const BOOLEAN_OPTIONS = [
+  { label: 'Yes', value: true },
+  { label: 'No', value: false },
+];
 
 export interface RuleFieldSchema {
   name: string;
