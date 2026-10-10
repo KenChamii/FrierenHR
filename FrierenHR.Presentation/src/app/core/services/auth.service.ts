@@ -2,7 +2,7 @@ import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
-import { LoginDto, LoginResultDto } from '../models/auth.model';
+import { LoginDto, LoginResultDto, RegisterCompanyDto } from '../models/auth.model';
 
 const STORAGE_KEY = 'hr_auth';
 
@@ -23,6 +23,14 @@ export class AuthService {
 
   login(dto: LoginDto) {
     return this.http.post<LoginResultDto>(`${environment.apiUrl}/api/auth/login`, dto);
+  }
+
+  /**
+   * Creates a company and its first administrator. Returns the same shape as login, so the
+   * caller establishes a session the same way and the person lands in the app signed in.
+   */
+  registerCompany(dto: RegisterCompanyDto) {
+    return this.http.post<LoginResultDto>(`${environment.apiUrl}/api/auth/register-company`, dto);
   }
 
   /**

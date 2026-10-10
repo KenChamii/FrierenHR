@@ -34,6 +34,29 @@ public class LeaveRepository : Repository<LeaveRequest>, ILeaveRepository
             .Where(b => b.EmployeeId == employeeId)
             .ToListAsync(ct);
 
+    public async Task<List<LeaveRequest>> GetApprovedInRangeAsync(
+        Guid companyId, DateTime from, DateTime to, Guid? departmentId = null, CancellationToken ct = default)
+    {
+        var query = DbSet.Include(l => l.Employee).AsNoTracking()
+            .Where(l => l.Status == LeaveStatus.Approved
+                        && l.Employee!.CompanyId == companyId
+                        // Overlap, not containment: leave that starts before the window and
+                        // ends after it still covers every day in between.
+                        && l.StartDate <= to
+                        && l.EndDate >= from);
+
+        if (departmentId is not null)
+            query = query.Where(l => l.Employee!.DepartmentId == departmentId);
+
+        return await query.OrderBy(l => l.StartDate).ToListAsync(ct);
+    }
+
+    public async Task<List<LeaveBalance>> GetBalancesForCompanyAsync(Guid companyId, CancellationToken ct = default) =>
+        await Context.Set<LeaveBalance>().AsNoTracking()
+            .Include(b => b.Employee)
+            .Where(b => b.Employee!.CompanyId == companyId && b.Employee.IsActive)
+            .ToListAsync(ct);
+
     public async Task UpsertBalanceAsync(LeaveBalance balance, CancellationToken ct = default)
     {
         var existing = await Context.Set<LeaveBalance>()

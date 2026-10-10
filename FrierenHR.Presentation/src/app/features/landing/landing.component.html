@@ -7,7 +7,10 @@
       <a href="#modules">Modules</a>
       <a href="#approvals">Approvals</a>
     </nav>
-    <a class="btn btn-fill" routerLink="/login">Sign in</a>
+    <div class="topbar-cta">
+      <a class="btn" routerLink="/login">Sign in</a>
+      <a class="btn btn-fill" routerLink="/register">Create a company</a>
+    </div>
   </div>
 </header>
 
@@ -19,9 +22,10 @@
       those terms as rules you configure instead of code you commission, then applies them to every
       accrual, every timesheet and every request that follows.</p>
     <div class="cta-row">
-      <a class="btn btn-fill" href="#rules">See a rule <span aria-hidden="true">&rarr;</span></a>
-      <a class="btn" href="#modules">What it covers</a>
+      <a class="btn btn-fill" routerLink="/register">Create a company <span aria-hidden="true">&rarr;</span></a>
+      <a class="btn" href="#rules">See a rule</a>
     </div>
+    <p class="cta-note">Sets up a shift, accrual and approval rules you can edit straight away.</p>
     <div class="facts">
       <div><span class="lbl">Tenancy</span><span class="val">Per company</span></div>
       <div><span class="lbl">Rule types</span><span class="val mono">05</span></div>
@@ -220,8 +224,8 @@
           <p class="sub">Bring one leave rule you have never been able to automate cleanly. That is the
             useful test.</p>
           <div class="cta-row">
-            <a class="btn btn-fill" routerLink="/login">Sign in <span aria-hidden="true">&rarr;</span></a>
-            <a class="btn" href="#modules">Read the module list</a>
+            <a class="btn btn-fill" routerLink="/register">Create a company <span aria-hidden="true">&rarr;</span></a>
+            <a class="btn" routerLink="/login">Sign in</a>
           </div>
         </div>
         <div class="seal">

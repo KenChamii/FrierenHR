@@ -13,11 +13,15 @@ public class CompaniesController : ControllerBase
     private readonly ICompanyService _companyService;
     public CompaniesController(ICompanyService companyService) => _companyService = companyService;
 
-    // Company sign-up — there's no logged-in user yet at this point, so this has to stay open.
-    [HttpGet, AllowAnonymous]
+    // Was anonymous, to populate a sign-up dropdown. That published every tenant's name,
+    // code and headcount to anyone who asked. Sign-up now creates its own company through
+    // POST /api/auth/register-company and needs no list.
+    [HttpGet, Authorize(Roles = "HRAdmin")]
     public async Task<ActionResult<List<CompanyDto>>> GetAll(CancellationToken ct) => Ok(await _companyService.GetAllAsync(ct));
 
-    [HttpPost, AllowAnonymous]
+    // Creating a company without its first HRAdmin leaves a tenant nobody can log into, so
+    // this is no longer the sign-up route and requires an existing administrator.
+    [HttpPost, Authorize(Roles = "HRAdmin")]
     public async Task<ActionResult<CompanyDto>> Create(CreateCompanyDto dto, CancellationToken ct)
     {
         try { var created = await _companyService.CreateAsync(dto, ct); return CreatedAtAction(nameof(GetById), new { id = created.Id }, created); }

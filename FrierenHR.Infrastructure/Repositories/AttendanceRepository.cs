@@ -17,4 +17,11 @@ public class AttendanceRepository : Repository<AttendanceLog>, IAttendanceReposi
         if (to is not null) query = query.Where(a => a.TimeIn <= to);
         return await query.OrderByDescending(a => a.TimeIn).ToListAsync(ct);
     }
+
+    public async Task<List<AttendanceLog>> GetByCompanyAsync(
+        Guid companyId, DateTime from, DateTime to, CancellationToken ct = default) =>
+        await DbSet.AsNoTracking()
+            .Where(a => a.Employee!.CompanyId == companyId && a.TimeIn >= from && a.TimeIn <= to)
+            .OrderBy(a => a.EmployeeId).ThenBy(a => a.TimeIn)
+            .ToListAsync(ct);
 }

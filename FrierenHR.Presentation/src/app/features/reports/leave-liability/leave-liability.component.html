@@ -1,0 +1,89 @@
+<div class="page">
+  <header class="page-head">
+    <div>
+      <span class="exhibit">Finance</span>
+      <h2>Leave liability</h2>
+      <p class="sub">What unused leave would cost if it were all paid out. Unpaid leave is left
+        out, and balances belonging to deactivated employees are not counted.</p>
+    </div>
+  </header>
+
+  <section class="controls">
+    <label>
+      <span class="exhibit">Daily rate</span>
+      <p-inputNumber [(ngModel)]="dailyRate" name="dailyRate" mode="decimal"
+                     [min]="0" [maxFractionDigits]="2" placeholder="0.00"></p-inputNumber>
+    </label>
+    <button pButton type="button" label="Calculate" [loading]="loading()" (click)="run()"></button>
+    <button pButton type="button" severity="secondary" [outlined]="true" label="Download CSV"
+            [loading]="exporting()" [disabled]="!data()?.rows?.length" (click)="download()"></button>
+  </section>
+
+  @if (error()) { <p-message severity="error" [text]="error()!"></p-message> }
+
+  @if (data()) {
+    <section class="headline">
+      <div class="figure">
+        <span class="n mono">{{ data()!.totalValue | number: '1.2-2' }}</span>
+        <span class="l">Total exposure</span>
+      </div>
+      <div class="figure small">
+        <span class="n mono">{{ data()!.totalDays }}</span>
+        <span class="l">Days outstanding</span>
+      </div>
+      <div class="figure small">
+        <span class="n mono">{{ data()!.dailyRate | number: '1.2-2' }}</span>
+        <span class="l">Rate applied</span>
+      </div>
+    </section>
+  }
+
+  @if (data()?.byDepartment?.length) {
+    <section class="box">
+      <div class="box-h"><span class="exhibit">By department</span></div>
+      <ul class="dept-list">
+        @for (dept of data()!.byDepartment; track dept.departmentName) {
+          <li>
+            <span class="name">{{ dept.departmentName }}</span>
+            <span class="days mono">{{ dept.days }} days</span>
+            <span class="value mono">{{ dept.value | number: '1.2-2' }}</span>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
+  @if (data()?.rows?.length) {
+    <section class="box">
+      <div class="box-h">
+        <span class="exhibit">Per employee</span>
+        <span class="count mono">{{ data()!.rows.length }} balance(s)</span>
+      </div>
+
+      <p-table [value]="data()!.rows" [paginator]="true" [rows]="25" styleClass="p-datatable-sm">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Employee</th>
+            <th>Department</th>
+            <th>Leave type</th>
+            <th class="num">Days</th>
+            <th class="num">Value</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td>{{ row.employeeName }}</td>
+            <td class="muted">{{ row.departmentName }}</td>
+            <td class="muted">{{ row.leaveType }}</td>
+            <td class="num mono">{{ row.days }}</td>
+            <td class="num mono">{{ row.value | number: '1.2-2' }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </section>
+  } @else if (data() && !loading()) {
+    <p class="empty">No payable balances are outstanding.</p>
+  } @else if (!data() && !loading()) {
+    <p class="empty">Enter a daily rate to calculate the exposure.</p>
+  }
+</div>

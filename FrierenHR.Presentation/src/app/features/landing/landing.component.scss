@@ -178,6 +178,21 @@ p { margin: 0; }
   .lede { margin-top: 26px; }
 }
 
+.topbar-cta {
+  display: flex;
+  gap: 0.5rem;
+}
+
+// Says what sign-up actually does, so the button is not a leap of faith.
+.cta-note {
+  margin: 0.75rem 0 0;
+  font-family: var(--hr-font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--hr-text-muted);
+}
+
 .cta-row {
   display: flex;
   flex-wrap: wrap;

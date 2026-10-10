@@ -1,0 +1,32 @@
+@use '../../../../styles/admin-page';
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+}
+
+// Figures are read down a column, so they align right and share one width.
+:host ::ng-deep .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+:host ::ng-deep td.muted { color: var(--hr-text-muted); }
+
+:host ::ng-deep td.flag { color: var(--hr-danger, #8c3b2e); }
+
+:host ::ng-deep tr.totals td {
+  border-top: 1px solid var(--hr-text);
+  font-family: var(--hr-font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+}
