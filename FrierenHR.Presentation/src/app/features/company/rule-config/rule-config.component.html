@@ -1,73 +1,273 @@
-<h2>Rules Config</h2>
-<p class="hint">Edit a rule as JSON, save it, then test it against sample facts — no redeploy needed.</p>
+<div class="rules-page">
+  <header class="page-head">
+    <div>
+      <span class="exhibit">Company rules</span>
+      <h2>Policy, written once</h2>
+      <p class="sub">Build a rule from the fields the engine reads. Rules of the same type are tried in
+        priority order and the first match wins.</p>
+    </div>
+    <div class="head-actions">
+      <button pButton type="button" severity="secondary" [outlined]="true" label="Seed starter rules"
+              [loading]="seeding()" (click)="seedDefaults()"></button>
+    </div>
+  </header>
 
-<p-panel header="Configured Rules" styleClass="mb-4">
-  @if (!loading() && configs().length === 0) {
-    <p class="empty">Nothing configured yet for your company.</p>
-    <p-button label="Seed Default Rules" icon="pi pi-sparkles" [loading]="seeding()" (onClick)="seedDefaults()" />
-  } @else {
-    <p-table [value]="configs()" [loading]="loading()" responsiveLayout="scroll">
-      <ng-template pTemplate="header"><tr><th>Rule Type</th><th>Priority</th><th>Status</th><th></th></tr></ng-template>
-      <ng-template pTemplate="body" let-config>
-        <tr>
-          <td>{{ config.ruleType }}</td>
-          <td>{{ config.priority }}</td>
-          <td><p-tag [value]="config.isActive ? 'Active' : 'Inactive'" [severity]="config.isActive ? 'success' : 'secondary'" /></td>
-          <td><p-button label="Edit" icon="pi pi-pencil" [text]="true" (onClick)="edit(config)" /></td>
-        </tr>
-      </ng-template>
-    </p-table>
-    <p-button label="Seed Any Missing Defaults" icon="pi pi-sparkles" [text]="true" [loading]="seeding()" (onClick)="seedDefaults()" styleClass="mt-2" />
+  @if (schemaError()) {
+    <p-message severity="error" [text]="schemaError()!"></p-message>
   }
-</p-panel>
 
-<div class="rule-config-grid">
-  <p-panel [header]="editingId() ? 'Edit Rule' : 'New Rule'">
-    @if (saveError()) { <p-message severity="error" [text]="saveError()!" styleClass="w-full mb-2" /> }
-    @if (saveSuccess()) { <p-message severity="success" text="Saved." styleClass="w-full mb-2" /> }
+  @if (schema()) {
+    <form [formGroup]="form" class="layout">
 
-    <form [formGroup]="form" (ngSubmit)="save()">
-      <label for="ruleType">Rule type</label>
-      <p-dropdown [options]="ruleTypes" formControlName="ruleType" styleClass="w-full" />
-
-      <div class="template-row">
-        <p-button label="Load Default Template" icon="pi pi-refresh" [text]="true" type="button" (onClick)="loadDefaultTemplate()" />
-        <p-button label="Start Blank Instead" icon="pi pi-file" [text]="true" severity="secondary" type="button" (onClick)="startBlank()" />
-      </div>
-
-      <label for="ruleJson">Rule JSON</label>
-      <textarea pTextarea formControlName="ruleJson" rows="10" class="w-full code-area"></textarea>
-
-      <div class="inline-row">
-        <div>
-          <label for="priority">Priority</label>
-          <p-inputnumber formControlName="priority" [min]="0" styleClass="w-full" />
+      <!-- builder -->
+      <section class="builder">
+        <div class="builder-head">
+          <span class="exhibit">{{ editingId() ? 'Editing a rule' : 'New rule' }}</span>
+          <div class="builder-head-actions">
+            <button pButton type="button" severity="secondary" [text]="true" label="Load starter" (click)="loadStarter()"></button>
+            <button pButton type="button" severity="secondary" [text]="true" label="Start blank" (click)="startBlank()"></button>
+          </div>
         </div>
-        <div class="switch-row">
-          <label for="isActive">Active</label>
-          <p-toggleswitch formControlName="isActive" />
-        </div>
-      </div>
 
-      <p-button [label]="editingId() ? 'Update Rule' : 'Save Rule'" type="submit" [loading]="saving()" [disabled]="form.invalid" styleClass="mt-3" />
+        <div class="field">
+          <label for="ruleType">Rule type</label>
+          <p-dropdown inputId="ruleType" formControlName="ruleType" [options]="ruleTypeOptions()"
+                      optionLabel="label" optionValue="value" styleClass="w-full"></p-dropdown>
+          @if (currentSchema(); as rt) {
+            <small class="hint">{{ rt.description }}</small>
+            @if (!rt.wired) {
+              <p-message severity="warn" styleClass="inline-note"
+                         text="Rules of this type save and validate, but nothing evaluates them yet."></p-message>
+            }
+          }
+        </div>
+
+        <div class="group">
+          <span class="group-label">When all of these are true</span>
+
+          @if (!conditions.length) {
+            <p class="empty-conditions">No conditions, so this rule applies to every employee.</p>
+          }
+
+          <div formArrayName="conditions">
+            @for (group of conditions.controls; track $index; let i = $index) {
+              <div class="condition" [formGroupName]="i">
+                <p-dropdown formControlName="field" [options]="fieldOptions()" optionLabel="label"
+                            optionValue="value" (onChange)="onFieldChange(i)" styleClass="w-full"></p-dropdown>
+
+                <p-dropdown formControlName="op" [options]="operatorOptionsFor(group.value.field)"
+                            optionLabel="label" optionValue="value" (onChange)="onOperatorChange(i)"
+                            styleClass="w-full"></p-dropdown>
+
+                @if (fieldFor(group.value.field); as field) {
+                  <div class="value-cell">
+                    @if (group.value.op === 'in') {
+                      <p-multiSelect formControlName="value" [options]="enumOptionsFor(field.name)"
+                                     optionLabel="label" optionValue="value" display="chip"
+                                     placeholder="Pick one or more" styleClass="w-full"></p-multiSelect>
+                    } @else if (field.kind === 'Enum') {
+                      <p-dropdown formControlName="value" [options]="enumOptionsFor(field.name)"
+                                  optionLabel="label" optionValue="value" styleClass="w-full"></p-dropdown>
+                    } @else if (field.kind === 'Text') {
+                      <input pInputText formControlName="value" class="w-full" />
+                    } @else {
+                      <p-inputNumber formControlName="value" [showButtons]="false"
+                                     [minFractionDigits]="0"
+                                     [maxFractionDigits]="field.kind === 'Decimal' ? 2 : 0"
+                                     styleClass="w-full"></p-inputNumber>
+                    }
+                    @if (field.unit) { <span class="unit">{{ field.unit }}</span> }
+                  </div>
+                }
+
+                <button pButton type="button" severity="secondary" [text]="true" icon="pi pi-times"
+                        class="remove" [attr.aria-label]="'Remove condition ' + (i + 1)"
+                        (click)="removeCondition(i)"></button>
+              </div>
+            }
+          </div>
+
+          <button pButton type="button" severity="secondary" [outlined]="true" icon="pi pi-plus"
+                  label="Add condition" class="add-condition" (click)="addCondition()"></button>
+        </div>
+
+        <div class="group">
+          <span class="group-label">Then</span>
+          <div class="field">
+            <p-dropdown formControlName="actionType" [options]="actionOptions()" optionLabel="label"
+                        optionValue="value" styleClass="w-full"></p-dropdown>
+          </div>
+
+          @if (actionSchema(); as action) {
+            <div class="action-params">
+              @for (param of action.parameters; track param.name) {
+                <div class="field">
+                  <label [for]="'param-' + param.name">
+                    {{ param.label }}
+                    @if (!param.required) { <span class="optional">optional</span> }
+                  </label>
+                  <div class="value-cell">
+                    @if (param.name === 'cap') {
+                      <p-inputNumber [inputId]="'param-' + param.name" formControlName="cap"
+                                     [minFractionDigits]="0" [maxFractionDigits]="2" styleClass="w-full"></p-inputNumber>
+                    } @else {
+                      <p-inputNumber [inputId]="'param-' + param.name" formControlName="amount"
+                                     [minFractionDigits]="0" [maxFractionDigits]="2" styleClass="w-full"></p-inputNumber>
+                    }
+                    @if (param.unit) { <span class="unit">{{ param.unit }}</span> }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="group two-up">
+          <div class="field">
+            <label for="priority">Priority</label>
+            <p-inputNumber inputId="priority" formControlName="priority" [showButtons]="true"
+                           [min]="0" styleClass="w-full"></p-inputNumber>
+            <small class="hint">Lower numbers are tried first.</small>
+          </div>
+          <div class="field switch">
+            <label for="isActive">Active</label>
+            <p-toggleswitch inputId="isActive" formControlName="isActive"></p-toggleswitch>
+          </div>
+        </div>
+
+        @if (saveError()) { <p-message severity="error" [text]="saveError()!"></p-message> }
+        @if (saveSuccess()) { <p-message severity="success" text="Rule saved."></p-message> }
+
+        <div class="save-row">
+          <button pButton type="button" [label]="editingId() ? 'Save changes' : 'Create rule'"
+                  [loading]="saving()" (click)="save()"></button>
+          <button pButton type="button" severity="secondary" [text]="true"
+                  [label]="showJson() ? 'Hide JSON' : 'Advanced: view JSON'" (click)="toggleJson()"></button>
+        </div>
+
+        @if (showJson()) {
+          <pre class="json">{{ ruleJson() }}</pre>
+          <small class="hint">This is what gets stored. The form is the supported way to edit it.</small>
+        }
+      </section>
+
+      <!-- reading and context -->
+      <aside class="side">
+        <div class="preview">
+          <span class="exhibit">Reads as</span>
+          <p class="sentence">{{ previewSentence() || 'Pick an action to see the rule in words.' }}</p>
+        </div>
+
+        <div class="stack">
+          <span class="exhibit">Evaluation order</span>
+          @if (stackedRules().length) {
+            <ol class="stack-list">
+              @for (rule of stackedRules(); track rule.id) {
+                <li [class.current]="rule.id === editingId()" [class.inactive]="!rule.isActive">
+                  <div class="stack-row">
+                    <span class="pri">{{ rule.priority }}</span>
+                    <span class="desc">{{ summarise(rule) }}</span>
+                    @if (rule.id === editingId()) {
+                      <p-tag value="editing" severity="info"></p-tag>
+                    } @else {
+                      <button pButton type="button" severity="secondary" [text]="true" label="Edit"
+                              (click)="edit(rule)"></button>
+                    }
+                  </div>
+                  @if (!rule.isActive) { <span class="off">inactive, skipped</span> }
+                </li>
+              }
+            </ol>
+            <small class="hint">The first rule whose conditions match is the one that runs. Later rules
+              are not consulted.</small>
+          } @else {
+            <p class="empty">Nothing configured for this type yet.</p>
+          }
+        </div>
+
+        <div class="test">
+          <span class="exhibit">Try it</span>
+          <p class="hint">Fill in the facts and run the active rules for this type.</p>
+          <form [formGroup]="testForm" class="test-fields">
+            @for (field of currentSchema()?.fields ?? []; track field.name) {
+              <div class="field">
+                <label [for]="'fact-' + field.name">{{ field.label }}</label>
+                <div class="value-cell">
+                  @if (field.kind === 'Enum') {
+                    <p-dropdown [inputId]="'fact-' + field.name" [formControlName]="field.name"
+                                [options]="enumOptionsFor(field.name)" optionLabel="label"
+                                optionValue="value" styleClass="w-full"></p-dropdown>
+                  } @else if (field.kind === 'Text') {
+                    <input pInputText [id]="'fact-' + field.name" [formControlName]="field.name" class="w-full" />
+                  } @else {
+                    <p-inputNumber [inputId]="'fact-' + field.name" [formControlName]="field.name"
+                                   [minFractionDigits]="0"
+                                   [maxFractionDigits]="field.kind === 'Decimal' ? 2 : 0"
+                                   styleClass="w-full"></p-inputNumber>
+                  }
+                  @if (field.unit) { <span class="unit">{{ field.unit }}</span> }
+                </div>
+              </div>
+            }
+          </form>
+          <button pButton type="button" severity="secondary" [outlined]="true" label="Run against saved rules"
+                  [loading]="testing()" (click)="runTest()"></button>
+
+          @if (testError()) { <p-message severity="error" [text]="testError()!"></p-message> }
+
+          @if (testResult(); as result) {
+            <div class="result" [class.matched]="result.matched" [class.failed]="!result.success">
+              <span class="verdict">
+                @if (!result.success) { Rule error }
+                @else if (result.matched) { Matched }
+                @else { No rule matched }
+              </span>
+              <p class="msg">{{ result.message }}</p>
+              @if (result.actionType) {
+                <dl class="result-meta">
+                  <dt>Action</dt><dd>{{ result.actionType }}</dd>
+                  @if (result.resultValue !== null && result.resultValue !== undefined) {
+                    <dt>Value</dt><dd>{{ result.resultValue }}</dd>
+                  }
+                </dl>
+              }
+            </div>
+          }
+        </div>
+      </aside>
     </form>
-  </p-panel>
 
-  <p-panel header="Test Evaluate">
-    @if (testError()) { <p-message severity="error" [text]="testError()!" styleClass="w-full mb-2" /> }
-
-    <label for="facts">Sample facts (JSON)</label>
-    <textarea pTextarea rows="6" class="w-full code-area" [ngModel]="testFactsJson()" (ngModelChange)="testFactsJson.set($event)"></textarea>
-
-    <p-button label="Run Test" icon="pi pi-play" [loading]="testing()" (onClick)="runTest()" styleClass="mt-3" />
-
-    @if (testResult(); as result) {
-      <div class="result-box" [class.matched]="result.matched">
-        <div><strong>Matched:</strong> {{ result.matched }}</div>
-        <div><strong>Action:</strong> {{ result.actionType ?? '—' }}</div>
-        <div><strong>Result value:</strong> {{ result.resultValue ?? '—' }}</div>
-        <div><strong>Message:</strong> {{ result.message }}</div>
-      </div>
-    }
-  </p-panel>
+    <!-- everything configured, across all types -->
+    <section class="all-rules">
+      <span class="exhibit">All configured rules</span>
+      <p-table [value]="configs()" [loading]="loading()" styleClass="p-datatable-sm">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Type</th>
+            <th>Rule</th>
+            <th class="num">Priority</th>
+            <th>State</th>
+            <th></th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-rule>
+          <tr>
+            <td>{{ labelFor(rule.ruleType) }}</td>
+            <td class="rule-cell">{{ summarise(rule) }}</td>
+            <td class="num">{{ rule.priority }}</td>
+            <td>
+              <p-tag [value]="rule.isActive ? 'active' : 'inactive'"
+                     [severity]="rule.isActive ? 'success' : 'secondary'"></p-tag>
+            </td>
+            <td class="num">
+              <button pButton type="button" severity="secondary" [text]="true" label="Edit" (click)="edit(rule)"></button>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr><td colspan="5" class="empty">No rules configured. Seed the starters to get going.</td></tr>
+        </ng-template>
+      </p-table>
+    </section>
+  }
 </div>
