@@ -1,0 +1,172 @@
+// Shared layout for the configuration and review screens: holidays, shifts, corrections and
+// the audit trail. They are the same shape, so the shape lives here rather than four times.
+//
+// Used with @use from a component stylesheet, which scopes everything to that component.
+// Colour and type come from the global tokens in _theme.scss, never redefined here.
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.exhibit {
+  display: block;
+  font-family: var(--hr-font-mono);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--hr-accent);
+}
+
+.page-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--hr-border);
+
+  h2 {
+    margin: 0.5rem 0 0;
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+  }
+
+  .sub {
+    margin: 0.5rem 0 0;
+    max-width: 62ch;
+    color: var(--hr-text-muted);
+  }
+}
+
+.head-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.cols {
+  display: grid;
+  grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 1000px) {
+  .cols { grid-template-columns: 1fr; }
+}
+
+.box {
+  border: 1px solid var(--hr-border);
+  background: var(--hr-surface);
+}
+
+.box-h {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 1rem 1.25rem 0.875rem;
+  border-bottom: 1px solid var(--hr-border);
+}
+
+.count {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: var(--hr-text-muted);
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+
+  label {
+    font-family: var(--hr-font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--hr-text-muted);
+  }
+}
+
+.hint {
+  color: var(--hr-text-muted);
+  font-size: 0.8rem;
+  line-height: 1.55;
+
+  code {
+    font-family: var(--hr-font-mono);
+    font-size: 0.72rem;
+    background: var(--hr-surface-alt);
+    padding: 0.1rem 0.3rem;
+  }
+}
+
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.mono {
+  font-family: var(--hr-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.nowrap { white-space: nowrap; }
+.right { text-align: right; white-space: nowrap; }
+
+.dow {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--hr-text-muted);
+  margin-left: 0.4rem;
+}
+
+.empty {
+  padding: 1.25rem;
+  color: var(--hr-text-muted);
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+// The row currently loaded into the form, so it is obvious what is being edited.
+tr.editing { background: var(--hr-accent-soft); }
+
+.import {
+  display: flex;
+  flex-direction: column;
+
+  textarea {
+    width: 100%;
+    margin: 1rem 1.25rem 0;
+    width: calc(100% - 2.5rem);
+    font-family: var(--hr-font-mono);
+    font-size: 0.78rem;
+    line-height: 1.6;
+  }
+
+  .row-actions { padding: 1rem 1.25rem 1.25rem; }
+}
+
+:host ::ng-deep {
+  .w-full { width: 100%; }
+  .p-inputnumber { width: 100%; }
+}

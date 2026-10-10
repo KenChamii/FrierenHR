@@ -1,0 +1,57 @@
+@use '../../../../styles/admin-page';
+
+.two-up {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.value-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+
+  .unit {
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    color: var(--hr-text-muted);
+    white-space: nowrap;
+  }
+}
+
+.field.switch {
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+// Seven square toggles rather than a multi-select: the week is short enough to show whole,
+// and a glance is faster than opening a list.
+.day-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.day {
+  flex: 1 1 auto;
+  min-width: 44px;
+  padding: 0.5rem 0.25rem;
+  border: 1px solid var(--hr-border);
+  background: transparent;
+  color: var(--hr-text-muted);
+  font-family: var(--hr-font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+
+  &:hover { border-color: var(--hr-accent); }
+
+  &.on {
+    background: var(--hr-sidebar);
+    border-color: var(--hr-sidebar);
+    color: var(--hr-text-inverse);
+  }
+}

@@ -1,0 +1,86 @@
+<div class="page">
+  <header class="page-head">
+    <div>
+      <span class="exhibit">Accountability</span>
+      <h2>Audit trail</h2>
+      <p class="sub">Every change to a record, who made it and when. Written automatically, and
+        nothing in the application amends or deletes it.</p>
+    </div>
+    <div class="head-actions">
+      <p-dropdown [options]="entityOptions" optionLabel="label" optionValue="value"
+                  [ngModel]="entityName()" (ngModelChange)="onFilterChange($event)"
+                  [ngModelOptions]="{ standalone: true }"></p-dropdown>
+    </div>
+  </header>
+
+  @if (error()) { <p-message severity="error" [text]="error()!"></p-message> }
+
+  <section class="box">
+    <div class="box-h">
+      <span class="exhibit">
+        @if (loading()) { Loading } @else { Showing {{ showing().from }} to {{ showing().to }} }
+      </span>
+      <span class="count mono">{{ total() }} recorded</span>
+    </div>
+
+    @if (!loading() && !rows().length) {
+      <p class="empty">
+        Nothing recorded yet.
+        @if (entityName()) { Nothing of this kind has changed. }
+        @else { The trail starts from the first change made after this was deployed, so an
+          empty list here is expected on a fresh database. }
+      </p>
+    }
+
+    <ol class="trail">
+      @for (row of rows(); track row.id) {
+        <li class="entry" [class.open]="row.expanded">
+          <button type="button" class="entry-head" (click)="toggle(row)"
+                  [attr.aria-expanded]="row.expanded">
+            <span class="when mono">{{ row.changedAt | date: 'dd MMM, HH:mm' }}</span>
+            <p-tag [value]="row.action" [severity]="severityFor(row.action)"></p-tag>
+            <span class="what">{{ labelFor(row.entityName) }}</span>
+            <span class="by">{{ row.changedByName ?? 'System' }}</span>
+            <span class="fields mono">
+              @if (row.changeList.length) { {{ row.changeList.length }} field(s) }
+            </span>
+            <span class="chev" aria-hidden="true">{{ row.expanded ? '&minus;' : '+' }}</span>
+          </button>
+
+          @if (row.expanded) {
+            <div class="detail">
+              @if (row.changeList.length) {
+                <table class="changes">
+                  <thead>
+                    <tr><th>Field</th><th>From</th><th>To</th></tr>
+                  </thead>
+                  <tbody>
+                    @for (change of row.changeList; track change.field) {
+                      <tr>
+                        <td class="field-name mono">{{ change.field }}</td>
+                        <td class="from mono">{{ change.from || '&mdash;' }}</td>
+                        <td class="to mono">{{ change.to || '&mdash;' }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              } @else {
+                <p class="hint">No field-level detail was recorded for this change.</p>
+              }
+              <p class="record mono">Record {{ row.entityId }}</p>
+            </div>
+          }
+        </li>
+      }
+    </ol>
+
+    @if (hasPrevious() || hasNext()) {
+      <div class="pager">
+        <button pButton type="button" severity="secondary" [outlined]="true" label="Newer"
+                [disabled]="!hasPrevious()" (click)="previous()"></button>
+        <button pButton type="button" severity="secondary" [outlined]="true" label="Older"
+                [disabled]="!hasNext()" (click)="next()"></button>
+      </div>
+    }
+  </section>
+</div>

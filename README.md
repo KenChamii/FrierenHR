@@ -25,12 +25,17 @@ Administrators do not write that JSON. The rules screen builds it from a schema 
 
 Rules of the same type stack by priority. `RuleEvaluator.EvaluateFirstMatch` tries them in priority order and the first match wins, which is how an exception for probationary staff sits above the general rule.
 
+The facts include whether the day is a holiday and which kind, so holiday pay is configuration too: "when overtime hours is at least 1 and holiday type is Regular, pay overtime at 2.0 times the normal rate" needs no code change.
+
 ## Modules
 
 | Module | What it covers |
 | --- | --- |
 | Leave | Balances per type, scheduled accrual, requests routed through approval chains |
-| Attendance | Clock in and out with break minutes, late grace applied from the company's rule |
+| Attendance | Clock in and out with break minutes, late grace measured against the employee's shift |
+| Scheduling | Per-company holiday calendar and shift definitions, with rest days feeding leave day counts |
+| Corrections | A missed clock-in is a request with a reason, decided by a manager, and approving writes the row |
+| Audit | Every change to a record, captured by a save interceptor rather than by each service |
 | Timesheets | Weekly hours from attendance, submitted once, overtime at the configured multiplier |
 | Approvals | Chains defined per company, automatic escalation when a level sits too long |
 | Messaging | Direct and group conversations over SignalR, with attachment type and size limits from config |
@@ -87,8 +92,12 @@ The suite covers the rules engine end to end: every supported operator, missing 
 Recorded deliberately rather than left to be discovered.
 
 - **No refresh tokens.** Access tokens last eight hours and logout is client-side only, so there is no server-side revocation. Acceptable for an internal tool, not for anything public facing.
-- **No holiday calendar.** There is no `Holiday` entity, so a leave request spanning a public holiday still deducts that day, and overtime on a holiday gets the ordinary multiplier. This is the next thing worth building.
+- **No refresh on the lateness flag.** Minutes late are computed against the employee's shift and fed to the rules engine, but nothing stores the result yet, so lateness can be configured and evaluated without being reported on.
 - **List endpoints are unpaginated.** `Repository<T>.GetAllAsync` returns whole tables. Fine at seed scale, wrong for employee lists and message history in production.
 - **Photos and attachments go to local disk.** `LocalDiskPhotoStorageService` writes under `wwwroot/uploads`, which does not survive a container restart. The interface is there to swap in blob storage.
 - **Dashboard figures are approximate.** Three of the four counts derive from one approver-scoped query rather than company-wide ones.
+
+## Licence
+
+MIT.
 

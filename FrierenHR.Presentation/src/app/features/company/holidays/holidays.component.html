@@ -1,0 +1,109 @@
+<div class="page">
+  <header class="page-head">
+    <div>
+      <span class="exhibit">Company calendar</span>
+      <h2>Holidays</h2>
+      <p class="sub">Leave requests skip these days, and overtime rules can pay a premium on
+        them. A day recorded here is a day nobody is expected to work.</p>
+    </div>
+    <div class="head-actions">
+      <p-dropdown [options]="years()" optionLabel="label" optionValue="value"
+                  [ngModel]="year()" (ngModelChange)="onYearChange($event)"
+                  [ngModelOptions]="{ standalone: true }"></p-dropdown>
+      <button pButton type="button" severity="secondary" [outlined]="true"
+              [label]="showImport() ? 'Close import' : 'Paste a year'"
+              (click)="showImport.set(!showImport())"></button>
+    </div>
+  </header>
+
+  @if (error()) { <p-message severity="error" [text]="error()!"></p-message> }
+  @if (notice()) { <p-message severity="success" [text]="notice()!"></p-message> }
+
+  @if (showImport()) {
+    <section class="box import">
+      <div class="box-h">
+        <span class="exhibit">Bulk add</span>
+        <span class="hint">One per line: <code>2026-01-01, New Year's Day, Regular</code>.
+          The type is optional and defaults to Regular. Dates already recorded are skipped.</span>
+      </div>
+      <textarea pTextarea rows="7" [(ngModel)]="importText" class="w-full"
+                placeholder="2026-01-01, New Year's Day, Regular&#10;2026-04-09, Araw ng Kagitingan, Regular&#10;2026-08-21, Ninoy Aquino Day, SpecialNonWorking"></textarea>
+      <div class="row-actions">
+        <button pButton type="button" label="Import" [loading]="importing()" (click)="runImport()"></button>
+      </div>
+    </section>
+  }
+
+  <div class="cols">
+    <section class="box form-box">
+      <div class="box-h">
+        <span class="exhibit">{{ editingId() ? 'Editing' : 'Add a holiday' }}</span>
+      </div>
+      <form [formGroup]="form" (ngSubmit)="save()" class="stack">
+        <div class="field">
+          <label for="date">Date</label>
+          <input pInputText id="date" type="date" formControlName="date" class="w-full" />
+        </div>
+        <div class="field">
+          <label for="name">Name</label>
+          <input pInputText id="name" formControlName="name" placeholder="New Year's Day" class="w-full" />
+        </div>
+        <div class="field">
+          <label for="type">Type</label>
+          <p-dropdown inputId="type" formControlName="type" [options]="holidayTypes"
+                      optionLabel="label" optionValue="value" styleClass="w-full"></p-dropdown>
+        </div>
+        <div class="field">
+          <label for="departmentId">Applies to</label>
+          <p-dropdown inputId="departmentId" formControlName="departmentId" [options]="departmentOptions()"
+                      optionLabel="label" optionValue="value" styleClass="w-full"></p-dropdown>
+          <small class="hint">A department entry sits on top of the company-wide calendar.</small>
+        </div>
+        <div class="row-actions">
+          <button pButton type="submit" [label]="editingId() ? 'Save changes' : 'Add'" [loading]="saving()"></button>
+          @if (editingId()) {
+            <button pButton type="button" severity="secondary" [text]="true" label="Cancel" (click)="cancelEdit()"></button>
+          }
+        </div>
+      </form>
+    </section>
+
+    <section class="box">
+      <div class="box-h">
+        <span class="exhibit">{{ year() }}</span>
+        <span class="count mono">{{ list().length }} recorded</span>
+      </div>
+      <p-table [value]="list()" [loading]="loading()" styleClass="p-datatable-sm">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Date</th>
+            <th>Holiday</th>
+            <th>Type</th>
+            <th>Applies to</th>
+            <th></th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-holiday>
+          <tr [class.editing]="holiday.id === editingId()">
+            <td class="mono nowrap">{{ holiday.date }} <span class="dow">{{ weekdayOf(holiday.date) }}</span></td>
+            <td>{{ holiday.name }}</td>
+            <td><p-tag [value]="labelFor(holiday.type)" [severity]="severityFor(holiday.type)"></p-tag></td>
+            <td>{{ holiday.departmentName ?? 'Whole company' }}</td>
+            <td class="right">
+              <button pButton type="button" severity="secondary" [text]="true" label="Edit" (click)="edit(holiday)"></button>
+              <button pButton type="button" severity="danger" [text]="true" label="Remove" (click)="remove(holiday)"></button>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="5" class="empty">
+              Nothing recorded for {{ year() }}. Until a holiday is here, leave requests spanning
+              it will still deduct the day.
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </section>
+  </div>
+</div>
