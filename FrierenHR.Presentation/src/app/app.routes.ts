@@ -3,13 +3,21 @@ import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
+  // The landing page is the application's front door. pathMatch 'full' keeps it to the root
+  // URL only, so the shell below still owns /dashboard, /leave and the rest.
+  {
+    path: '',
+    pathMatch: 'full',
+    loadComponent: () => import('./features/landing/landing.component').then(m => m.LandingComponent),
+  },
+  // Kept so existing links to /welcome still work.
+  { path: 'welcome', pathMatch: 'full', redirectTo: '' },
   { path: 'login', loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent) },
   {
     path: '',
     loadComponent: () => import('./layout/shell/shell.component').then(m => m.ShellComponent),
     canActivate: [authGuard],
     children: [
-      { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
       { path: 'dashboard', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
       { path: 'employees', loadComponent: () => import('./features/employees/employee-list/employee-list.component').then(m => m.EmployeeListComponent) },
       { path: 'leave', loadComponent: () => import('./features/leave/leave-home/leave-home.component').then(m => m.LeaveHomeComponent) },
@@ -37,5 +45,6 @@ export const routes: Routes = [
       },
     ],
   },
-  { path: '**', redirectTo: 'dashboard' },
+  // An unknown URL lands somewhere public rather than bouncing off the auth guard.
+  { path: '**', redirectTo: '' },
 ];
