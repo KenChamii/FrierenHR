@@ -28,12 +28,29 @@ public interface ILeaveRepository : IRepository<LeaveRequest>
     Task<LeaveBalance?> GetBalanceAsync(Guid employeeId, LeaveType leaveType, CancellationToken ct = default);
     Task<List<LeaveBalance>> GetBalancesAsync(Guid employeeId, CancellationToken ct = default);
     Task UpsertBalanceAsync(LeaveBalance balance, CancellationToken ct = default);
+
+    /// <summary>
+    /// Approved leave overlapping a range, company-wide. Overlapping rather than contained,
+    /// so a fortnight's leave still shows on a week that falls inside it.
+    /// </summary>
+    Task<List<LeaveRequest>> GetApprovedInRangeAsync(
+        Guid companyId, DateTime from, DateTime to, Guid? departmentId = null, CancellationToken ct = default);
+
+    /// <summary>Every balance in the company, for the liability report.</summary>
+    Task<List<LeaveBalance>> GetBalancesForCompanyAsync(Guid companyId, CancellationToken ct = default);
 }
 
 public interface IAttendanceRepository : IRepository<AttendanceLog>
 {
     Task<AttendanceLog?> GetOpenLogAsync(Guid employeeId, CancellationToken ct = default);
     Task<List<AttendanceLog>> GetByEmployeeAsync(Guid employeeId, DateTime? from = null, DateTime? to = null, CancellationToken ct = default);
+
+    /// <summary>
+    /// Every log in the company for a period, in one query. The payroll export needs all of
+    /// them, and asking per employee would be one round trip per person.
+    /// </summary>
+    Task<List<AttendanceLog>> GetByCompanyAsync(
+        Guid companyId, DateTime from, DateTime to, CancellationToken ct = default);
 }
 
 public interface ITimesheetRepository : IRepository<Timesheet>
