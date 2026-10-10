@@ -1,5 +1,6 @@
 ﻿using FrierenHR.Application.Common.DTOs;
 using FrierenHR.Application.Common.Interfaces;
+using FrierenHR.Application.Features.Scheduling;
 using FrierenHR.Core.Entities;
 using FrierenHR.Core.Enums;
 using FrierenHR.Core.RulesEngine;
@@ -14,16 +15,34 @@ public class AttendanceService : IAttendanceService
     private readonly IRuleConfigRepository _ruleConfigRepository;
     private readonly IRuleEvaluator _ruleEvaluator;
     private readonly ITimesheetRepository _timesheetRepository;
+    private readonly IShiftService _shiftService;
+    private readonly IWorkingCalendarProvider _workingCalendar;
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     public AttendanceService(IAttendanceRepository attendanceRepository, IEmployeeRepository employeeRepository,
-        IRuleConfigRepository ruleConfigRepository, IRuleEvaluator ruleEvaluator, ITimesheetRepository timesheetRepository)
+        IRuleConfigRepository ruleConfigRepository, IRuleEvaluator ruleEvaluator, ITimesheetRepository timesheetRepository,
+        IShiftService shiftService, IWorkingCalendarProvider workingCalendar)
     {
         _attendanceRepository = attendanceRepository;
         _employeeRepository = employeeRepository;
         _ruleConfigRepository = ruleConfigRepository;
         _ruleEvaluator = ruleEvaluator;
         _timesheetRepository = timesheetRepository;
+        _shiftService = shiftService;
+        _workingCalendar = workingCalendar;
+    }
+
+    /// <summary>
+    /// Minutes past the shift's expected start. Zero when the employee is early, or when the
+    /// company has defined no shift, because without an expected start there is nothing to be
+    /// late for.
+    /// </summary>
+    private static int MinutesLate(Shift? shift, DateTime clockIn)
+    {
+        if (shift is null) return 0;
+        var actual = TimeOnly.FromDateTime(clockIn);
+        var late = (actual - shift.StartTime).TotalMinutes;
+        return late <= 0 ? 0 : (int)late;
     }
 
     /// <summary>Normalizes any date within a week to that week's Monday (mirrors TimesheetService.GetWeekStart).</summary>
@@ -69,11 +88,23 @@ public class AttendanceService : IAttendanceService
         var employee = await _employeeRepository.GetByIdAsync(dto.EmployeeId, ct)
             ?? throw new InvalidOperationException($"Employee '{dto.EmployeeId}' not found.");
 
-        // Late/grace period check — driven by RuleType.LateGracePeriod, not hardcoded shift times.
+        // Lateness is measured against the employee's shift rather than inferred from the
+        // hour alone, which could not tell a late morning start from an on-time afternoon one.
+        var now = DateTime.UtcNow;
+        var today = DateOnly.FromDateTime(now);
+        var shift = await _shiftService.ResolveForEmployeeAsync(employee.Id, ct);
+        var calendar = await _workingCalendar.ForEmployeeAsync(employee.Id, today, today, ct);
+
         var graceRules = await LoadRules(employee.CompanyId, RuleType.LateGracePeriod, ct);
-        var graceContext = new RuleContext().Set("clockInHour", DateTime.UtcNow.Hour);
+        var graceContext = new RuleContext()
+            .Set("clockInHour", now.Hour)
+            .Set("minutesLate", MinutesLate(shift, now))
+            .Set("isHoliday", calendar.IsHoliday(today))
+            .Set("holidayType", calendar.HolidayTypeOn(today)?.ToString() ?? "None");
+
         var graceResult = _ruleEvaluator.EvaluateFirstMatch(graceRules, RuleType.LateGracePeriod.ToString(), graceContext);
-        // graceResult.ResultValue (minutes) is available here if you want to flag/store lateness explicitly.
+        // graceResult.ResultValue is the grace period in minutes. Compare it against
+        // minutesLate to flag or store lateness once there is somewhere to put it.
 
         var log = new AttendanceLog { EmployeeId = dto.EmployeeId, TimeIn = DateTime.UtcNow, Source = dto.Source };
         await _attendanceRepository.AddAsync(log, ct);
@@ -184,8 +215,16 @@ public class AttendanceService : IAttendanceService
         const decimal standardHours = 8m; // MVP: fixed standard shift; make this an AppConfig/rule if you want it configurable too
         var otHours = Math.Max(0, totalHours - standardHours);
 
+        // Holiday facts so a company can configure a premium for overtime worked on one,
+        // without any change to the engine.
+        var day = DateOnly.FromDateTime(date);
+        var calendar = await _workingCalendar.ForEmployeeAsync(employeeId, day, day, ct);
+
         var rules = await LoadRules(employee.CompanyId, RuleType.OTMultiplier, ct);
-        var context = new RuleContext().Set("otHours", otHours);
+        var context = new RuleContext()
+            .Set("otHours", otHours)
+            .Set("isHoliday", calendar.IsHoliday(day))
+            .Set("holidayType", calendar.HolidayTypeOn(day)?.ToString() ?? "None");
         var result = _ruleEvaluator.EvaluateFirstMatch(rules, RuleType.OTMultiplier.ToString(), context);
 
         return new OtComputationResultDto(result.Matched, otHours, result.Matched ? result.ResultValue ?? 0 : 0, result.Message);
