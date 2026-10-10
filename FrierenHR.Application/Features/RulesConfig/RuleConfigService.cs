@@ -1,33 +1,16 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using FrierenHR.Application.Common.DTOs;
 using FrierenHR.Application.Common.Interfaces;
 using FrierenHR.Core.Entities;
+using FrierenHR.Core.Enums;
 using FrierenHR.Core.RulesEngine;
+using FrierenHR.Core.RulesEngine.Schema;
 
 namespace FrierenHR.Application.Features.RulesConfig;
 
 public class RuleConfigService : IRuleConfigService
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
-
-    // Starter templates so a brand-new company doesn't face a blank JSON box with no idea
-    // what a valid rule looks like. "Seed Defaults" writes these in as real, active configs;
-    // the frontend also offers loading one into the editor without saving, for someone who
-    // wants to start from a template and tweak it before committing.
-    public static readonly IReadOnlyDictionary<FrierenHR.Core.Enums.RuleType, string> DefaultTemplates =
-        new Dictionary<FrierenHR.Core.Enums.RuleType, string>
-        {
-            [FrierenHR.Core.Enums.RuleType.LeaveAccrual] =
-                "{\"ruleType\":\"LeaveAccrual\",\"conditions\":[{\"field\":\"tenureMonths\",\"op\":\">=\",\"value\":0}],\"action\":{\"type\":\"AccrueDays\",\"amount\":1.25,\"cap\":15}}",
-            [FrierenHR.Core.Enums.RuleType.LeaveApproval] =
-                "{\"ruleType\":\"LeaveApproval\",\"conditions\":[{\"field\":\"days\",\"op\":\"<=\",\"value\":2}],\"action\":{\"type\":\"AutoApprove\"}}",
-            [FrierenHR.Core.Enums.RuleType.OTMultiplier] =
-                "{\"ruleType\":\"OTMultiplier\",\"conditions\":[{\"field\":\"otHours\",\"op\":\">=\",\"value\":0}],\"action\":{\"type\":\"OTMultiplier\",\"amount\":1.5}}",
-            [FrierenHR.Core.Enums.RuleType.LateGracePeriod] =
-                "{\"ruleType\":\"LateGracePeriod\",\"conditions\":[{\"field\":\"clockInHour\",\"op\":\">=\",\"value\":9}],\"action\":{\"type\":\"LateGraceMinutes\",\"amount\":15}}",
-            [FrierenHR.Core.Enums.RuleType.ApprovalEscalation] =
-                "{\"ruleType\":\"ApprovalEscalation\",\"conditions\":[{\"field\":\"daysWaiting\",\"op\":\">=\",\"value\":3}],\"action\":{\"type\":\"EscalateAfterDays\",\"amount\":3}}",
-        };
 
     private readonly IRuleConfigRepository _ruleConfigRepository;
     private readonly IRuleEvaluator _ruleEvaluator;
@@ -38,14 +21,23 @@ public class RuleConfigService : IRuleConfigService
         _ruleEvaluator = ruleEvaluator;
     }
 
+    /// <summary>What a valid rule looks like per rule type. The editing UI builds its form from this.</summary>
+    public IReadOnlyDictionary<RuleType, RuleTypeSchema> GetSchema() => RuleSchemaCatalog.All;
+
     public async Task<RuleConfigDto> SaveAsync(SaveRuleConfigDto dto, CancellationToken ct = default)
     {
         RuleDefinition? parsed;
         try { parsed = JsonSerializer.Deserialize<RuleDefinition>(dto.RuleJson, JsonOptions); }
         catch (JsonException ex) { throw new InvalidOperationException($"RuleJson is not valid JSON: {ex.Message}"); }
 
-        if (parsed is null || string.IsNullOrWhiteSpace(parsed.Action.Type))
-            throw new InvalidOperationException("RuleJson must include a non-empty 'action.type'.");
+        if (parsed is null)
+            throw new InvalidOperationException("RuleJson did not describe a rule.");
+
+        // Valid JSON is not a valid rule. The schema catalog is the same one the form is built
+        // from, so a mistyped field or an unsupported operator is rejected here by name rather
+        // than silently never matching at evaluation time.
+        var problem = RuleSchemaCatalog.Validate(dto.RuleType, parsed);
+        if (problem is not null) throw new InvalidOperationException(problem);
 
         if (dto.Id is not null)
         {
@@ -86,8 +78,8 @@ public class RuleConfigService : IRuleConfigService
         foreach (var config in configs)
         {
             var parsed = JsonSerializer.Deserialize<RuleDefinition>(config.RuleJson, JsonOptions);
-            // A row that fails to deserialize here would already have failed SaveAsync's
-            // validation on the way in — skip defensively instead of 500ing the whole test.
+            // Anything unparseable would already have failed SaveAsync on the way in. Skip
+            // rather than failing the whole test run.
             if (parsed is not null) rules.Add(parsed);
         }
 
@@ -99,11 +91,8 @@ public class RuleConfigService : IRuleConfigService
         return new RuleEvaluationResultDto(result.Matched, result.Success, result.ResultValue, result.Message, result.ActionType);
     }
 
-    // Facts arrive over HTTP as untyped JSON, so ASP.NET Core model-binds
-    // Dictionary<string, object?> values as JsonElement — not int/decimal/string.
-    // ConditionEvaluator.TryToDecimal has no idea what a JsonElement is. This is
-    // the exact ambiguity Appendix D calls out; here's where it's actually resolved,
-    // by unwrapping to plain CLR types before the fact ever reaches RuleContext.
+    // Facts arrive as untyped JSON, so model binding gives JsonElement rather than int or
+    // string. ConditionEvaluator cannot read a JsonElement, so unwrap to CLR types first.
     private static object? NormalizeFactValue(object? raw)
     {
         if (raw is not JsonElement element) return raw;
@@ -126,18 +115,27 @@ public class RuleConfigService : IRuleConfigService
         return configs.Select(ToDto).ToList();
     }
 
-    // Fills in a starter rule for any RuleType this company doesn't already have configured.
-    // Never overwrites an existing config — safe to call more than once (e.g. after a new
-    // RuleType gets added to the enum later, this backfills just the missing one).
+    /// <summary>
+    /// Fills in the catalog's starter rule for any rule type this company has not configured.
+    /// Never overwrites an existing config, so it is safe to call again after a new rule type
+    /// is added to the enum.
+    /// </summary>
     public async Task<List<RuleConfigDto>> SeedDefaultsAsync(Guid companyId, CancellationToken ct = default)
     {
         var existing = await _ruleConfigRepository.GetByCompanyAsync(companyId, ct);
         var existingTypes = existing.Select(c => c.RuleType).ToHashSet();
 
-        foreach (var (ruleType, json) in DefaultTemplates)
+        foreach (var (ruleType, schema) in RuleSchemaCatalog.All)
         {
             if (existingTypes.Contains(ruleType)) continue;
-            var entity = new CompanyRuleConfig { CompanyId = companyId, RuleType = ruleType, RuleJson = json, IsActive = true, Priority = 0 };
+            var entity = new CompanyRuleConfig
+            {
+                CompanyId = companyId,
+                RuleType = ruleType,
+                RuleJson = JsonSerializer.Serialize(schema.Starter, JsonOptions),
+                IsActive = true,
+                Priority = 0
+            };
             await _ruleConfigRepository.AddAsync(entity, ct);
         }
         await _ruleConfigRepository.SaveChangesAsync(ct);

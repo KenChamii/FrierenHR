@@ -1,5 +1,7 @@
 ﻿using FrierenHR.Application.Common.DTOs;
 using FrierenHR.Application.Features.RulesConfig;
+using FrierenHR.Core.Enums;
+using FrierenHR.Core.RulesEngine.Schema;
 using FrierenHR.WebAPI.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +15,13 @@ public class RulesConfigController : ControllerBase
 {
     private readonly IRuleConfigService _ruleConfigService;
     public RulesConfigController(IRuleConfigService ruleConfigService) => _ruleConfigService = ruleConfigService;
+
+    // GET /api/rules-config/schema — what a valid rule looks like per rule type. The rules
+    // screen builds its form from this, so the form can only offer fields and operators the
+    // evaluator actually implements. Static, so it needs no company scope.
+    [HttpGet("schema")]
+    public ActionResult<IReadOnlyDictionary<RuleType, RuleTypeSchema>> GetSchema() =>
+        Ok(_ruleConfigService.GetSchema());
 
     // GET /api/rules-config — list every rule configured for the caller's own company (any RuleType, active or not).
     [HttpGet]
