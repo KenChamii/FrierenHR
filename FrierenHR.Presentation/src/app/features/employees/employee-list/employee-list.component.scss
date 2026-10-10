@@ -1,1 +1,12 @@
-.header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.header-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--hr-border);
+
+  h2, h3 { font-weight: 300; letter-spacing: -0.015em; }
+}

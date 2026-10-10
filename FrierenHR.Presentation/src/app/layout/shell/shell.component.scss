@@ -1,89 +1,228 @@
-.shell { display: flex; min-height: 100vh; background: var(--hr-bg); }
+.shell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--hr-bg);
+}
 
 .sidebar {
-  width: 250px;
+  width: 238px;
+  flex: none;
   background: var(--hr-sidebar);
-  color: #e5f2ea;
+  color: var(--hr-text-inverse);
   display: flex;
   flex-direction: column;
-  padding: 1.35rem 0.9rem;
+  padding: 1.5rem 0 1.25rem;
+  border-right: 1px solid rgba(242, 237, 225, 0.12);
 
   .brand {
-    display: flex; align-items: center; gap: 0.6rem;
-    padding: 0 0.4rem 1.75rem;
-    color: #fff; font-weight: 800; font-size: 1.05rem; letter-spacing: -0.01em;
+    display: flex;
+    align-items: baseline;
+    gap: 0.7rem;
+    padding: 0 1.375rem 1.25rem;
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    color: var(--hr-text-inverse);
+    border-bottom: 1px solid rgba(242, 237, 225, 0.12);
 
+    // A gold square rather than a rounded tile: the mark is a rule, not a button.
     .brand-mark {
-      width: 34px; height: 34px; border-radius: 10px;
-      background: var(--hr-accent-gradient);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.95rem;
+      width: 9px;
+      height: 9px;
+      flex: none;
+      background: var(--hr-accent);
+      align-self: center;
+
+      i { display: none; }
     }
   }
 
-  nav { display: flex; flex-direction: column; gap: 0.3rem; flex: 1; }
-  .sidebar-footer { border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.75rem; margin-top: 0.75rem; }
+  nav {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin-top: 0.875rem;
+  }
+
+  .sidebar-footer {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(242, 237, 225, 0.12);
+  }
 
   .nav-link {
-    display: flex; align-items: center; gap: 0.65rem; padding: 0.65rem 0.85rem;
-    border-radius: 999px; color: #b9d0c3; text-decoration: none; font-size: 0.89rem; font-weight: 500;
-    background: none; border: none; cursor: pointer; width: 100%; text-align: left;
-    transition: background 0.15s ease, color 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    width: 100%;
+    padding: 0.625rem 1.375rem;
+    border: none;
+    border-left: 2px solid transparent;
+    background: none;
+    color: var(--hr-text-inverse);
+    opacity: 0.72;
+    font-family: var(--hr-font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s ease, opacity 0.15s ease;
 
-    i { width: 18px; text-align: center; font-size: 0.95rem; }
+    i { width: 16px; text-align: center; font-size: 0.8rem; }
 
-    &:hover { background: rgba(255,255,255,0.07); color: #fff; }
-    &.active { background: var(--hr-accent-gradient); color: #fff; box-shadow: 0 4px 14px rgba(0,0,0,0.25); }
+    &:hover {
+      opacity: 1;
+      background: var(--hr-sidebar-alt);
+    }
+
+    // Gold marks the current page and nothing else in the sidebar.
+    &.active {
+      opacity: 1;
+      background: var(--hr-sidebar-alt);
+      border-left-color: var(--hr-accent);
+    }
   }
 }
 
-.main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
 
 .topbar {
-  height: 68px;
-  background: var(--hr-surface);
+  height: 64px;
+  background: var(--hr-bg);
   border-bottom: 1px solid var(--hr-border);
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
   padding: 0 1.75rem;
 
   .search {
-    display: flex; align-items: center; gap: 0.6rem;
-    background: var(--hr-surface-alt);
-    border-radius: 999px;
-    padding: 0.5rem 1rem;
-    width: 280px;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 300px;
     max-width: 40vw;
+    padding: 0.5rem 0.875rem;
+    background: var(--hr-surface-alt);
+    border: 1px solid var(--hr-border);
     color: var(--hr-text-muted);
 
-    i { font-size: 0.85rem; }
+    i { font-size: 0.8rem; }
+
     input {
-      border: none; background: transparent; outline: none; width: 100%;
-      font-family: var(--hr-font); font-size: 0.85rem; color: var(--hr-text);
+      width: 100%;
+      border: none;
+      background: transparent;
+      outline: none;
+      color: var(--hr-text);
+      font-family: var(--hr-font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+
+      &::placeholder { color: var(--hr-text-muted); }
     }
   }
 
-  .topbar-actions { display: flex; align-items: center; gap: 0.9rem; }
+  .topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+  }
 
   .icon-btn {
-    width: 38px; height: 38px; border-radius: 50%; border: none;
-    background: var(--hr-surface-alt); color: var(--hr-text-muted);
-    display: flex; align-items: center; justify-content: center; cursor: pointer;
-    transition: background 0.15s ease;
-    &:hover { background: var(--hr-accent-soft); color: var(--hr-accent-dark); }
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--hr-border);
+    background: transparent;
+    color: var(--hr-text-muted);
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+
+    &:hover { border-color: var(--hr-accent); color: var(--hr-accent); }
   }
 
-  .divider { width: 1px; height: 26px; background: var(--hr-border); }
+  .divider { width: 1px; height: 24px; background: var(--hr-border); }
 
-  .user { display: flex; align-items: center; gap: 0.65rem; }
+  .user {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    text-decoration: none;
+  }
+
   .avatar {
-    width: 38px; height: 38px; border-radius: 50%;
-    background: var(--hr-accent-gradient); color: #fff;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 0.8rem;
+    width: 34px;
+    height: 34px;
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--hr-sidebar);
+    color: var(--hr-text-inverse);
+    font-family: var(--hr-font-mono);
+    font-size: 0.7rem;
+    font-weight: 700;
   }
-  .user-meta { display: flex; flex-direction: column; line-height: 1.2; }
-  .welcome { color: var(--hr-text); font-weight: 600; font-size: 0.85rem; }
-  .role-badge { color: var(--hr-text-muted); font-size: 0.72rem; }
+
+  .user-meta { display: flex; flex-direction: column; line-height: 1.25; }
+
+  .welcome { color: var(--hr-text); font-size: 0.875rem; }
+
+  .role-badge {
+    font-family: var(--hr-font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--hr-accent);
+  }
 }
 
-.content { padding: 1.75rem; flex: 1; }
+.content {
+  flex: 1;
+  padding: 1.75rem;
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .shell { flex-direction: column; }
+
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1rem;
+
+    .brand { padding: 0 0.75rem 0 0; border-bottom: none; }
+
+    nav { flex-direction: row; flex-wrap: wrap; margin-top: 0; }
+
+    .nav-link {
+      padding: 0.5rem 0.75rem;
+      border-left: none;
+      border-bottom: 2px solid transparent;
+
+      &.active { border-bottom-color: var(--hr-accent); }
+
+      span { display: none; }
+      i { font-size: 1rem; }
+    }
+
+    .sidebar-footer { margin: 0 0 0 auto; padding-top: 0; border-top: none; }
+  }
+
+  .topbar { padding: 0 1rem; }
+  .topbar .search { display: none; }
+  .content { padding: 1.25rem 1rem; }
+}

@@ -1,14 +1,12 @@
 .dash-header {
   position: relative;
   overflow: hidden;
-  border-radius: var(--hr-radius-lg);
-  background: var(--hr-hero-gradient);
+  background: var(--hr-sidebar);
   padding: 2rem 1.75rem;
   margin-bottom: 1.5rem;
-  min-height: 130px;
+  min-height: 140px;
   display: flex;
-  align-items: center;
-  box-shadow: var(--hr-shadow-lg);
+  align-items: flex-end;
 
   .dash-scene {
     position: absolute;
@@ -23,41 +21,72 @@
     z-index: 1;
   }
 
-  h2 { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.01em; color: #fff; }
-  .subtitle { margin: 0.15rem 0 0; color: rgba(234,244,238,0.85); font-size: 0.9rem; }
+  h2 {
+    margin: 0;
+    font-size: clamp(1.5rem, 3vw, 2.1rem);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    color: var(--hr-text-inverse);
+  }
+
+  .subtitle {
+    margin: 0.625rem 0 0;
+    font-family: var(--hr-font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--hr-accent-light);
+  }
 }
 
+// Hairline grid rather than separate cards: the figures read as one table of numbers.
 .stat-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.1rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1px;
+  background: var(--hr-border);
+  border: 1px solid var(--hr-border);
 }
 
 :host ::ng-deep .stat-card {
   border: none;
+  background: var(--hr-surface);
+  box-shadow: none;
 
-  .p-card-body { padding: 1.4rem 1.4rem 1.5rem; }
+  .p-card-body { padding: 1.25rem 1.375rem 1.5rem; }
   .p-card-content { padding: 0; }
 
-  &.accent {
-    background: var(--hr-accent-gradient);
-    color: #fff;
-
-    .stat-label { color: rgba(255,255,255,0.82); }
-    .stat-icon { background: rgba(255,255,255,0.16); color: #fff; }
-  }
+  // The one figure that matters gets the gold, everything else stays quiet.
+  &.accent .stat-value { color: var(--hr-accent); }
 }
 
 .stat-icon {
-  width: 42px; height: 42px; border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--hr-accent-soft); color: var(--hr-accent-dark);
-  font-size: 1.05rem; margin-bottom: 0.9rem;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  border: 1px solid var(--hr-border);
+  color: var(--hr-text-muted);
+  font-size: 0.8rem;
 
-  &.warning { background: #fdf1dd; color: #b9791a; }
-  &.info { background: #e5eefb; color: #2d63b0; }
-  &.success { background: #e4f5ea; color: #1f7a4d; }
+  &.warning { color: var(--hr-warning); border-color: var(--hr-warning); }
+  &.info { color: var(--hr-info); border-color: var(--hr-info); }
+  &.success { color: var(--hr-accent); border-color: var(--hr-accent); }
 }
 
-.stat-value { font-size: 2.1rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
-.stat-label { color: var(--hr-text-muted); font-size: 0.85rem; margin-top: 0.35rem; }
+.stat-value {
+  font-size: clamp(2rem, 4vw, 2.6rem);
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-label {
+  margin-top: 0.625rem;
+  font-size: 0.875rem;
+  color: var(--hr-text-muted);
+  line-height: 1.3;
+}

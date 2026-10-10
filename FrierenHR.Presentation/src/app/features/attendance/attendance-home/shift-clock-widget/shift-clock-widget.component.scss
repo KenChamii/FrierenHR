@@ -22,9 +22,10 @@
 }
 
 .tick-label {
-  font-size: 10px;
+  font-size: 9px;
   fill: var(--hr-text-muted);
-  font-family: var(--hr-font);
+  font-family: var(--hr-font-mono);
+  letter-spacing: 0.06em;
 }
 
 .shift-arc {
@@ -56,7 +57,9 @@
   justify-content: center;
   align-items: center;
   gap: 0.75rem 1.25rem;
-  font-size: 0.9rem;
+  font-family: var(--hr-font-mono);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .time-chip {
@@ -66,10 +69,10 @@
   color: var(--hr-text);
 }
 
+// Square, like every other marker in this palette.
 .time-chip .dot {
   width: 8px;
   height: 8px;
-  border-radius: 50%;
   display: inline-block;
 }
 
@@ -77,8 +80,8 @@
 .time-chip.end .dot { background: var(--hr-danger); }
 
 .hours-total {
-  font-weight: 600;
-  color: var(--hr-accent-dark);
+  font-weight: 700;
+  color: var(--hr-accent);
 }
 
 .break-field {
