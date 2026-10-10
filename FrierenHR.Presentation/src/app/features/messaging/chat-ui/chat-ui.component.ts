@@ -58,7 +58,9 @@ export class ChatUiComponent implements OnInit, OnDestroy {
     return groups;
   });
 
-  private readonly avatarPalette = ['#1f7a4d', '#14532d', '#3b7dd8', '#d9a441', '#45b980'];
+  // Shades of the one green, not five hues. Avatars should tell people apart without
+  // introducing colours the rest of the palette does not use.
+  private readonly avatarPalette = ['#1f3a2e', '#2f5042', '#4a6b5c', '#173025', '#3a4a42'];
 
   // Attachment picker state: a file is uploaded as soon as it's chosen (not on send) so the
   // person sees the size/type error immediately instead of after typing a message and hitting send.

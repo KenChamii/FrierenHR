@@ -1,3 +1,22 @@
-.leave-form { display: flex; flex-direction: column; gap: 0.4rem; max-width: 480px; }
-.date-row { display: flex; gap: 1rem; > div { flex: 1; } }
-label { font-size: 0.85rem; color: var(--hr-text-muted); margin-top: 0.5rem; }
+.leave-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-width: 480px;
+}
+
+.date-row {
+  display: flex;
+  gap: 1rem;
+
+  > div { flex: 1; min-width: 0; }
+}
+
+label {
+  margin-top: 0.75rem;
+  font-family: var(--hr-font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--hr-text-muted);
+}

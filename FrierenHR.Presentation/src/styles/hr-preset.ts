@@ -2,75 +2,75 @@ import { definePreset } from '@primeng/themes';
 import Aura from '@primeng/themes/aura';
 
 /**
- * FrierenHR brand preset — extends PrimeNG's Aura theme with the
- * app's green palette so PrimeNG components (buttons, inputs, tables,
- * cards, etc.) automatically match the custom dashboard/login design.
+ * FrierenHR brand preset. Points PrimeNG's token layer at the Ledger palette in
+ * styles/_theme.scss so buttons, inputs and tables match the custom screens without
+ * per-component overrides.
+ *
+ * Radius is near square and surfaces are bone rather than white. Both are deliberate: the
+ * design is built on hairline rules, so a rounded control beside a square panel reads as
+ * unfinished.
  */
 export const HrPreset = definePreset(Aura, {
   semantic: {
     primary: {
-      50: '#eafaf1',
-      100: '#c8f0d8',
-      200: '#9de0bd',
-      300: '#72cf9f',
-      400: '#45b980',
-      500: '#1f7a4d',
-      600: '#1a6b43',
-      700: '#155937',
-      800: '#14532d',
-      900: '#0d3821',
-      950: '#082715',
+      50: '#f4efe4',
+      100: '#e7dcc4',
+      200: '#d4bb91',
+      300: '#c0a273',
+      400: '#b4945e',
+      500: '#a8854f',
+      600: '#8f7043',
+      700: '#755b37',
+      800: '#4a6b5c',
+      900: '#1f3a2e',
+      950: '#173025',
     },
     colorScheme: {
       light: {
         primary: {
-          color: '#1f7a4d',
-          contrastColor: '#ffffff',
-          hoverColor: '#175e3b',
-          activeColor: '#14532d',
+          color: '#1f3a2e',
+          contrastColor: '#f5f0e6',
+          hoverColor: '#2f5042',
+          activeColor: '#173025',
         },
         surface: {
-          0: '#ffffff',
-          50: '#f4f6f5',
-          100: '#e9ede9',
-          200: '#dde3dd',
+          0: '#faf7ef',
+          50: '#f5f0e6',
+          100: '#efe9dc',
+          200: '#ddd4c2',
         },
         highlight: {
-          background: '#eafaf1',
-          focusBackground: '#c8f0d8',
-          color: '#14532d',
-          focusColor: '#14532d',
+          background: '#f0e9da',
+          focusBackground: '#e7dcc4',
+          color: '#1f3a2e',
+          focusColor: '#1f3a2e',
+        },
+        formField: {
+          background: '#faf7ef',
+          borderColor: '#ddd4c2',
+          hoverBorderColor: '#a8854f',
+          focusBorderColor: '#1f3a2e',
+          color: '#1f3a2e',
+          placeholderColor: '#6b7b73',
         },
       },
     },
   },
   components: {
     button: {
-      colorScheme: {
-        light: {
-          root: {
-            'border.radius': '10px',
-          },
-        },
-      },
+      colorScheme: { light: { root: { 'border.radius': '2px' } } },
     },
     inputtext: {
-      colorScheme: {
-        light: {
-          root: {
-            'border.radius': '10px',
-          },
-        },
-      },
+      colorScheme: { light: { root: { 'border.radius': '2px' } } },
     },
     card: {
-      colorScheme: {
-        light: {
-          root: {
-            'border.radius': '16px',
-          },
-        },
-      },
+      colorScheme: { light: { root: { 'border.radius': '2px' } } },
+    },
+    select: {
+      colorScheme: { light: { root: { 'border.radius': '2px' } } },
+    },
+    datatable: {
+      colorScheme: { light: { root: { 'border.color': '#ddd4c2' } } },
     },
   },
 });

@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FrierenHR.Core\FrierenHR.Core.csproj" />
+    <ProjectReference Include="..\FrierenHR.Application\FrierenHR.Application.csproj" />
   </ItemGroup>
 
 </Project>

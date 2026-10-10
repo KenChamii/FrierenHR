@@ -1,6 +1,7 @@
 ﻿using FrierenHR.WebAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using FrierenHR.Application.Common.Interfaces;
 using FrierenHR.Application.Common.Security;
 
@@ -16,7 +17,8 @@ public class AuthController : ControllerBase
     public record LoginDto(string Email, string Password);
     public record LoginResultDto(string Token, Guid EmployeeId, string FullName, string Role);
 
-    [HttpPost("login"), AllowAnonymous]
+    // Throttled per IP by the "login" policy in Program.cs, since this endpoint is anonymous.
+    [HttpPost("login"), AllowAnonymous, EnableRateLimiting("login")]
     public async Task<ActionResult<LoginResultDto>> Login(LoginDto dto, CancellationToken ct)
     {
         var employee = await _employeeRepository.GetByEmailAsync(dto.Email, ct);

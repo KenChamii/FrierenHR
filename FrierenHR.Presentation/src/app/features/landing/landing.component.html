@@ -1,0 +1,248 @@
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <div class="brand"><span class="mark"></span>FrierenHR<span class="sub">HR Ledger</span></div>
+    <nav class="topnav">
+      <a href="#rules">Rules</a>
+      <a href="#ledger">Leave ledger</a>
+      <a href="#modules">Modules</a>
+      <a href="#approvals">Approvals</a>
+    </nav>
+    <a class="btn btn-fill" routerLink="/login">Sign in</a>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <p class="eyebrow">Human resources, multi-company</p>
+    <h1>Your policy, written <em>once</em>.</h1>
+    <p class="lede">Every company keeps leave, overtime and approvals on its own terms. FrierenHR holds
+      those terms as rules you configure instead of code you commission, then applies them to every
+      accrual, every timesheet and every request that follows.</p>
+    <div class="cta-row">
+      <a class="btn btn-fill" href="#rules">See a rule <span aria-hidden="true">&rarr;</span></a>
+      <a class="btn" href="#modules">What it covers</a>
+    </div>
+    <div class="facts">
+      <div><span class="lbl">Tenancy</span><span class="val">Per company</span></div>
+      <div><span class="lbl">Rule types</span><span class="val mono">05</span></div>
+      <div><span class="lbl">Modules</span><span class="val mono">06</span></div>
+      <div><span class="lbl">Built on</span><span class="val">.NET &middot; Angular</span></div>
+    </div>
+  </div>
+
+  <section id="rules">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow">Exhibit I &middot; Rule configuration</p>
+          <h2>Accrual, in the words of the <em>people</em> who set it.</h2>
+        </div>
+        <p class="body-copy">An administrator builds the condition and the outcome from the fields the
+          engine actually understands. Nothing is typed from memory, so a rule that saves is a rule
+          that runs.</p>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="wrap panel-in">
+        <div class="builder">
+          <div>
+            <p class="eyebrow">Leave accrual &middot; Draft</p>
+            <div class="mock-field">
+              <span>Rule type</span>
+              <div class="control">Leave accrual</div>
+            </div>
+            <div class="mock-field">
+              <span>When all of these are true</span>
+              <div class="cond-row">
+                <div class="control">Months of service</div>
+                <div class="control">is at least</div>
+                <div class="control num">12</div>
+              </div>
+            </div>
+            <div class="mock-field">
+              <div class="cond-row">
+                <div class="control">Employment type</div>
+                <div class="control">is</div>
+                <div class="control">Regular</div>
+              </div>
+            </div>
+            <span class="addcond">+ Add condition</span>
+            <div class="mock-field spaced">
+              <span>Then</span>
+              <div class="control">Accrue leave days</div>
+            </div>
+            <div class="cond-row pair">
+              <div class="mock-field"><span>Days per month</span><div class="control num">1.25</div></div>
+              <div class="mock-field"><span>Maximum balance</span><div class="control num">15.00</div></div>
+            </div>
+          </div>
+          <div class="preview">
+            <p class="eyebrow">Reads as</p>
+            <p class="sentence">When months of service is at least <b>12</b> and employment type is
+              <b>Regular</b>, accrue <b>1.25</b> days per month, up to a maximum balance of <b>15</b> days.</p>
+            <p class="note">Priority 0 &middot; Active<br>Stacks under a higher-priority rule of the same type.
+              <br><br>Fields, operators and outcomes come from the engine itself, so this form can never
+              offer a rule the evaluator will not run.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="ledger">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow">Exhibit II &middot; Balances</p>
+          <h2>A balance you can <em>account</em> for.</h2>
+        </div>
+        <p class="body-copy">Accrual runs nightly across every active employee and leaves a row behind
+          each time. When somebody asks why they have eight days and not nine, the answer is a line you
+          can point at.</p>
+      </div>
+      <div class="two-col">
+        <div class="fig">
+          <p class="fig-lbl">Figure 2.1 &middot; Vacation balance</p>
+          <h3>Six months under the rule above.</h3>
+          <div class="chart">
+            <span class="cap-line" aria-hidden="true"></span>
+            <span class="cap-tag">Cap {{ cap }}.00</span>
+            @for (point of balances; track point.month; let last = $last) {
+              <div class="bar" [class.now]="last">
+                <span class="v">{{ point.value | number: '1.2-2' }}</span>
+                <span class="col" [style.height]="heightFor(point.value)"></span>
+                <span class="m">{{ point.month }}</span>
+              </div>
+            }
+          </div>
+        </div>
+        <div class="tablewrap">
+          <table>
+            <caption>Table 2.2 &middot; Ledger, one employee, vacation</caption>
+            <thead>
+              <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Entry</th>
+                <th scope="col" class="num">Change</th>
+                <th scope="col" class="num">Balance</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of ledger; track row.date) {
+                <tr>
+                  <td class="mono">{{ row.date }}</td>
+                  <td>{{ row.entry }}</td>
+                  <td class="num" [class.neg]="row.negative">{{ row.change }}</td>
+                  <td class="num">{{ row.balance }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="modules">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow">Exhibit III &middot; Scope</p>
+          <h2>Six things, done <em>properly</em>.</h2>
+        </div>
+        <p class="body-copy">Each one reads the same configured rules, so a grace period set once is the
+          grace period everywhere it matters.</p>
+      </div>
+      <div class="mods">
+        @for (module of modules; track module.index) {
+          <article>
+            <span class="n">{{ module.index }}</span>
+            <h3>{{ module.name }}</h3>
+            <p>{{ module.blurb }}</p>
+          </article>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section id="approvals">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow">Exhibit IV &middot; Routing</p>
+          <h2>Requests that know where to <em>go</em>.</h2>
+        </div>
+        <p class="body-copy">A chain is configuration, not a hard-coded hierarchy. Change the levels and
+          the next request follows the new path.</p>
+      </div>
+      <div class="chain">
+        @for (step of chain; track step.level; let last = $last) {
+          <div class="step" [class.done]="step.done" [class.final]="step.final">
+            <span class="lv">{{ step.level }}</span>
+            <span class="who">{{ step.who }}</span>
+            <span class="st">{{ step.state }}</span>
+          </div>
+          @if (!last) { <span class="arrow" aria-hidden="true">&rarr;</span> }
+        }
+      </div>
+      <p class="escalate">Escalation rule, this company: when a step has been waiting 3 days or more,
+        raise it to the next level automatically. One day left on level 2.</p>
+    </div>
+  </section>
+
+  <section id="build">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow">Exhibit V &middot; Construction</p>
+          <h2>Built in <em>layers</em>, on purpose.</h2>
+        </div>
+        <p class="body-copy">Domain rules sit furthest from the database and the wire, so the parts that
+          encode policy can be tested without either.</p>
+      </div>
+      <div class="layers">
+        @for (layer of layers; track layer.name) {
+          <div class="layer">
+            <span class="nm">{{ layer.name }}</span>
+            <span class="ds">{{ layer.owns }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="signoff">
+    <div class="panel">
+      <div class="wrap panel-in signoff-in">
+        <div>
+          <p class="eyebrow">Sign-off</p>
+          <h2>See it against your <em>own</em> policy.</h2>
+          <p class="sub">Bring one leave rule you have never been able to automate cleanly. That is the
+            useful test.</p>
+          <div class="cta-row">
+            <a class="btn btn-fill" routerLink="/login">Sign in <span aria-hidden="true">&rarr;</span></a>
+            <a class="btn" href="#modules">Read the module list</a>
+          </div>
+        </div>
+        <div class="seal">
+          <span class="lbl">Rule types available</span>
+          <span class="val">{{ ruleTypes.join(' · ') }}</span>
+          <span class="lbl spaced">Configured per</span>
+          <span class="val">Company, with stacking priority</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot-in">
+    <div>
+      <div class="brand small"><span class="mark"></span>FrierenHR<span class="sub">HR Ledger</span></div>
+      <p class="foot-note">A portfolio project. Figures on this page are illustrative.</p>
+    </div>
+    <p class="credit">Visual direction adapted from<br>
+      <a href="https://templatemo.com/tm-626-ledger-slideshow" target="_blank" rel="noopener">Ledger Slideshow by TemplateMo</a>
+    </p>
+  </div>
+</footer>

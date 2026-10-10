@@ -14,19 +14,29 @@ body {
   background: var(--hr-bg);
   color: var(--hr-text);
   -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'kern' 1, 'liga' 1;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--hr-font);
   color: var(--hr-text);
+  font-weight: 300;
+  letter-spacing: -0.018em;
   margin: 0 0 0.25rem;
 }
 
+/* Figures line up in columns across tables and stat tiles. */
+table,
+.stat-value,
+.p-inputnumber-input {
+  font-variant-numeric: tabular-nums;
+}
+
 ::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-thumb { background: #cfe0d6; border-radius: 999px; }
+::-webkit-scrollbar-thumb { background: var(--hr-border); }
 ::-webkit-scrollbar-track { background: transparent; }
 
-/* Soften default PrimeNG card shadow app-wide to match the brand */
+/* Hairline rules carry the structure, so cards do not need a shadow. */
 .p-card {
   box-shadow: var(--hr-shadow) !important;
   border-radius: var(--hr-radius) !important;

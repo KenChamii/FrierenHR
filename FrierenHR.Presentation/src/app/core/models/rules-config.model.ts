@@ -14,3 +14,56 @@ export interface TestEvaluateRequestDto { companyId: string; ruleType: RuleType;
 export interface RuleEvaluationResultDto {
   matched: boolean; success: boolean; resultValue?: number; message: string; actionType?: string;
 }
+
+// --- Schema served by GET /api/rules-config/schema ---
+// Mirrors FrierenHR.Core.RulesEngine.Schema. The rules form is built from this rather than
+// from anything hardcoded here, so it cannot offer a field or operator the engine lacks.
+
+export type RuleValueKind = 'Integer' | 'Decimal' | 'Text' | 'Enum';
+
+export interface RuleFieldSchema {
+  name: string;
+  label: string;
+  kind: RuleValueKind;
+  operators: string[];
+  unit?: string | null;
+  options?: string[] | null;
+}
+
+export interface RuleActionParamSchema {
+  name: 'amount' | 'cap' | string;
+  label: string;
+  kind: RuleValueKind;
+  required: boolean;
+  unit?: string | null;
+}
+
+export interface RuleActionSchema {
+  type: string;
+  label: string;
+  /** Sentence fragment with {amount} and {cap} placeholders, used for the preview line. */
+  summary: string;
+  parameters: RuleActionParamSchema[];
+}
+
+export interface RuleTypeSchema {
+  ruleType: string;
+  label: string;
+  description: string;
+  fields: RuleFieldSchema[];
+  actions: RuleActionSchema[];
+  /** False when the engine supports the type but nothing calls it yet. */
+  wired: boolean;
+  starter: RuleDefinitionDto;
+}
+
+export type RuleSchemaMap = Record<RuleType, RuleTypeSchema>;
+
+/** Reads as the operator does, for the preview line and the operator dropdown. */
+export const OPERATOR_LABELS: Record<string, string> = {
+  '>=': 'is at least',
+  '<=': 'is at most',
+  '==': 'is',
+  '!=': 'is not',
+  'in': 'is any of',
+};

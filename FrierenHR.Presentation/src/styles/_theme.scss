@@ -1,36 +1,44 @@
+// Ledger design tokens. Forest green on bone with tarnished gold as the only accent, a serif
+// for text and a mono for labels and figures. Variable names are unchanged from the previous
+// palette so every existing component picks this up without edits.
+//
+// Components that hardcode a colour instead of using these tokens will not follow. Those are
+// being migrated screen by screen: shell and login first, then the data-dense pages.
 :root {
   // Surfaces
-  --hr-bg: #f4f6f5;
-  --hr-surface: #ffffff;
-  --hr-surface-alt: #eef2ef;
-  --hr-sidebar: #0b1f17;          // near-black green
-  --hr-sidebar-alt: #123625;
+  --hr-bg: #f5f0e6;               // bone
+  --hr-surface: #faf7ef;
+  --hr-surface-alt: #efe9dc;
+  --hr-sidebar: #1f3a2e;          // forest green
+  --hr-sidebar-alt: #173025;
 
-  // Brand greens
-  --hr-accent: #1f7a4d;
-  --hr-accent-dark: #14532d;
-  --hr-accent-light: #45b980;
-  --hr-accent-soft: #eafaf1;      // pale mint, chip/highlight backgrounds
-  --hr-accent-gradient: linear-gradient(135deg, #1f7a4d 0%, #0f4d30 100%);
-  --hr-hero-gradient: linear-gradient(160deg, #0f4d30 0%, #1f7a4d 55%, #4bbf87 100%);
+  // Accent. Gold is the only one, used sparingly: active nav, the one figure that matters.
+  --hr-accent: #a8854f;
+  --hr-accent-dark: #86693c;
+  --hr-accent-light: #d4bb91;
+  --hr-accent-soft: #f0e9da;      // highlight background
+  --hr-accent-gradient: linear-gradient(135deg, #2f5042 0%, #1f3a2e 100%);
+  --hr-hero-gradient: linear-gradient(160deg, #173025 0%, #1f3a2e 55%, #2f5042 100%);
 
   // Text
-  --hr-text: #16241d;
-  --hr-text-muted: #6b7c73;
-  --hr-text-inverse: #eaf4ee;
+  --hr-text: #1f3a2e;
+  --hr-text-muted: #6b7b73;
+  --hr-text-inverse: #f2ede1;
 
-  // Structure
-  --hr-border: #e5e9e6;
-  --hr-radius-sm: 10px;
-  --hr-radius: 16px;
-  --hr-radius-lg: 22px;
-  --hr-shadow: 0 4px 20px rgba(15, 61, 39, 0.07);
-  --hr-shadow-lg: 0 12px 32px rgba(15, 61, 39, 0.12);
+  // Structure. Hairline rules instead of shadows, and corners close to square: both are
+  // central to this look, so they live here rather than per component.
+  --hr-border: #ddd4c2;
+  --hr-radius-sm: 2px;
+  --hr-radius: 2px;
+  --hr-radius-lg: 2px;
+  --hr-shadow: none;
+  --hr-shadow-lg: 0 1px 0 rgba(31, 58, 46, 0.14);
 
-  // Status colors (used sparingly across widgets)
-  --hr-danger: #d9534f;
-  --hr-warning: #d9a441;
-  --hr-info: #3b7dd8;
+  // Status. Kept muted so they sit inside the palette instead of shouting over it.
+  --hr-danger: #9c4a3f;
+  --hr-warning: #9a6b2f;
+  --hr-info: #3f6b4f;
 
-  --hr-font: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --hr-font: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --hr-font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 }

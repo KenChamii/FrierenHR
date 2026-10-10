@@ -365,3 +365,15 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# FrierenHR
+# User-uploaded photos and chat attachments are runtime data, not source
+FrierenHR.WebAPI/wwwroot/uploads/
+
+# Angular build output and caches
+FrierenHR.Presentation/dist/
+FrierenHR.Presentation/.angular/
+
+# Local secrets, in case anyone ever adds one of these by hand
+appsettings.Local.json
+*.user

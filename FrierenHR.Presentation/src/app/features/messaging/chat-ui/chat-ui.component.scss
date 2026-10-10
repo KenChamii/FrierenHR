@@ -1,153 +1,393 @@
 .chat-shell {
-  display: grid; grid-template-columns: 320px 1fr; height: calc(100vh - 64px - 3rem);
-  background: var(--hr-surface); border-radius: var(--hr-radius); box-shadow: var(--hr-shadow); overflow: hidden;
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  height: calc(100vh - 64px - 3rem);
+  background: var(--hr-surface);
+  border: 1px solid var(--hr-border);
+  overflow: hidden;
 }
 
 .conversation-list {
-  border-right: 1px solid var(--hr-border); padding: 1rem; overflow-y: auto;
-  .empty { color: var(--hr-text-muted); padding: 0 0.25rem; }
+  border-right: 1px solid var(--hr-border);
+  padding: 1rem 0;
+  overflow-y: auto;
+
+  .empty { color: var(--hr-text-muted); padding: 0 1rem; font-size: 0.875rem; }
 }
 
 .list-header {
-  display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;
-  h3 { margin: 0; display: flex; align-items: center; gap: 0.5rem; font-size: 1.15rem; }
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding: 0 1rem 0.75rem;
+  border-bottom: 1px solid var(--hr-border);
+
+  h3 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 300;
+    letter-spacing: -0.01em;
+  }
 }
 
-.header-badge {
-  display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px;
-  padding: 0 6px; border-radius: 999px; background: var(--hr-accent); color: #fff; font-size: 0.7rem; font-weight: 700;
+// Counts are square and gold, the same marker used everywhere else for "needs attention".
+.header-badge,
+.unread-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  background: var(--hr-accent);
+  color: #17241d;
+  font-family: var(--hr-font-mono);
+  font-weight: 700;
 }
+
+.header-badge { min-width: 20px; height: 20px; font-size: 0.65rem; }
 
 .new-message-box {
-  display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.75rem;
-  padding: 0.75rem; border-radius: var(--hr-radius-sm); background: var(--hr-surface-alt);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0 1rem 0.75rem;
+  padding: 0.75rem;
+  background: var(--hr-surface-alt);
+  border: 1px solid var(--hr-border);
 }
+
 .new-message-actions { display: flex; gap: 0.5rem; }
 
-// Shared avatar look — reused by the conversation list and the chat header.
+// Shared by the conversation list and the chat header. Square, since nothing else here is round.
 .avatar {
-  flex: none; width: 42px; height: 42px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  color: #fff; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.02em;
+  flex: none;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--hr-text-inverse);
+  font-family: var(--hr-font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .conversation-item {
-  display: flex; align-items: center; gap: 0.65rem; width: 100%; text-align: left;
-  padding: 0.6rem 0.5rem; border-radius: 12px; border: none; background: none; cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  padding: 0.625rem 1rem;
+  border: none;
+  border-left: 2px solid transparent;
+  background: none;
+  text-align: left;
+  cursor: pointer;
 
   &:hover { background: var(--hr-bg); }
+
   &.active {
     background: var(--hr-accent-soft);
-    .name { color: var(--hr-accent-dark); }
+    border-left-color: var(--hr-accent);
   }
 
-  .conversation-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.15rem; }
-  .row-1, .row-2 { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
-
-  .name { font-weight: 600; font-size: 0.92rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .time { font-size: 0.72rem; color: var(--hr-text-muted); flex: none; }
-  .preview { font-size: 0.8rem; color: var(--hr-text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-  .unread-badge {
-    flex: none; display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px;
-    padding: 0 5px; border-radius: 999px; background: var(--hr-accent); color: #fff; font-size: 0.66rem; font-weight: 700;
+  .conversation-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
   }
+
+  .row-1,
+  .row-2 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .name {
+    font-size: 0.95rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .time {
+    flex: none;
+    font-family: var(--hr-font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    color: var(--hr-text-muted);
+  }
+
+  .preview {
+    font-size: 0.8rem;
+    color: var(--hr-text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .unread-badge { min-width: 18px; height: 18px; font-size: 0.6rem; }
 }
 
 .chat-pane { display: flex; flex-direction: column; height: 100%; }
-.placeholder { margin: auto; color: var(--hr-text-muted); }
+
+.placeholder { margin: auto; color: var(--hr-text-muted); font-size: 0.9rem; }
 
 .chat-header {
-  display: flex; align-items: center; gap: 0.65rem; padding: 0.85rem 1rem;
-  border-bottom: 1px solid var(--hr-border); flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex: none;
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--hr-border);
 
-  .contact-name { font-weight: 700; font-size: 1rem; }
+  .contact-name { font-size: 1.05rem; font-weight: 400; }
 }
 
 .back-btn {
-  display: none; align-items: center; justify-content: center; width: 32px; height: 32px;
-  border: none; background: none; border-radius: 50%; color: var(--hr-text); cursor: pointer;
-  &:hover { background: var(--hr-bg); }
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--hr-border);
+  background: none;
+  color: var(--hr-text);
+  cursor: pointer;
+
+  &:hover { border-color: var(--hr-accent); color: var(--hr-accent); }
 }
 
-.messages { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
 
 .date-divider {
-  display: flex; align-items: center; justify-content: center; margin: 0.5rem 0; position: relative;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0.75rem 0;
 
   span {
-    background: var(--hr-surface); padding: 0 0.75rem; font-size: 0.72rem; color: var(--hr-text-muted); z-index: 1;
+    z-index: 1;
+    padding: 0 0.75rem;
+    background: var(--hr-surface);
+    font-family: var(--hr-font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--hr-text-muted);
   }
+
   &::before {
-    content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--hr-border);
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background: var(--hr-border);
   }
 }
 
 .bubble {
-  max-width: 60%; padding: 0.5rem 0.75rem; border-radius: 14px; background: var(--hr-surface-alt); align-self: flex-start;
+  max-width: 60%;
+  padding: 0.5rem 0.75rem;
+  align-self: flex-start;
+  background: var(--hr-surface-alt);
+  border: 1px solid var(--hr-border);
 
-  &.mine { background: var(--hr-accent); color: #fff; align-self: flex-end; .sender, .time { color: rgba(255,255,255,0.75); } }
+  // Own messages take the forest ground rather than gold, which stays reserved for counts
+  // and the one figure that matters on a screen.
+  &.mine {
+    align-self: flex-end;
+    background: var(--hr-sidebar);
+    border-color: var(--hr-sidebar);
+    color: var(--hr-text-inverse);
 
-  .sender { font-size: 0.72rem; color: var(--hr-text-muted); font-weight: 600; }
-  .body { font-size: 0.9rem; margin: 0.1rem 0; white-space: pre-wrap; word-break: break-word; }
-  .time { font-size: 0.68rem; color: var(--hr-text-muted); text-align: right; }
+    .sender,
+    .time { color: var(--hr-accent-light); }
+  }
 
-  .attachment { margin: 0.1rem 0; }
+  .sender {
+    font-family: var(--hr-font-mono);
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--hr-text-muted);
+  }
+
+  .body {
+    margin: 0.2rem 0;
+    font-size: 0.9rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .time {
+    text-align: right;
+    font-family: var(--hr-font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.06em;
+    color: var(--hr-text-muted);
+  }
+
+  .attachment { margin: 0.2rem 0; }
 
   .attachment-image {
-    display: block; max-width: 220px; max-height: 220px; width: 100%; height: auto;
-    border-radius: 10px; object-fit: cover;
+    display: block;
+    width: 100%;
+    max-width: 220px;
+    max-height: 220px;
+    height: auto;
+    object-fit: cover;
+    border: 1px solid var(--hr-border);
   }
 
   .attachment-file {
-    display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.65rem; border-radius: 10px;
-    background: rgba(255,255,255,0.4); color: inherit; text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.65rem;
+    border: 1px solid var(--hr-border);
+    background: var(--hr-surface);
+    color: inherit;
+    text-decoration: none;
 
     .pi-file { font-size: 1rem; flex: none; }
-    .attachment-name { font-size: 0.85rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .attachment-size { font-size: 0.7rem; opacity: 0.75; flex: none; margin-left: auto; }
+
+    .attachment-name {
+      font-size: 0.85rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .attachment-size {
+      flex: none;
+      margin-left: auto;
+      font-family: var(--hr-font-mono);
+      font-size: 0.62rem;
+      opacity: 0.75;
+    }
   }
 
-  &.mine .attachment-file { background: rgba(255,255,255,0.18); }
+  &.mine {
+    .attachment-image,
+    .attachment-file {
+      border-color: rgba(242, 237, 225, 0.22);
+    }
+
+    .attachment-file { background: rgba(242, 237, 225, 0.08); }
+  }
 }
 
-// Selected/uploading attachment, shown above the composer before the message is sent.
+// Selected or uploading attachment, above the composer before the message is sent.
 .attachment-preview {
-  display: flex; align-items: center; gap: 0.5rem; margin: 0 0.75rem; padding: 0.5rem 0.65rem;
-  border-radius: 10px; background: var(--hr-surface-alt); flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: none;
+  margin: 0 0.75rem;
+  padding: 0.5rem 0.65rem;
+  background: var(--hr-surface-alt);
+  border: 1px solid var(--hr-border);
 
-  .pi-spinner, .pi-file { color: var(--hr-text-muted); flex: none; }
-  .preview-thumb { width: 32px; height: 32px; border-radius: 6px; object-fit: cover; flex: none; }
-  .preview-name { font-size: 0.82rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .preview-size { font-size: 0.72rem; color: var(--hr-text-muted); flex: none; margin-left: auto; }
+  .pi-spinner,
+  .pi-file { color: var(--hr-text-muted); flex: none; }
+
+  .preview-thumb {
+    width: 32px;
+    height: 32px;
+    flex: none;
+    object-fit: cover;
+    border: 1px solid var(--hr-border);
+  }
+
+  .preview-name {
+    font-size: 0.82rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .preview-size {
+    flex: none;
+    margin-left: auto;
+    font-family: var(--hr-font-mono);
+    font-size: 0.65rem;
+    color: var(--hr-text-muted);
+  }
 
   .remove-attachment {
-    flex: none; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px;
-    border: none; background: none; border-radius: 50%; color: var(--hr-text-muted); cursor: pointer;
-    &:hover { background: var(--hr-bg); color: var(--hr-danger); }
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: none;
+    color: var(--hr-text-muted);
+    cursor: pointer;
+
+    &:hover { color: var(--hr-danger); }
   }
 }
 
 .attachment-error-banner {
-  margin: 0 0.75rem; padding: 0.4rem 0.65rem; border-radius: 8px;
-  background: rgba(217, 83, 79, 0.1); color: var(--hr-danger); font-size: 0.78rem; flex: none;
+  flex: none;
+  margin: 0 0.75rem;
+  padding: 0.5rem 0 0.5rem 0.75rem;
+  border-left: 2px solid var(--hr-danger);
+  color: var(--hr-danger);
+  font-size: 0.78rem;
 }
 
 .composer {
-  display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem; border-top: 1px solid var(--hr-border); flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: none;
+  padding: 0.75rem;
+  border-top: 1px solid var(--hr-border);
 }
 
 .hidden-file-input { display: none; }
 
 .attach-btn {
-  flex: none; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px;
-  border: none; background: none; border-radius: 50%; color: var(--hr-text-muted); cursor: pointer;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--hr-border);
+  background: none;
+  color: var(--hr-text-muted);
+  cursor: pointer;
 
-  &:hover:not(:disabled) { background: var(--hr-bg); color: var(--hr-accent); }
+  &:hover:not(:disabled) { border-color: var(--hr-accent); color: var(--hr-accent); }
   &:disabled { cursor: not-allowed; opacity: 0.5; }
 }
 
-// Below this width, show only one pane at a time — the list, or the open chat with a back button.
+// Below this width, show one pane at a time: the list, or the open chat with a back button.
 @media (max-width: 720px) {
   .chat-shell { grid-template-columns: 1fr; }
   .conversation-list { display: block; }
