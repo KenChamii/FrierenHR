@@ -148,6 +148,67 @@ namespace FrierenHR.Infrastructure.Migrations
                     b.ToTable("ApprovalInstances", (string)null);
                 });
 
+            modelBuilder.Entity("FrierenHR.Core.Entities.AttendanceCorrection", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("AttendanceLogId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime?>("DecidedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("DecidedByEmployeeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DecisionComment")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid>("EmployeeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("RequestedBreakMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<TimeOnly>("RequestedTimeIn")
+                        .HasColumnType("time");
+
+                    b.Property<TimeOnly>("RequestedTimeOut")
+                        .HasColumnType("time");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AttendanceLogId");
+
+                    b.HasIndex("DecidedByEmployeeId");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("EmployeeId", "Date");
+
+                    b.ToTable("AttendanceCorrections", (string)null);
+                });
+
             modelBuilder.Entity("FrierenHR.Core.Entities.AttendanceLog", b =>
                 {
                     b.Property<Guid>("Id")
@@ -182,6 +243,51 @@ namespace FrierenHR.Infrastructure.Migrations
                     b.HasIndex("EmployeeId", "TimeIn");
 
                     b.ToTable("AttendanceLogs", (string)null);
+                });
+
+            modelBuilder.Entity("FrierenHR.Core.Entities.AuditEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Action")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ChangedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("ChangedByEmployeeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Changes")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("EntityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("EntityName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId", "ChangedAt");
+
+                    b.HasIndex("EntityName", "EntityId");
+
+                    b.ToTable("AuditEntries", (string)null);
                 });
 
             modelBuilder.Entity("FrierenHR.Core.Entities.Company", b =>
@@ -332,12 +438,17 @@ namespace FrierenHR.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<Guid?>("ShiftId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CompanyId");
+
+                    b.HasIndex("ShiftId");
 
                     b.ToTable("Departments", (string)null);
                 });
@@ -388,6 +499,9 @@ namespace FrierenHR.Infrastructure.Migrations
                     b.Property<int>("Role")
                         .HasColumnType("int");
 
+                    b.Property<Guid?>("ShiftId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -402,7 +516,51 @@ namespace FrierenHR.Infrastructure.Migrations
 
                     b.HasIndex("ManagerId");
 
+                    b.HasIndex("ShiftId");
+
                     b.ToTable("Employees", (string)null);
+                });
+
+            modelBuilder.Entity("FrierenHR.Core.Entities.Holiday", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<Guid?>("DepartmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.HasIndex("CompanyId", "Date");
+
+                    b.HasIndex("CompanyId", "Date", "DepartmentId")
+                        .IsUnique()
+                        .HasFilter("[DepartmentId] IS NOT NULL");
+
+                    b.ToTable("Holidays", (string)null);
                 });
 
             modelBuilder.Entity("FrierenHR.Core.Entities.LeaveBalance", b =>
@@ -540,6 +698,54 @@ namespace FrierenHR.Infrastructure.Migrations
                     b.ToTable("Messages", (string)null);
                 });
 
+            modelBuilder.Entity("FrierenHR.Core.Entities.Shift", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("BreakMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<TimeOnly>("EndTime")
+                        .HasColumnType("time");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("RestDays")
+                        .HasColumnType("int");
+
+                    b.Property<TimeOnly>("StartTime")
+                        .HasColumnType("time");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Shifts_CompanyId_SingleDefault")
+                        .HasFilter("[IsDefault] = 1");
+
+                    b.HasIndex("CompanyId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("Shifts", (string)null);
+                });
+
             modelBuilder.Entity("FrierenHR.Core.Entities.Timesheet", b =>
                 {
                     b.Property<Guid>("Id")
@@ -617,6 +823,31 @@ namespace FrierenHR.Infrastructure.Migrations
                     b.Navigation("ApprovalChain");
                 });
 
+            modelBuilder.Entity("FrierenHR.Core.Entities.AttendanceCorrection", b =>
+                {
+                    b.HasOne("FrierenHR.Core.Entities.AttendanceLog", "AttendanceLog")
+                        .WithMany()
+                        .HasForeignKey("AttendanceLogId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("FrierenHR.Core.Entities.Employee", "DecidedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("DecidedByEmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("FrierenHR.Core.Entities.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AttendanceLog");
+
+                    b.Navigation("DecidedByEmployee");
+
+                    b.Navigation("Employee");
+                });
+
             modelBuilder.Entity("FrierenHR.Core.Entities.AttendanceLog", b =>
                 {
                     b.HasOne("FrierenHR.Core.Entities.Employee", "Employee")
@@ -677,7 +908,14 @@ namespace FrierenHR.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("FrierenHR.Core.Entities.Shift", "Shift")
+                        .WithMany("Departments")
+                        .HasForeignKey("ShiftId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Company");
+
+                    b.Navigation("Shift");
                 });
 
             modelBuilder.Entity("FrierenHR.Core.Entities.Employee", b =>
@@ -698,11 +936,36 @@ namespace FrierenHR.Infrastructure.Migrations
                         .HasForeignKey("ManagerId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("FrierenHR.Core.Entities.Shift", "Shift")
+                        .WithMany("Employees")
+                        .HasForeignKey("ShiftId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Company");
 
                     b.Navigation("Department");
 
                     b.Navigation("Manager");
+
+                    b.Navigation("Shift");
+                });
+
+            modelBuilder.Entity("FrierenHR.Core.Entities.Holiday", b =>
+                {
+                    b.HasOne("FrierenHR.Core.Entities.Company", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FrierenHR.Core.Entities.Department", "Department")
+                        .WithMany()
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Company");
+
+                    b.Navigation("Department");
                 });
 
             modelBuilder.Entity("FrierenHR.Core.Entities.LeaveBalance", b =>
@@ -751,6 +1014,17 @@ namespace FrierenHR.Infrastructure.Migrations
                     b.Navigation("Conversation");
 
                     b.Navigation("SenderEmployee");
+                });
+
+            modelBuilder.Entity("FrierenHR.Core.Entities.Shift", b =>
+                {
+                    b.HasOne("FrierenHR.Core.Entities.Company", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
                 });
 
             modelBuilder.Entity("FrierenHR.Core.Entities.Timesheet", b =>
@@ -802,6 +1076,13 @@ namespace FrierenHR.Infrastructure.Migrations
                     b.Navigation("LeaveBalances");
 
                     b.Navigation("LeaveRequests");
+                });
+
+            modelBuilder.Entity("FrierenHR.Core.Entities.Shift", b =>
+                {
+                    b.Navigation("Departments");
+
+                    b.Navigation("Employees");
                 });
 #pragma warning restore 612, 618
         }

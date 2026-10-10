@@ -1,6 +1,5 @@
 ﻿using FrierenHR.Core.Entities;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection.Emit;
 
 namespace FrierenHR.Infrastructure.Data;
 
@@ -23,6 +22,11 @@ public class FrierenHRDbContext : DbContext
     public DbSet<ConversationParticipant> ConversationParticipants => Set<ConversationParticipant>();
     public DbSet<Message> Messages => Set<Message>();
     public DbSet<Timesheet> Timesheets => Set<Timesheet>();
+    public DbSet<Holiday> Holidays => Set<Holiday>();
+    public DbSet<Shift> Shifts => Set<Shift>();
+    public DbSet<AttendanceCorrection> AttendanceCorrections => Set<AttendanceCorrection>();
+    public DbSet<AuditEntry> AuditEntries => Set<AuditEntry>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(FrierenHRDbContext).Assembly);
