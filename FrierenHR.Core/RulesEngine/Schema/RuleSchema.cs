@@ -8,7 +8,9 @@ public enum RuleValueKind
     Integer,
     Decimal,
     Text,
-    Enum
+    Enum,
+    /// <summary>Compared as text by the evaluator, so "true" matches a true fact either case.</summary>
+    Boolean
 }
 
 /// <summary>A fact the evaluator can read for a rule type.</summary>

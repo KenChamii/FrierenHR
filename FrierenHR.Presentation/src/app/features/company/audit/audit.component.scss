@@ -1,0 +1,120 @@
+@use '../../../../styles/admin-page';
+
+// A trail reads as a single stack of events, not as cards.
+.trail {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.entry {
+  border-bottom: 1px solid var(--hr-border);
+
+  &:last-child { border-bottom: none; }
+  &.open { background: var(--hr-surface-alt); }
+}
+
+.entry-head {
+  display: grid;
+  grid-template-columns: 7.5rem auto minmax(0, 1fr) 10rem 6rem 1.5rem;
+  gap: 0.875rem;
+  align-items: center;
+  width: 100%;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+
+  &:hover { background: var(--hr-accent-soft); }
+
+  .when {
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    color: var(--hr-text-muted);
+  }
+
+  .what { font-size: 0.95rem; }
+
+  .by {
+    font-size: 0.85rem;
+    color: var(--hr-text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .fields {
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    color: var(--hr-text-muted);
+    text-align: right;
+  }
+
+  .chev {
+    font-family: var(--hr-font-mono);
+    color: var(--hr-accent);
+    text-align: center;
+  }
+}
+
+@media (max-width: 900px) {
+  .entry-head {
+    grid-template-columns: auto 1fr 1.5rem;
+    row-gap: 0.4rem;
+
+    .by { grid-column: 1 / 3; }
+    .fields { display: none; }
+  }
+}
+
+.detail {
+  padding: 0 1.25rem 1.125rem 1.25rem;
+}
+
+.changes {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--hr-border);
+  background: var(--hr-surface);
+
+  th, td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--hr-border);
+    text-align: left;
+    vertical-align: top;
+    font-size: 0.78rem;
+    overflow-wrap: anywhere;
+  }
+
+  thead th {
+    font-family: var(--hr-font-mono);
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--hr-text-muted);
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+
+  .field-name { color: var(--hr-text); }
+  .from { color: var(--hr-text-muted); text-decoration: line-through; }
+  .to { color: var(--hr-accent); }
+}
+
+.record {
+  margin: 0.75rem 0 0;
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  color: var(--hr-text-muted);
+}
+
+.pager {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--hr-border);
+}

@@ -1,6 +1,7 @@
 ﻿using FrierenHR.Application.Common.DTOs;
 using FrierenHR.Application.Common.Interfaces;
 using FrierenHR.Application.Features.Approval;
+using FrierenHR.Application.Features.Scheduling;
 using FrierenHR.Core.Entities;
 using FrierenHR.Core.Enums;
 using FrierenHR.Core.RulesEngine;
@@ -16,16 +17,19 @@ public class LeaveService : ILeaveService
     private readonly IRuleConfigRepository _ruleConfigRepository;
     private readonly IRuleEvaluator _ruleEvaluator;
     private readonly IApprovalService _approvalService;
+    private readonly IWorkingCalendarProvider _workingCalendar;
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     public LeaveService(IEmployeeRepository employeeRepository, ILeaveRepository leaveRepository,
-        IRuleConfigRepository ruleConfigRepository, IRuleEvaluator ruleEvaluator, IApprovalService approvalService)
+        IRuleConfigRepository ruleConfigRepository, IRuleEvaluator ruleEvaluator, IApprovalService approvalService,
+        IWorkingCalendarProvider workingCalendar)
     {
         _employeeRepository = employeeRepository;
         _leaveRepository = leaveRepository;
         _ruleConfigRepository = ruleConfigRepository;
         _ruleEvaluator = ruleEvaluator;
         _approvalService = approvalService;
+        _workingCalendar = workingCalendar;
     }
 
     public async Task<LeaveRequestDto> RequestLeaveAsync(CreateLeaveRequestDto dto, CancellationToken ct = default)
@@ -33,7 +37,18 @@ public class LeaveService : ILeaveService
         var employee = await _employeeRepository.GetByIdAsync(dto.EmployeeId, ct)
             ?? throw new InvalidOperationException($"Employee '{dto.EmployeeId}' not found.");
 
-        var days = (decimal)(dto.EndDate.Date - dto.StartDate.Date).TotalDays + 1;
+        // Working days, not calendar days. A request spanning a weekend or a public holiday
+        // used to deduct those days from the balance.
+        var from = DateOnly.FromDateTime(dto.StartDate);
+        var to = DateOnly.FromDateTime(dto.EndDate);
+        if (to < from) throw new InvalidOperationException("The end date cannot be before the start date.");
+
+        var calendar = await _workingCalendar.ForEmployeeAsync(dto.EmployeeId, from, to, ct);
+        var days = (decimal)calendar.CountWorkingDays(from, to);
+
+        if (days <= 0)
+            throw new InvalidOperationException(
+                "That range is entirely rest days and holidays, so there is nothing to deduct.");
 
         // Ask the rules engine — NOT an if/else — whether this needs manual approval for THIS company.
         var rules = await LoadRules(employee.CompanyId, RuleType.LeaveApproval, ct);
@@ -69,10 +84,11 @@ public class LeaveService : ILeaveService
         }
         else
         {
+            // Deducted once. This ran twice before, halving an auto-approved employee's
+            // balance for every request they made.
             await ApplyBalanceDeduction(employee.Id, dto.LeaveType, days, ct);
         }
 
-        if (!requiresApproval) await ApplyBalanceDeduction(employee.Id, dto.LeaveType, days, ct);
         await _leaveRepository.SaveChangesAsync(ct);
         return ToDto(entity, employee);
     }

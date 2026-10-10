@@ -3,7 +3,7 @@ using FrierenHR.Core.Enums;
 
 namespace FrierenHR.Core.Entities;
 
-public class CompanyRuleConfig : BaseEntity
+public class CompanyRuleConfig : BaseEntity, ICompanyScoped
 {
     public Guid CompanyId { get; set; }
     public Company? Company { get; set; }

@@ -1,0 +1,133 @@
+<div class="page">
+  <header class="page-head">
+    <div>
+      <span class="exhibit">Attendance</span>
+      <h2>Corrections</h2>
+      <p class="sub">For a day you forgot to clock in or out. Your manager sees the hours you
+        are claiming and the reason, and approving writes the attendance row.</p>
+    </div>
+  </header>
+
+  @if (error()) { <p-message severity="error" [text]="error()!"></p-message> }
+  @if (notice()) { <p-message severity="success" [text]="notice()!"></p-message> }
+
+  @if (canApprove() && inbox().length) {
+    <section class="box inbox">
+      <div class="box-h">
+        <span class="exhibit">Waiting on you</span>
+        <span class="count mono">{{ inbox().length }}</span>
+      </div>
+      <div class="requests">
+        @for (request of inbox(); track request.id) {
+          <article class="request">
+            <div class="who">
+              <span class="name">{{ request.employeeName }}</span>
+              <span class="when mono">{{ request.date }}</span>
+            </div>
+            <div class="claim mono">
+              {{ request.requestedTimeIn.slice(0, 5) }} to {{ request.requestedTimeOut.slice(0, 5) }}
+              <span class="sep">&middot;</span>{{ request.requestedBreakMinutes }}m break
+              <span class="sep">&middot;</span>{{ claimedHours(request) }}h claimed
+            </div>
+            <p class="reason">{{ request.reason }}</p>
+            <div class="decide">
+              <input pInputText [(ngModel)]="comments[request.id]" [ngModelOptions]="{ standalone: true }"
+                     placeholder="Note, shown to them if you decline" class="w-full" />
+              <div class="row-actions">
+                <button pButton type="button" label="Approve" [loading]="deciding() === request.id"
+                        (click)="decide(request, true)"></button>
+                <button pButton type="button" severity="secondary" [outlined]="true" label="Decline"
+                        [loading]="deciding() === request.id" (click)="decide(request, false)"></button>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+  }
+
+  <div class="cols">
+    <section class="box form-box">
+      <div class="box-h">
+        <span class="exhibit">Request a correction</span>
+      </div>
+      <form [formGroup]="form" (ngSubmit)="submit()" class="stack">
+        <div class="field">
+          <label for="date">Day to correct</label>
+          <input pInputText id="date" type="date" formControlName="date" [max]="today" class="w-full" />
+        </div>
+
+        <div class="two-up">
+          <div class="field">
+            <label for="timeIn">Clocked in</label>
+            <input pInputText id="timeIn" type="time" formControlName="requestedTimeIn" class="w-full" />
+          </div>
+          <div class="field">
+            <label for="timeOut">Clocked out</label>
+            <input pInputText id="timeOut" type="time" formControlName="requestedTimeOut" class="w-full" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="break">Unpaid break</label>
+          <div class="value-cell">
+            <p-inputNumber inputId="break" formControlName="requestedBreakMinutes" [min]="0" [max]="720"
+                           styleClass="w-full"></p-inputNumber>
+            <span class="unit mono">minutes</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="reason">Why</label>
+          <textarea pTextarea id="reason" formControlName="reason" rows="3" class="w-full"
+                    placeholder="Biometric scanner was down when I arrived."></textarea>
+          <small class="hint">Required. Your manager decides on this, so write what they would
+            need to know.</small>
+        </div>
+
+        <div class="row-actions">
+          <button pButton type="submit" label="Send request" [loading]="saving()"></button>
+        </div>
+      </form>
+    </section>
+
+    <section class="box">
+      <div class="box-h">
+        <span class="exhibit">Your requests</span>
+        <span class="count mono">{{ mine().length }}</span>
+      </div>
+      <p-table [value]="mine()" [loading]="loading()" styleClass="p-datatable-sm">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Date</th>
+            <th>Claimed</th>
+            <th>Reason</th>
+            <th>Status</th>
+            <th>Decision</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-request>
+          <tr>
+            <td class="mono nowrap">{{ request.date }}</td>
+            <td class="mono nowrap">
+              {{ request.requestedTimeIn.slice(0, 5) }}&ndash;{{ request.requestedTimeOut.slice(0, 5) }}
+            </td>
+            <td class="reason-cell">{{ request.reason }}</td>
+            <td><p-tag [value]="request.status" [severity]="severityFor(request.status)"></p-tag></td>
+            <td class="decision">
+              @if (request.decidedAt) {
+                <span class="by">{{ request.decidedByName }}</span>
+                @if (request.decisionComment) { <span class="note">{{ request.decisionComment }}</span> }
+              } @else {
+                <span class="muted">Waiting</span>
+              }
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr><td colspan="5" class="empty">No corrections requested.</td></tr>
+        </ng-template>
+      </p-table>
+    </section>
+  </div>
+</div>

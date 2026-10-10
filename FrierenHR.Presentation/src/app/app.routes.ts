@@ -25,6 +25,8 @@ export const routes: Routes = [
       { path: 'approvals', loadComponent: () => import('./features/approval/approval-home/approval-home.component').then(m => m.ApprovalHomeComponent) },
       { path: 'messages', loadComponent: () => import('./features/messaging/chat-ui/chat-ui.component').then(m => m.ChatUiComponent) },
       { path: 'profile', loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent) },
+      // Anyone can raise a correction; the approver queue inside is role gated by the API.
+      { path: 'corrections', loadComponent: () => import('./features/attendance/corrections/corrections.component').then(m => m.CorrectionsComponent) },
       {
         path: 'my-team',
         loadComponent: () => import('./features/team/my-team.component').then(m => m.MyTeamComponent),
@@ -40,6 +42,24 @@ export const routes: Routes = [
       {
         path: 'departments',
         loadComponent: () => import('./features/company/departments/departments.component').then(m => m.DepartmentsComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['HRAdmin'] },
+      },
+      {
+        path: 'holidays',
+        loadComponent: () => import('./features/company/holidays/holidays.component').then(m => m.HolidaysComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['HRAdmin'] },
+      },
+      {
+        path: 'shifts',
+        loadComponent: () => import('./features/company/shifts/shifts.component').then(m => m.ShiftsComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['HRAdmin'] },
+      },
+      {
+        path: 'audit',
+        loadComponent: () => import('./features/company/audit/audit.component').then(m => m.AuditComponent),
         canActivate: [roleGuard],
         data: { roles: ['HRAdmin'] },
       },

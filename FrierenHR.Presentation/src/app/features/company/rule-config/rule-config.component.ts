@@ -16,8 +16,8 @@ import { RulesConfigService } from '../../../core/services/rules-config.service'
 import { AuthService } from '../../../core/services/auth.service';
 import { RuleType } from '../../../core/models/enums.model';
 import {
-  OPERATOR_LABELS, RuleActionSchema, RuleConfigDto, RuleDefinitionDto, RuleEvaluationResultDto,
-  RuleFieldSchema, RuleSchemaMap, RuleTypeSchema,
+  BOOLEAN_OPTIONS, OPERATOR_LABELS, RuleActionSchema, RuleConfigDto, RuleDefinitionDto,
+  RuleEvaluationResultDto, RuleFieldSchema, RuleSchemaMap, RuleTypeSchema,
 } from '../../../core/models/rules-config.model';
 
 interface Option<T = string> { label: string; value: T; }
@@ -111,8 +111,13 @@ export class RuleConfigComponent implements OnInit {
         const field = schema.fields.find(f => f.name === group.value.field);
         const value = group.value.value;
         if (!field || value === null || value === undefined || value === '') return null;
+        // false is a meaningful value for a Boolean field, so it must not be filtered out
+        // by the emptiness check above.
+        if (value === false && field.kind !== 'Boolean') return null;
         const operator = OPERATOR_LABELS[group.value.op] ?? group.value.op;
-        const rendered = Array.isArray(value) ? value.join(' or ') : value;
+        const rendered = Array.isArray(value)
+          ? value.join(' or ')
+          : field.kind === 'Boolean' ? (value ? 'yes' : 'no') : value;
         const unit = field.unit && field.kind !== 'Enum' ? ` ${field.unit}` : '';
         return `${field.label.toLowerCase()} ${operator} ${rendered}${unit}`;
       })
@@ -209,6 +214,8 @@ export class RuleConfigComponent implements OnInit {
   enumOptionsFor(name: string): Option[] {
     return (this.fieldFor(name)?.options ?? []).map(o => ({ label: o, value: o }));
   }
+
+  readonly booleanOptions = BOOLEAN_OPTIONS;
 
   // --- saving ---
 
@@ -365,13 +372,17 @@ export class RuleConfigComponent implements OnInit {
 
   /** A plausible starting value so the test panel is useful the moment it opens. */
   private sampleFor(field: RuleFieldSchema): any {
+    if (field.kind === 'Boolean') return false;
     if (field.kind === 'Enum') return field.options?.[0] ?? null;
     if (field.kind === 'Text') return '';
-    return field.name === 'clockInHour' ? 9 : 12;
+    if (field.name === 'clockInHour') return 9;
+    if (field.name === 'minutesLate') return 0;
+    return 12;
   }
 
   private defaultValueFor(field: RuleFieldSchema, op?: string): any {
     if (op === 'in') return [];
+    if (field.kind === 'Boolean') return false;
     if (field.kind === 'Enum') return field.options?.[0] ?? null;
     if (field.kind === 'Text') return '';
     return 0;

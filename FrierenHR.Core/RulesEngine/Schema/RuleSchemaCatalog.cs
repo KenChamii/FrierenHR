@@ -16,9 +16,24 @@ public static class RuleSchemaCatalog
 {
     private static readonly string[] NumericOps = { ">=", "<=", "==", "!=" };
     private static readonly string[] TextOps = { "==", "!=", "in" };
+    private static readonly string[] EqualityOps = { "==", "!=" };
+
+    /// <summary>
+    /// "None" is what the attendance service sets when the day is an ordinary working day,
+    /// so a rule can test for it the same way it tests for a holiday type.
+    /// </summary>
+    private static readonly string[] HolidayTypeOptions =
+        ["None", .. Enum.GetNames<HolidayType>()];
 
     private static readonly RuleFieldSchema TenureMonths = new(
         "tenureMonths", "Months of service", RuleValueKind.Integer, NumericOps, "months");
+
+    // Shared by the rule types evaluated against a particular day.
+    private static readonly RuleFieldSchema IsHoliday = new(
+        "isHoliday", "Falls on a holiday", RuleValueKind.Boolean, EqualityOps);
+
+    private static readonly RuleFieldSchema HolidayKind = new(
+        "holidayType", "Holiday type", RuleValueKind.Enum, TextOps, Options: HolidayTypeOptions);
 
     private static RuleDefinition Starter(RuleType ruleType, string field, string op, object value, RuleAction action) =>
         new()
@@ -83,6 +98,8 @@ public static class RuleSchemaCatalog
                 Fields:
                 [
                     new("otHours", "Overtime hours", RuleValueKind.Decimal, NumericOps, "hours"),
+                    IsHoliday,
+                    HolidayKind,
                 ],
                 Actions:
                 [
@@ -103,7 +120,10 @@ public static class RuleSchemaCatalog
                 "How long after the shift start an arrival is still not counted late.",
                 Fields:
                 [
+                    new("minutesLate", "Minutes after shift start", RuleValueKind.Integer, NumericOps, "minutes"),
                     new("clockInHour", "Clock-in hour", RuleValueKind.Integer, NumericOps, "0 to 23"),
+                    IsHoliday,
+                    HolidayKind,
                 ],
                 Actions:
                 [
@@ -171,6 +191,9 @@ public static class RuleSchemaCatalog
 
             if (field.Kind is RuleValueKind.Integer or RuleValueKind.Decimal && !LooksNumeric(condition.Value))
                 return $"'{field.Label}' expects a number but the rule has '{condition.Value}'.";
+
+            if (field.Kind is RuleValueKind.Boolean && !bool.TryParse(condition.Value?.ToString(), out _))
+                return $"'{field.Label}' expects true or false but the rule has '{condition.Value}'.";
 
             if (field is { Kind: RuleValueKind.Enum, Options: not null } && condition.Op != "in")
             {

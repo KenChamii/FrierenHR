@@ -65,6 +65,9 @@
                       <p-multiSelect formControlName="value" [options]="enumOptionsFor(field.name)"
                                      optionLabel="label" optionValue="value" display="chip"
                                      placeholder="Pick one or more" styleClass="w-full"></p-multiSelect>
+                    } @else if (field.kind === 'Boolean') {
+                      <p-dropdown formControlName="value" [options]="booleanOptions"
+                                  optionLabel="label" optionValue="value" styleClass="w-full"></p-dropdown>
                     } @else if (field.kind === 'Enum') {
                       <p-dropdown formControlName="value" [options]="enumOptionsFor(field.name)"
                                   optionLabel="label" optionValue="value" styleClass="w-full"></p-dropdown>
@@ -193,7 +196,11 @@
               <div class="field">
                 <label [for]="'fact-' + field.name">{{ field.label }}</label>
                 <div class="value-cell">
-                  @if (field.kind === 'Enum') {
+                  @if (field.kind === 'Boolean') {
+                    <p-dropdown [inputId]="'fact-' + field.name" [formControlName]="field.name"
+                                [options]="booleanOptions" optionLabel="label"
+                                optionValue="value" styleClass="w-full"></p-dropdown>
+                  } @else if (field.kind === 'Enum') {
                     <p-dropdown [inputId]="'fact-' + field.name" [formControlName]="field.name"
                                 [options]="enumOptionsFor(field.name)" optionLabel="label"
                                 optionValue="value" styleClass="w-full"></p-dropdown>

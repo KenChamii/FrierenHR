@@ -1,0 +1,107 @@
+@use '../../../../styles/admin-page';
+
+.two-up {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.value-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+
+  .unit {
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    color: var(--hr-text-muted);
+    white-space: nowrap;
+  }
+}
+
+// The approver's queue sits above everything else, because it is the only part of this page
+// that someone else is waiting on.
+.inbox .box-h .exhibit { color: var(--hr-accent); }
+
+.requests {
+  display: flex;
+  flex-direction: column;
+}
+
+.request {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--hr-border);
+
+  &:last-child { border-bottom: none; }
+}
+
+.who {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.75rem;
+
+  .name { font-size: 1.05rem; }
+
+  .when {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    color: var(--hr-text-muted);
+  }
+}
+
+.claim {
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  color: var(--hr-text-muted);
+
+  .sep { margin: 0 0.4rem; opacity: 0.6; }
+}
+
+.reason {
+  margin: 0;
+  max-width: 70ch;
+  padding-left: 0.875rem;
+  border-left: 2px solid var(--hr-border);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.decide {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding-top: 0.25rem;
+}
+
+@media (max-width: 760px) {
+  .decide { grid-template-columns: 1fr; }
+}
+
+.reason-cell {
+  max-width: 34ch;
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+.decision {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.85rem;
+
+  .by { color: var(--hr-text); }
+  .note { color: var(--hr-text-muted); font-size: 0.8rem; }
+  .muted {
+    font-family: var(--hr-font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--hr-text-muted);
+  }
+}

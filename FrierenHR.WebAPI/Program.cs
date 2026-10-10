@@ -1,7 +1,11 @@
 using System.Text;
 using System.Threading.RateLimiting;
+using FrierenHR.Application.Common.Interfaces;
 using FrierenHR.Application.Features.Approval;
 using FrierenHR.Application.Features.Attendance;
+using FrierenHR.Application.Features.Attendance.Corrections;
+using FrierenHR.Application.Features.Audit;
+using FrierenHR.Application.Features.Scheduling;
 using FrierenHR.Application.Features.Company;
 using FrierenHR.Application.Features.Employee;
 using FrierenHR.Application.Features.Leave;
@@ -10,6 +14,7 @@ using FrierenHR.Application.Features.RulesConfig;
 using FrierenHR.Application.Features.Timesheet;
 using FrierenHR.Core.RulesEngine;
 using FrierenHR.Infrastructure.Data;
+using FrierenHR.Infrastructure.Data.Auditing;
 using FrierenHR.Infrastructure.Repositories;
 using FrierenHR.WebAPI.Common;
 using FrierenHR.WebAPI.Hubs;
@@ -30,7 +35,15 @@ var jwtKey = Required(builder.Configuration["Jwt:Key"], "Jwt:Key");
 if (jwtKey.Length < 32)
     throw new InvalidOperationException("Jwt:Key must be at least 32 characters. Set it with: dotnet user-secrets set \"Jwt:Key\" \"<long random string>\"");
 
-builder.Services.AddDbContext<FrierenHRDbContext>(options => options.UseSqlServer(connectionString));
+// The audit interceptor needs the acting user, which is request scoped, so the context is
+// built per request with the interceptor resolved from the same scope.
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUser, HttpContextCurrentUser>();
+builder.Services.AddScoped<AuditSaveChangesInterceptor>();
+
+builder.Services.AddDbContext<FrierenHRDbContext>((sp, options) => options
+    .UseSqlServer(connectionString)
+    .AddInterceptors(sp.GetRequiredService<AuditSaveChangesInterceptor>()));
 
 builder.Services.AddScoped<TokenService>();
 
@@ -109,6 +122,19 @@ builder.Services.AddScoped<IMessagingRepository, MessagingRepository>();
 builder.Services.AddScoped<IMessagingService, MessagingService>();
 builder.Services.AddScoped<ITimesheetRepository, TimesheetRepository>();
 builder.Services.AddScoped<ITimesheetService, TimesheetService>();
+
+// Scheduling: holidays, shifts, and the working calendar both of them feed.
+builder.Services.AddScoped<IHolidayRepository, HolidayRepository>();
+builder.Services.AddScoped<IShiftRepository, ShiftRepository>();
+builder.Services.AddScoped<IHolidayService, HolidayService>();
+builder.Services.AddScoped<IShiftService, ShiftService>();
+builder.Services.AddScoped<IWorkingCalendarProvider, WorkingCalendarProvider>();
+
+// Attendance corrections and the audit trail.
+builder.Services.AddScoped<IAttendanceCorrectionRepository, AttendanceCorrectionRepository>();
+builder.Services.AddScoped<IAttendanceCorrectionService, AttendanceCorrectionService>();
+builder.Services.AddScoped<IAuditRepository, AuditRepository>();
+builder.Services.AddScoped<IAuditService, AuditService>();
 
 // Allowed origins come from config so pointing at a different frontend is not a code change.
 var corsOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()

@@ -706,13 +706,4 @@ footer {
 
 .foot-note { margin-top: 10px; font-size: 14px; }
 
-.credit {
-  font-family: var(--hr-font-mono);
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  line-height: 1.8;
-
-  a { color: var(--hr-text-muted); }
-}
-
 :focus-visible { outline: 2px solid var(--hr-accent); outline-offset: 3px; }

@@ -1,0 +1,122 @@
+<div class="page">
+  <header class="page-head">
+    <div>
+      <span class="exhibit">Company schedule</span>
+      <h2>Shifts</h2>
+      <p class="sub">A shift says when someone is expected to start, so lateness can be measured
+        rather than guessed from the hour of the clock-in. Rest days here also decide which
+        days a leave request skips.</p>
+    </div>
+  </header>
+
+  @if (error()) { <p-message severity="error" [text]="error()!"></p-message> }
+  @if (notice()) { <p-message severity="success" [text]="notice()!"></p-message> }
+
+  <div class="cols">
+    <section class="box form-box">
+      <div class="box-h">
+        <span class="exhibit">{{ editingId() ? 'Editing' : 'Add a shift' }}</span>
+      </div>
+      <form [formGroup]="form" (ngSubmit)="save()" class="stack">
+        <div class="field">
+          <label for="name">Name</label>
+          <input pInputText id="name" formControlName="name" placeholder="Day shift" class="w-full" />
+        </div>
+
+        <div class="two-up">
+          <div class="field">
+            <label for="startTime">Starts</label>
+            <input pInputText id="startTime" type="time" formControlName="startTime" class="w-full" />
+          </div>
+          <div class="field">
+            <label for="endTime">Ends</label>
+            <input pInputText id="endTime" type="time" formControlName="endTime" class="w-full" />
+          </div>
+        </div>
+        <small class="hint">An end time before the start means the shift crosses midnight.</small>
+
+        <div class="field">
+          <label for="breakMinutes">Unpaid break</label>
+          <div class="value-cell">
+            <p-inputNumber inputId="breakMinutes" formControlName="breakMinutes" [min]="0" [max]="720"
+                           styleClass="w-full"></p-inputNumber>
+            <span class="unit mono">minutes</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Rest days</label>
+          <div class="day-toggles">
+            @for (day of weekDays; track day.value) {
+              <button type="button" class="day" [class.on]="isRestDay(day.value)"
+                      [attr.aria-pressed]="isRestDay(day.value)" (click)="toggleDay(day.value)">
+                {{ day.short }}
+              </button>
+            }
+          </div>
+          <small class="hint">Days this shift does not run. Leave requests skip them.</small>
+        </div>
+
+        <div class="field switch">
+          <label for="isDefault">Company default</label>
+          <p-toggleswitch inputId="isDefault" formControlName="isDefault"></p-toggleswitch>
+          <small class="hint">Used for anyone whose employee and department have no shift of
+            their own. Only one shift can hold this.</small>
+        </div>
+
+        <div class="row-actions">
+          <button pButton type="submit" [label]="editingId() ? 'Save changes' : 'Add'" [loading]="saving()"></button>
+          @if (editingId()) {
+            <button pButton type="button" severity="secondary" [text]="true" label="Cancel" (click)="cancelEdit()"></button>
+          }
+        </div>
+      </form>
+    </section>
+
+    <section class="box">
+      <div class="box-h">
+        <span class="exhibit">Defined shifts</span>
+        <span class="count mono">{{ list().length }}</span>
+      </div>
+      <p-table [value]="list()" [loading]="loading()" styleClass="p-datatable-sm">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Shift</th>
+            <th>Hours</th>
+            <th>Rest days</th>
+            <th class="right">Worked</th>
+            <th class="right">On it</th>
+            <th></th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-shift>
+          <tr [class.editing]="shift.id === editingId()">
+            <td>
+              {{ shift.name }}
+              @if (shift.isDefault) { <p-tag value="default" severity="success"></p-tag> }
+            </td>
+            <td class="mono nowrap">
+              {{ shift.startTime.slice(0, 5) }} to {{ shift.endTime.slice(0, 5) }}
+              @if (shift.crossesMidnight) { <span class="dow">next day</span> }
+            </td>
+            <td>{{ restDayLabels(shift.restDays) }}</td>
+            <td class="right mono">{{ workedHours(shift) }}h</td>
+            <td class="right mono">{{ shift.assignedEmployeeCount }}</td>
+            <td class="right">
+              <button pButton type="button" severity="secondary" [text]="true" label="Edit" (click)="edit(shift)"></button>
+              <button pButton type="button" severity="danger" [text]="true" label="Remove" (click)="remove(shift)"></button>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="6" class="empty">
+              No shifts yet. Without one, nobody has an expected start time, so nobody is ever
+              counted late and leave requests fall back to skipping Saturday and Sunday.
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </section>
+  </div>
+</div>
