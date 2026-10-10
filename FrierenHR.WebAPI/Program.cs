@@ -10,6 +10,8 @@ using FrierenHR.Application.Features.Company;
 using FrierenHR.Application.Features.Employee;
 using FrierenHR.Application.Features.Leave;
 using FrierenHR.Application.Features.Messaging;
+using FrierenHR.Application.Features.Onboarding;
+using FrierenHR.Application.Features.Reporting;
 using FrierenHR.Application.Features.RulesConfig;
 using FrierenHR.Application.Features.Timesheet;
 using FrierenHR.Core.RulesEngine;
@@ -135,6 +137,16 @@ builder.Services.AddScoped<IAttendanceCorrectionRepository, AttendanceCorrection
 builder.Services.AddScoped<IAttendanceCorrectionService, AttendanceCorrectionService>();
 builder.Services.AddScoped<IAuditRepository, AuditRepository>();
 builder.Services.AddScoped<IAuditService, AuditService>();
+
+// Sign-up. Writes a company and its first administrator in one transaction.
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IRegistrationService, RegistrationService>();
+
+// Reporting. Read-only, so these compose the repositories above rather than owning data.
+builder.Services.AddScoped<IAvailabilityService, AvailabilityService>();
+builder.Services.AddScoped<ILeaveForecastService, LeaveForecastService>();
+builder.Services.AddScoped<IPayrollExportService, PayrollExportService>();
+builder.Services.AddScoped<ILeaveLiabilityService, LeaveLiabilityService>();
 
 // Allowed origins come from config so pointing at a different frontend is not a code change.
 var corsOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
