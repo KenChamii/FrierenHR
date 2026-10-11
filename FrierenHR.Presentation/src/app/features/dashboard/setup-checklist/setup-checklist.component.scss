@@ -1,0 +1,173 @@
+.setup {
+  margin-bottom: 1.75rem;
+  border: 1px solid var(--hr-border);
+  background: var(--hr-surface);
+}
+
+.setup-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem 1rem;
+
+  h3 {
+    margin: 0.3rem 0 0.2rem;
+    font-weight: 300;
+    letter-spacing: -0.01em;
+  }
+
+  .sub {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--hr-text-muted);
+  }
+}
+
+// A hairline, not a chunky progress bar. It marks progress without demanding attention.
+.bar {
+  height: 2px;
+  background: var(--hr-border);
+
+  .fill {
+    display: block;
+    height: 100%;
+    background: var(--hr-accent);
+    transition: width 0.4s ease;
+  }
+}
+
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: step;
+}
+
+.step {
+  display: grid;
+  grid-template-columns: 1.5rem minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: start;
+  padding: 0.875rem 1.5rem;
+  border-bottom: 1px solid var(--hr-border);
+
+  &:last-child { border-bottom: none; }
+
+  .mark {
+    width: 1.1rem;
+    height: 1.1rem;
+    margin-top: 0.15rem;
+    border: 1px solid var(--hr-border);
+    border-radius: 50%;
+    font-size: 0.7rem;
+    line-height: 1rem;
+    text-align: center;
+    color: transparent;
+  }
+
+  .body { display: flex; flex-direction: column; gap: 0.2rem; }
+
+  .title { font-size: 0.95rem; }
+
+  .why {
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--hr-text-muted);
+  }
+
+  .opt {
+    margin-left: 0.4rem;
+    font-size: 0.55rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--hr-text-muted);
+  }
+
+  .step-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    align-self: center;
+  }
+
+  // Quieter than the primary action: the escape hatch, not the expected path.
+  // Named mark-done rather than mark, which is the tick circle above.
+  .mark-done {
+    border: none;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: var(--hr-font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--hr-text-muted);
+    white-space: nowrap;
+
+    &:hover { color: var(--hr-text); text-decoration: underline; }
+  }
+
+  .go {
+    align-self: center;
+    font-family: var(--hr-font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--hr-accent);
+    text-decoration: none;
+    white-space: nowrap;
+
+    &:hover { text-decoration: underline; }
+  }
+}
+
+.step.done {
+  .mark {
+    border-color: var(--hr-accent);
+    background: var(--hr-accent);
+    color: var(--hr-surface);
+  }
+
+  .title { color: var(--hr-text-muted); text-decoration: line-through; }
+  .why { display: none; }
+}
+
+// The step to do next. Marked by a rule and weight as well as the ring, so it does not
+// depend on colour alone.
+.step.next {
+  background: var(--hr-accent-soft);
+  box-shadow: inset 2px 0 0 var(--hr-accent);
+
+  .mark {
+    border-color: var(--hr-accent);
+    animation: ring 2s ease-out infinite;
+  }
+
+  .title { font-weight: 500; }
+}
+
+.step.optional:not(.done) .mark { border-style: dashed; }
+
+// A slow pulse, once every couple of seconds. Enough to find on a page, not enough to
+// nag at somebody reading the step next to it.
+@keyframes ring {
+  0% { box-shadow: 0 0 0 0 var(--hr-accent); opacity: 1; }
+  70% { box-shadow: 0 0 0 6px rgba(0, 0, 0, 0); opacity: 1; }
+  100% { box-shadow: 0 0 0 0 rgba(0, 0, 0, 0); opacity: 1; }
+}
+
+// Respect a request for less movement. An animation nobody asked for is the first thing to
+// drop for somebody who finds motion uncomfortable.
+@media (prefers-reduced-motion: reduce) {
+  .step.next .mark { animation: none; }
+  .bar .fill { transition: none; }
+}
+
+@media (max-width: 760px) {
+  .step {
+    grid-template-columns: 1.5rem minmax(0, 1fr);
+
+    .step-actions { grid-column: 2; justify-self: start; margin-top: 0.3rem; }
+  }
+}

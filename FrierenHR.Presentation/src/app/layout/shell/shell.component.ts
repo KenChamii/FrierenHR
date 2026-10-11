@@ -4,18 +4,27 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { AuthService } from '../../core/services/auth.service';
 import { MessagingService } from '../../core/services/messaging.service';
+import { SetupService } from '../../core/services/setup.service';
+import { SetupBannerComponent } from '../setup-banner/setup-banner.component';
 
 interface NavItem { label: string; icon: string; path: string; roles?: string[]; }
 
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, ButtonModule],
+  imports: [
+    CommonModule, RouterOutlet, RouterLink, RouterLinkActive, ButtonModule,
+    SetupBannerComponent,
+  ],
   templateUrl: './shell.component.html',
   styleUrl: './shell.component.scss',
 })
 export class ShellComponent implements OnInit {
   private readonly messaging = inject(MessagingService);
+  private readonly setup = inject(SetupService);
+
+  /** The nav item the setup checklist is pointing at, or null when setup is done. */
+  readonly setupTarget = computed(() => this.setup.nextRoute());
 
   /** Conversations with something unread, shown on the Messages link from any screen. */
   readonly unreadMessages = computed(() => this.messaging.unreadCount());
@@ -45,6 +54,9 @@ export class ShellComponent implements OnInit {
   constructor(public authService: AuthService) {}
 
   async ngOnInit(): Promise<void> {
+    // Setup progress drives the pointer beside the nav item that comes next.
+    this.setup.refresh();
+
     // Connected here rather than on the Messages screen, so a message that arrives while
     // somebody is on Leave or Attendance still lights up the sidebar.
     try {
@@ -63,6 +75,14 @@ export class ShellComponent implements OnInit {
   /** True for the Messages link while anything is unread. */
   showsUnread(item: NavItem): boolean {
     return item.path === '/messages' && this.unreadMessages() > 0;
+  }
+
+  /**
+   * True for the one nav item setup is asking for next, so the sidebar points at the same
+   * step the checklist does rather than leaving somebody to find it among nineteen links.
+   */
+  isSetupTarget(item: NavItem): boolean {
+    return this.setupTarget() === item.path;
   }
 
   readonly initials = computed(() => {

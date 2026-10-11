@@ -1,0 +1,62 @@
+// A strip above the page content, not a floating card. It belongs to the application
+// chrome rather than to whatever screen happens to be open.
+.setup-banner {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid var(--hr-border);
+  border-left: 2px solid var(--hr-accent);
+  background: var(--hr-accent-soft);
+}
+
+.step-of {
+  flex: none;
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hr-text-muted);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  margin-right: auto;
+
+  .title { font-size: 0.925rem; }
+
+  // One line. The full reasoning is on the dashboard checklist; here it is a reminder.
+  .why {
+    font-size: 0.78rem;
+    line-height: 1.4;
+    color: var(--hr-text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex: none;
+}
+
+@media (max-width: 860px) {
+  .setup-banner {
+    flex-wrap: wrap;
+    gap: 0.625rem;
+  }
+
+  .body {
+    flex-basis: 100%;
+    order: 2;
+
+    .why { white-space: normal; }
+  }
+
+  .actions { order: 3; margin-left: auto; }
+}

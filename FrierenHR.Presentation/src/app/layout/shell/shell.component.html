@@ -7,8 +7,12 @@
     <nav>
       @for (item of navItems; track item.path) {
         @if (visible(item)) {
-          <a [routerLink]="item.path" routerLinkActive="active" class="nav-link">
+          <a [routerLink]="item.path" routerLinkActive="active" class="nav-link"
+             [class.setup-target]="isSetupTarget(item)">
             <i [class]="item.icon"></i><span>{{ item.label }}</span>
+            @if (isSetupTarget(item)) {
+              <span class="setup-dot" aria-label="Next setup step"></span>
+            }
             @if (showsUnread(item)) {
               <span class="nav-badge" [attr.aria-label]="unreadMessages() + ' unread conversation(s)'">
                 {{ unreadMessages() }}
@@ -45,6 +49,10 @@
         </a>
       </div>
     </header>
+    <!-- Above the content, so moving between setup steps never needs a trip back to the
+         dashboard. It hides itself on the screen it is pointing at. -->
+    <app-setup-banner />
+
     <main class="content">
       <router-outlet />
     </main>
