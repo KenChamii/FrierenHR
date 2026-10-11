@@ -2,7 +2,14 @@
 
 A multi-tenant HR system where company policy is configuration rather than code. Leave accrual, overtime multipliers, late grace periods and approval escalation are all defined per company through a rules engine, then applied consistently across leave, attendance, timesheets and approvals.
 
-Built with .NET 10 and Angular 18.
+Built with .NET 10, Angular 18 and PostgreSQL.
+
+**[Live demo](https://frierenhr.irreversiblechain.workers.dev)** — sign in as `hr@frierenhr.demo`, or create your own company from the landing page.
+
+The demo runs on free hosting that sleeps when idle, so the first request after a quiet
+period takes up to a minute while the API and the database wake. It is seeded with one
+company that has staff, three weeks of attendance, leave in several states and holidays,
+so the screens have something in them.
 
 ## Why the rules engine matters
 
@@ -106,7 +113,7 @@ The order the rest of the setup is done in matters, because several screens read
 ```
 FrierenHR.Core            Entities, enums, rules engine. No database, no HTTP, no framework
 FrierenHR.Application     Feature services and their contracts, one folder per capability
-FrierenHR.Infrastructure  EF Core mappings, migrations, repositories over SQL Server
+FrierenHR.Infrastructure  EF Core mappings, migrations, repositories over PostgreSQL
 FrierenHR.WebAPI          Controllers, JWT auth, SignalR hub, nightly accrual job
 FrierenHR.Presentation    Angular app, one feature area per module
 FrierenHR.Tests           xUnit, covering the rules engine, the working calendar, leave
@@ -117,14 +124,20 @@ Dependencies point inward. `Core` references nothing, which is why the rules eng
 
 ## Running it locally
 
-Requires the .NET 10 SDK, Node 20 or later, and SQL Server (LocalDB is fine).
+Requires the .NET 10 SDK, Node 20 or later, and Docker.
+
+Start the database first. It binds host port 5433 rather than 5432, so it does not collide
+with a PostgreSQL installed natively:
+
+```bash
+docker compose -f docker-compose.dev.yml up -d
+```
 
 Secrets are not committed. Set them with the user secrets manager:
 
 ```bash
-cd FrierenHR.WebAPI
-dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=(localdb)\\MSSQLLocalDB;Database=FrierenHRDb;Trusted_Connection=True;"
-dotnet user-secrets set "Jwt:Key" "<a random string of at least 32 characters>"
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Port=5433;Database=frierenhr;Username=frierenhr;Password=localdev" --project FrierenHR.WebAPI
+dotnet user-secrets set "Jwt:Key" "<a random string of at least 32 characters>" --project FrierenHR.WebAPI
 ```
 
 Startup fails with a named error if either is missing, rather than failing obscurely later.
@@ -139,6 +152,28 @@ cd FrierenHR.Presentation && npm ci && npm start
 The API serves Swagger at `/swagger` in Development and a health check at `/health` in every environment.
 
 In Development the app applies pending migrations and seeds demo data on startup. In any other environment it applies migrations but does not seed. For a controlled deployment, generate a migration bundle instead and run it as a deploy step.
+
+## Deployment
+
+Everything runs in containers, and both images are built on every push so a broken
+Dockerfile fails in CI rather than at deploy time.
+
+```bash
+cp .env.example .env     # fill in POSTGRES_PASSWORD and JWT_KEY
+docker compose up --build
+```
+
+That brings up PostgreSQL, the API, and nginx serving the built frontend and proxying
+`/api`, `/hubs` and `/uploads` to the API, so the browser sees one origin and CORS does not
+apply. Open `http://localhost:8080`.
+
+The hosted demo is arranged differently, because free hosting gives each service its own
+domain: the API on Render, the database on Neon, and the frontend on Cloudflare Workers.
+There the frontend holds the API's absolute URL and the API allows that origin explicitly.
+`FrierenHR.Presentation/src/environments/environment.ts` says which arrangement is in use.
+
+Migrations are applied on startup. Demo data is seeded only when `Demo__Seed` is set, and
+the seeder refuses any database that already holds a company.
 
 ## Testing
 
@@ -160,7 +195,7 @@ The suite covers the pieces that hold real logic and no dependencies:
 Recorded deliberately rather than left to be discovered.
 
 - **No refresh tokens.** Access tokens last eight hours and logout is client-side only, so there is no server-side revocation. Acceptable for an internal tool, not for anything public facing.
-- **No password reset.** Changing a password requires knowing the current one, so a forgotten administrator password has no route back in.
+- **No self-service password reset.** HR can issue a temporary password, which the holder is then forced to change before they can use anything else. There is no email, so that password is handed over in person, and the last remaining HR administrator locking themselves out still has no route back in.
 - **No payslip documents.** Payslips are figures on a screen, not generated PDFs, so there is nothing to attach or archive yet.
 - **One pay rate per employee, with no history.** A raise reprices every period that is regenerated afterwards, including old ones. Effective-dated compensation is the fix, and is not built.
 - **A split day cannot be entered.** The week grid holds one entry per day with a break as a duration, so 09:00 to 12:00 and 16:00 to 20:00 has to go through a correction. The model allows several entries per day, so this is a UI limit rather than a schema one.
@@ -168,6 +203,7 @@ Recorded deliberately rather than left to be discovered.
 - **Photos and attachments go to local disk.** `LocalDiskPhotoStorageService` writes under `wwwroot/uploads`, which does not survive a container restart. The interface is there to swap in blob storage.
 - **Unread is a flag, not a count.** The conversation query reports whether anything is unread, not how many, so the sidebar badge counts conversations rather than messages.
 - **The overtime multiplier on the payroll export is per employee, not per day.** A rule keyed on a particular day's holiday cannot be represented in a one-row-per-employee format; that would be a different report.
+- **Tenant isolation is enforced per endpoint, not globally.** There are no query filters on the context, so each controller checks the caller's company itself. Two places currently do not: `ApprovalChainsController.GetForCompany` trusts the company id in the route, and `IsSelfOrRole` admits a Manager or HRAdmin against any employee id, including another company's. Exploiting either needs a known GUID, but both are real. Global query filters are the fix.
 - **`ApprovalEscalation` rules are not evaluated.** They can be configured and are validated, but escalation reads `ApprovalChainStep.EscalateAfterDays` directly. The rules screen marks the type as not wired rather than implying it works.
 
 ## Licence
