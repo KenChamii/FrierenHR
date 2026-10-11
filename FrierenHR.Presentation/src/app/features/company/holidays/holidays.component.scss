@@ -1,1 +1,77 @@
 @use '../../../../styles/admin-page';
+
+// Reviewing a fetched year. Deliberately not a table: each row is something to decide on,
+// not something to read.
+.review .caveat {
+  margin: 0;
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid var(--hr-border);
+  background: var(--hr-accent-soft);
+  font-size: 0.85rem;
+  line-height: 1.5;
+
+  .source {
+    display: block;
+    margin-top: 0.375rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--hr-text-muted);
+  }
+}
+
+.suggestions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    display: grid;
+    grid-template-columns: auto 10rem minmax(0, 1fr) 12rem auto;
+    gap: 0.875rem;
+    align-items: center;
+    padding: 0.5rem 1.25rem;
+    border-bottom: 1px solid var(--hr-border);
+
+    &:last-child { border-bottom: none; }
+
+    // Not being imported, so it recedes without disappearing.
+    &.off { opacity: 0.5; }
+    &.recorded { background: var(--hr-surface-alt); }
+  }
+
+  .when {
+    font-size: 0.75rem;
+    color: var(--hr-text-muted);
+    white-space: nowrap;
+  }
+
+  .dow { margin-left: 0.3rem; opacity: 0.7; }
+
+  .name { font-size: 0.9rem; }
+
+  .tag {
+    font-size: 0.58rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--hr-accent);
+    white-space: nowrap;
+  }
+}
+
+.review-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--hr-border);
+}
+
+@media (max-width: 900px) {
+  .suggestions li {
+    grid-template-columns: auto minmax(0, 1fr);
+    row-gap: 0.4rem;
+
+    .when, .tag { grid-column: 2; }
+  }
+}

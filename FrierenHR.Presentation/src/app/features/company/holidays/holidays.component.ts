@@ -14,15 +14,22 @@ import { CompanyService } from '../../../core/services/company.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { DepartmentDto } from '../../../core/models/company.model';
 import {
-  HOLIDAY_TYPES, HolidayDto, HolidayType, SaveHolidayDto,
+  HOLIDAY_TYPES, HolidayDto, HolidaySuggestionDto, HolidayType, SaveHolidayDto,
 } from '../../../core/models/scheduling.model';
+import { CheckboxModule } from 'primeng/checkbox';
+
+/** A suggested holiday with the choices an administrator can change before importing. */
+interface SuggestionRow extends HolidaySuggestionDto {
+  include: boolean;
+  type: HolidayType;
+}
 
 @Component({
   selector: 'app-holidays',
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, FormsModule, ButtonModule, DropdownModule,
-    InputTextModule, MessageModule, TableModule, TagModule, TextareaModule,
+    InputTextModule, MessageModule, TableModule, TagModule, TextareaModule, CheckboxModule,
   ],
   templateUrl: './holidays.component.html',
   styleUrl: './holidays.component.scss',
@@ -44,6 +51,16 @@ export class HolidaysComponent implements OnInit {
   readonly notice = signal<string | null>(null);
   readonly editingId = signal<string | null>(null);
   readonly showImport = signal(false);
+
+  // --- Fetching a year from the holiday service ---
+
+  readonly showFetch = signal(false);
+  readonly fetching = signal(false);
+  readonly suggestions = signal<SuggestionRow[]>([]);
+  readonly suggestionSource = signal<string | null>(null);
+  readonly suggestionCaveat = signal<string | null>(null);
+
+  readonly selectedSuggestions = computed(() => this.suggestions().filter(s => s.include));
 
   readonly year = signal(new Date().getFullYear());
   readonly years = computed(() => {
@@ -187,6 +204,84 @@ export class HolidaysComponent implements OnInit {
 
   labelFor(type: HolidayType): string {
     return HOLIDAY_TYPES.find(t => t.value === type)?.label ?? type;
+  }
+
+  /**
+   * Fetches a year for review. Nothing is written here: the list is a starting point, not
+   * an authority, and the types in particular need checking before they affect pay.
+   */
+  fetchSuggestions(): void {
+    this.fetching.set(true);
+    this.error.set(null);
+    this.notice.set(null);
+
+    this.holidays.suggestions(this.year()).subscribe({
+      next: result => {
+        this.fetching.set(false);
+        this.suggestionSource.set(result.source);
+        this.suggestionCaveat.set(result.caveat);
+        this.suggestions.set(result.holidays.map(h => ({
+          ...h,
+          // A date already on the calendar is shown but not ticked, so importing cannot
+          // quietly add a second entry for it.
+          include: !h.alreadyRecorded,
+          type: h.suggestedType,
+        })));
+        this.showFetch.set(true);
+      },
+      error: err => {
+        this.fetching.set(false);
+        this.error.set(err?.error?.message ?? 'Could not fetch that year.');
+      },
+    });
+  }
+
+  toggleSuggestion(row: SuggestionRow): void {
+    this.updateSuggestion(row, { include: !row.include });
+  }
+
+  setSuggestionType(row: SuggestionRow, type: HolidayType): void {
+    this.updateSuggestion(row, { type });
+  }
+
+  private updateSuggestion(row: SuggestionRow, changes: Partial<SuggestionRow>): void {
+    this.suggestions.update(rows =>
+      rows.map(r => (r.date === row.date ? { ...r, ...changes } : r)));
+  }
+
+  cancelFetch(): void {
+    this.showFetch.set(false);
+    this.suggestions.set([]);
+  }
+
+  importSuggestions(): void {
+    const companyId = this.auth.currentCompanyId();
+    const chosen = this.selectedSuggestions();
+    if (!companyId || chosen.length === 0) return;
+
+    const rows: SaveHolidayDto[] = chosen.map(s => ({
+      companyId,
+      date: s.date,
+      name: s.name,
+      type: s.type,
+      departmentId: null,
+    }));
+
+    this.importing.set(true);
+    this.error.set(null);
+
+    this.holidays.import(rows).subscribe({
+      next: result => {
+        this.importing.set(false);
+        this.notice.set(`Added ${result.added}, skipped ${result.skipped}.`);
+        this.cancelFetch();
+        this.load();
+      },
+      error: err => {
+        this.importing.set(false);
+        this.error.set(err?.error?.message ?? 'Import failed.');
+      },
+    });
   }
 
   /** Regular holidays carry the premium, so they are the ones worth marking. */

@@ -11,7 +11,10 @@
                   [ngModel]="year()" (ngModelChange)="onYearChange($event)"
                   [ngModelOptions]="{ standalone: true }"></p-dropdown>
       <button pButton type="button" severity="secondary" [outlined]="true"
-              [label]="showImport() ? 'Close import' : 'Paste a year'"
+              label="Fetch {{ year() }}" [loading]="fetching()"
+              (click)="fetchSuggestions()"></button>
+      <button pButton type="button" severity="secondary" [text]="true"
+              [label]="showImport() ? 'Close paste' : 'Paste a year'"
               (click)="showImport.set(!showImport())"></button>
     </div>
   </header>
@@ -31,6 +34,61 @@
       <div class="row-actions">
         <button pButton type="button" label="Import" [loading]="importing()" (click)="runImport()"></button>
       </div>
+    </section>
+  }
+
+  @if (showFetch()) {
+    <section class="box review">
+      <div class="box-h">
+        <span class="exhibit">Review {{ year() }}</span>
+        <span class="count mono">{{ selectedSuggestions().length }} of {{ suggestions().length }} selected</span>
+      </div>
+
+      <!--
+        The caveat is not decoration. The feed carries public holidays only, suggests every
+        one as Regular, and lags proclamations, and the type decides what a worked day pays.
+      -->
+      <p class="caveat">
+        <strong>Check this before importing.</strong> {{ suggestionCaveat() }}
+        <span class="source mono">Source: {{ suggestionSource() }}</span>
+      </p>
+
+      @if (!suggestions().length) {
+        <p class="empty">The service returned nothing for {{ year() }}.</p>
+      } @else {
+        <ul class="suggestions">
+          @for (row of suggestions(); track row.date) {
+            <li [class.recorded]="row.alreadyRecorded" [class.off]="!row.include">
+              <p-checkbox [binary]="true" [ngModel]="row.include"
+                          [ngModelOptions]="{ standalone: true }"
+                          (ngModelChange)="toggleSuggestion(row)"
+                          [attr.aria-label]="'Import ' + row.name"></p-checkbox>
+
+              <span class="when mono">{{ row.date }} <span class="dow">{{ weekdayOf(row.date) }}</span></span>
+              <span class="name">{{ row.name }}</span>
+
+              <p-dropdown [options]="holidayTypes" optionLabel="label" optionValue="value"
+                          [ngModel]="row.type" [ngModelOptions]="{ standalone: true }"
+                          (ngModelChange)="setSuggestionType(row, $event)"
+                          [disabled]="!row.include"></p-dropdown>
+
+              @if (row.alreadyRecorded) {
+                <span class="tag mono">Already on the calendar</span>
+              }
+            </li>
+          }
+        </ul>
+
+        <div class="row-actions review-actions">
+          <button pButton type="button" severity="secondary" [text]="true" label="Cancel"
+                  (click)="cancelFetch()"></button>
+          <button pButton type="button"
+                  label="Import {{ selectedSuggestions().length }} holiday(s)"
+                  [loading]="importing()"
+                  [disabled]="!selectedSuggestions().length"
+                  (click)="importSuggestions()"></button>
+        </div>
+      }
     </section>
   }
 

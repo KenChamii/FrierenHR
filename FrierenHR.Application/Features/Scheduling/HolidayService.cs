@@ -6,18 +6,55 @@ namespace FrierenHR.Application.Features.Scheduling;
 
 public class HolidayService : IHolidayService
 {
+    /// <summary>Said on the review screen, so nobody saves the list believing it is official.</summary>
+    private const string FeedCaveat =
+        "Public holidays only, and every one is suggested as Regular. "
+        + "Special Non-Working days are declared by proclamation and are not in this list, "
+        + "so check the types and the dates against the official calendar before importing.";
+
+    private const string FeedSource = "Nager.Date";
+
     private readonly IHolidayRepository _holidayRepository;
     private readonly IDepartmentRepository _departmentRepository;
     private readonly IWorkingCalendarProvider _calendarProvider;
+    private readonly IHolidayFeed _holidayFeed;
 
     public HolidayService(
         IHolidayRepository holidayRepository,
         IDepartmentRepository departmentRepository,
-        IWorkingCalendarProvider calendarProvider)
+        IWorkingCalendarProvider calendarProvider,
+        IHolidayFeed holidayFeed)
     {
         _holidayRepository = holidayRepository;
         _departmentRepository = departmentRepository;
         _calendarProvider = calendarProvider;
+        _holidayFeed = holidayFeed;
+    }
+
+    public async Task<HolidaySuggestionsDto> GetSuggestionsAsync(
+        Guid companyId, int year, string countryCode, CancellationToken ct = default)
+    {
+        if (year < 2000 || year > 2100)
+            throw new InvalidOperationException("Pick a year between 2000 and 2100.");
+
+        if (string.IsNullOrWhiteSpace(countryCode) || countryCode.Trim().Length != 2)
+            throw new InvalidOperationException("A two-letter country code is required, such as PH.");
+
+        var suggestions = await _holidayFeed.GetForYearAsync(year, countryCode.Trim(), ct);
+
+        // Company-wide entries only. A department-specific holiday on the same date does not
+        // make the company-wide one redundant, so it should not suppress the suggestion.
+        var existingDates = (await _holidayRepository.GetByCompanyAsync(companyId, ct))
+            .Where(h => h.DepartmentId is null && h.Date.Year == year)
+            .Select(h => h.Date)
+            .ToHashSet();
+
+        var rows = suggestions
+            .Select(s => new HolidaySuggestionDto(
+                s.Date, s.Name, Core.Enums.HolidayType.Regular, existingDates.Contains(s.Date)))
+            .ToList();
+
+        return new HolidaySuggestionsDto(year, countryCode.Trim().ToUpperInvariant(), FeedSource, FeedCaveat, rows);
     }
 
     public async Task<List<HolidayDto>> GetForYearAsync(Guid companyId, int year, CancellationToken ct = default)
