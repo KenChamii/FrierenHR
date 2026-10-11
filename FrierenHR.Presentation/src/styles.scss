@@ -42,6 +42,29 @@ table,
   border-radius: var(--hr-radius) !important;
 }
 
+/* The width utility PrimeNG's styleClass is given in about a hundred places. PrimeFlex is
+   not a dependency, so without this the class resolves to nothing and the control keeps
+   its intrinsic width. Two component stylesheets defined it locally, which is why some
+   screens looked right and others did not. */
+.w-full { width: 100%; }
+
+/* PrimeNG renders its own element inside these hosts, and styleClass lands on that inner
+   element. The host itself stays inline, so a control told to fill its container often had
+   very little to fill. */
+p-dropdown.w-full,
+p-multiselect.w-full,
+p-inputnumber.w-full,
+p-calendar.w-full,
+p-datepicker.w-full {
+  display: block;
+  width: 100%;
+}
+
+p-inputnumber.w-full .p-inputnumber,
+p-inputnumber.w-full input {
+  width: 100%;
+}
+
 /* ---------------------------------------------------------------------------
    Narrow screens
 

@@ -149,9 +149,50 @@
 }
 
 @media (max-width: 760px) {
+  // Four controls across cannot work at this width: the field and operator dropdowns end
+  // up a few characters wide, with their chevron and clear icons on top of each other.
+  // One control per row instead, with the remove button beside the first.
   .condition {
     grid-template-columns: minmax(0, 1fr) auto;
-    .remove { grid-column: 2; grid-row: 1; }
+    row-gap: 0.5rem;
+    align-items: start;
+    padding: 0.75rem 0;
+
+    // Each control takes the full row. The remove button keeps its place beside the first,
+    // where it reads as belonging to the condition rather than to the last field in it.
+    > * { grid-column: 1; }
+
+    .remove {
+      grid-column: 2;
+      grid-row: 1;
+      align-self: center;
+    }
+  }
+
+  // PrimeNG renders its own element inside this host, and styleClass lands on that inner
+  // element rather than on the host itself. Without a width here the host shrinks to its
+  // content and the inner "w-full" has almost nothing to fill.
+  .condition p-dropdown,
+  .condition p-multiselect,
+  .condition p-inputnumber,
+  .condition .value-cell {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .condition .value-cell {
+    display: flex;
+    align-items: center;
+  }
+
+  .condition .p-dropdown,
+  .condition .p-multiselect,
+  .condition .p-inputnumber,
+  .condition .p-inputnumber input,
+  .condition input.p-inputtext {
+    width: 100%;
+    min-width: 0;
   }
 }
 
