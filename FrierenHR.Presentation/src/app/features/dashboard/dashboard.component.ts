@@ -1,6 +1,8 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CardModule } from 'primeng/card';
+import { SetupChecklistComponent } from './setup-checklist/setup-checklist.component';
+import { EmployeeGuideComponent } from './employee-guide/employee-guide.component';
 import { Observable, forkJoin, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth.service';
@@ -14,12 +16,13 @@ interface DashboardStats {
   awaitingMyDecision: number;
   onLeaveToday: number;
   myLeaveBalance: number;
+  myPendingRequests: number;
 }
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, CardModule],
+  imports: [CommonModule, CardModule, SetupChecklistComponent, EmployeeGuideComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
@@ -31,12 +34,20 @@ export class DashboardComponent implements OnInit {
 
   readonly stats = signal<DashboardStats>({
     totalEmployees: 0, awaitingMyDecision: 0, onLeaveToday: 0, myLeaveBalance: 0,
+    myPendingRequests: 0,
   });
   readonly loading = signal(true);
 
   /** Both company-wide figures need a role that is allowed to see other people's data. */
   readonly canSeeCompanyFigures = computed(() =>
     this.auth.currentRole() === 'Manager' || this.auth.currentRole() === 'HRAdmin');
+
+  /**
+   * Somebody with nobody reporting to them never has anything awaiting their decision, so
+   * the tile would read zero forever. They get their own pending requests instead, which is
+   * the thing they are actually waiting on.
+   */
+  readonly approves = computed(() => this.canSeeCompanyFigures());
 
   // Kept public for the template's greeting.
   get authService(): AuthService { return this.auth; }
@@ -56,6 +67,9 @@ export class DashboardComponent implements OnInit {
       balance: this.guard(
         this.leave.getBalances(employeeId).pipe(
           map(list => list.reduce((total, b) => total + b.balance, 0))), 0),
+      myPending: this.guard(
+        this.leave.getByEmployee(employeeId).pipe(
+          map(list => list.filter(r => r.status === 'Pending').length)), 0),
       // Counted from the availability report rather than from the approver's pending queue.
       // The old code filtered that queue for status 'Approved', and since the queue only ever
       // contains pending requests, the answer was always zero.
@@ -66,12 +80,13 @@ export class DashboardComponent implements OnInit {
                 row.days.some(day => day.status === 'OnLeave')).length)), 0)
         : of(0),
     }).subscribe({
-      next: ({ headcount, awaiting, balance, onLeave }) => {
+      next: ({ headcount, awaiting, balance, onLeave, myPending }) => {
         this.stats.set({
           totalEmployees: headcount,
           awaitingMyDecision: awaiting,
           onLeaveToday: onLeave,
           myLeaveBalance: Math.round(balance * 100) / 100,
+          myPendingRequests: myPending,
         });
         this.loading.set(false);
       },

@@ -1,0 +1,22 @@
+@if (visible()) {
+  <aside class="setup-banner">
+    <span class="step-of mono">
+      {{ progress()!.completed + 1 }} of {{ progress()!.required }}
+    </span>
+
+    <div class="body">
+      <span class="title">
+        {{ onTheirWay() ? 'Next:' : 'Start with:' }} {{ step()!.title }}
+      </span>
+      <span class="why">{{ step()!.why }}</span>
+    </div>
+
+    <div class="actions">
+      <button pButton type="button" [text]="true" severity="secondary" label="Already done"
+              (click)="markDone()"></button>
+      <button pButton type="button" label="Take me there" (click)="go()"></button>
+      <button pButton type="button" [text]="true" severity="secondary" icon="pi pi-times"
+              aria-label="Hide setup guidance" (click)="hide()"></button>
+    </div>
+  </aside>
+}

@@ -10,3 +10,51 @@
 
   h2, h3 { font-weight: 300; letter-spacing: -0.015em; }
 }
+
+// An account nobody has taken ownership of yet. Worth seeing at a glance, since HR still
+// knows that password.
+.pending-password {
+  font-family: var(--hr-font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--hr-accent);
+}
+
+.muted { color: var(--hr-text-muted); }
+
+.row-actions {
+  display: flex;
+  gap: 0.125rem;
+  white-space: nowrap;
+}
+
+.issued-intro {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+// Set large and monospaced because somebody is about to read it aloud or type it.
+.issued-password {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--hr-border);
+  background: var(--hr-surface-alt);
+
+  code {
+    font-family: var(--hr-font-mono);
+    font-size: 1.15rem;
+    letter-spacing: 0.08em;
+    user-select: all;
+  }
+}
+
+.issued-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.25rem;
+}

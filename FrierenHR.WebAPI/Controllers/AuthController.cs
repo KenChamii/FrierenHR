@@ -26,7 +26,8 @@ public class AuthController : ControllerBase
     }
 
     public record LoginDto(string Email, string Password);
-    public record LoginResultDto(string Token, Guid EmployeeId, string FullName, string Role);
+    public record LoginResultDto(
+        string Token, Guid EmployeeId, string FullName, string Role, bool MustChangePassword = false);
 
     // Throttled per IP by the "login" policy in Program.cs, since this endpoint is anonymous.
     [HttpPost("login"), AllowAnonymous, EnableRateLimiting("login")]
@@ -37,7 +38,9 @@ public class AuthController : ControllerBase
             return Unauthorized(new { message = "Invalid email or password." });
 
         var token = _tokenService.GenerateToken(employee);
-        return Ok(new LoginResultDto(token, employee.Id, $"{employee.FirstName} {employee.LastName}", employee.Role.ToString()));
+        return Ok(new LoginResultDto(
+            token, employee.Id, $"{employee.FirstName} {employee.LastName}", employee.Role.ToString(),
+            employee.MustChangePassword));
     }
 
     // Company sign-up. Anonymous by necessity: there is no account yet. Throttled under the

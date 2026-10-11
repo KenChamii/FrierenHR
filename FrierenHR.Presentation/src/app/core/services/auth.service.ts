@@ -6,7 +6,10 @@ import { LoginDto, LoginResultDto, RegisterCompanyDto } from '../models/auth.mod
 
 const STORAGE_KEY = 'hr_auth';
 
-interface StoredAuth { token: string; employeeId: string; fullName: string; role: string; companyId: string; }
+interface StoredAuth {
+  token: string; employeeId: string; fullName: string; role: string; companyId: string;
+  mustChangePassword: boolean;
+}
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -18,6 +21,9 @@ export class AuthService {
   readonly currentEmployeeId = computed(() => this._auth()?.employeeId ?? null);
   readonly currentFullName = computed(() => this._auth()?.fullName ?? null);
   readonly currentCompanyId = computed(() => this._auth()?.companyId ?? null);
+
+  /** While true the API refuses everything but changing the password, so the app routes there. */
+  readonly mustChangePassword = computed(() => this._auth()?.mustChangePassword === true);
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -39,7 +45,22 @@ export class AuthService {
    * the employee's own record has been fetched (see LoginComponent.submit()).
    */
   setSession(result: LoginResultDto, companyId = ''): void {
-    const stored: StoredAuth = { token: result.token, employeeId: result.employeeId, fullName: result.fullName, role: result.role, companyId };
+    const stored: StoredAuth = {
+      token: result.token, employeeId: result.employeeId, fullName: result.fullName,
+      role: result.role, companyId, mustChangePassword: result.mustChangePassword === true,
+    };
+    this._auth.set(stored);
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+  }
+
+  /**
+   * Swaps in the token returned by a successful password change. The previous one still
+   * carries mustChangePassword, so without this the account stays locked out of everything.
+   */
+  onPasswordChanged(token: string): void {
+    const current = this._auth();
+    if (!current) return;
+    const stored: StoredAuth = { ...current, token, mustChangePassword: false };
     this._auth.set(stored);
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
   }

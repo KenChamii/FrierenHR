@@ -5,10 +5,12 @@
   }
 </div>
 
+@if (error()) { <p-message severity="error" [text]="error()!" styleClass="w-full mb-2" /> }
+
 <p-table [value]="employees()" [loading]="loading()" [paginator]="true" [rows]="10" responsiveLayout="scroll">
   <ng-template pTemplate="header">
     <tr>
-      <th>Name</th><th>Email</th><th>Department</th><th>Manager</th><th>Role</th><th>Tenure</th><th>Status</th><th></th>
+      <th>Name</th><th>Email</th><th>Department</th><th>Manager</th><th>Role</th><th>Tenure</th><th>Status</th><th>Sign-in</th><th></th>
     </tr>
   </ng-template>
   <ng-template pTemplate="body" let-employee>
@@ -21,14 +23,53 @@
       <td>{{ employee.tenureMonths }} mo</td>
       <td><p-tag [value]="employee.isActive ? 'Active' : 'Inactive'" [severity]="employee.isActive ? 'success' : 'danger'" /></td>
       <td>
+        @if (employee.mustChangePassword) {
+          <span class="pending-password">Temporary password</span>
+        } @else {
+          <span class="muted">&mdash;</span>
+        }
+      </td>
+      <td class="row-actions">
         @if (authService.currentRole() === 'HRAdmin') {
-          <p-button icon="pi pi-pencil" [text]="true" (onClick)="openEdit(employee)" />
+          <p-button icon="pi pi-pencil" [text]="true" (onClick)="openEdit(employee)"
+                    pTooltip="Edit" />
+          @if (employee.id !== authService.currentEmployeeId()) {
+            <p-button icon="pi pi-key" [text]="true" severity="secondary"
+                      [loading]="resettingId() === employee.id"
+                      (onClick)="resetPassword(employee)"
+                      pTooltip="Issue a new temporary password" />
+          }
         }
       </td>
     </tr>
   </ng-template>
-  <ng-template pTemplate="emptymessage"><tr><td colspan="8">No employees yet.</td></tr></ng-template>
+  <ng-template pTemplate="emptymessage"><tr><td colspan="9">No employees yet.</td></tr></ng-template>
 </p-table>
+
+<!--
+  Shown once, because the password is stored only as a hash. If HR closes this without
+  noting it down, the only remedy is another reset, which is the correct trade: a password
+  that can be looked up later is a password that is stored.
+-->
+<p-dialog header="Temporary password" [visible]="!!issuedPassword()"
+          (visibleChange)="dismissIssuedPassword()" [modal]="true" [style]="{ width: '420px' }">
+  @if (issuedPassword(); as issued) {
+    <p class="issued-intro">
+      Give this to {{ issued.employeeName }}. They will be asked to replace it the first time
+      they sign in, and it will not be shown again.
+    </p>
+
+    <div class="issued-password">
+      <code>{{ issued.temporaryPassword }}</code>
+      <p-button icon="pi pi-copy" [text]="true" (onClick)="copyIssuedPassword()"
+                pTooltip="Copy" />
+    </div>
+
+    <div class="issued-actions">
+      <p-button label="Done" (onClick)="dismissIssuedPassword()" />
+    </div>
+  }
+</p-dialog>
 
 <p-dialog [header]="editingEmployee() ? 'Edit Employee' : 'Add Employee'" [(visible)]="dialogVisible" [modal]="true" [style]="{ width: '480px' }">
   @if (dialogVisible()) {

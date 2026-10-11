@@ -1,3 +1,15 @@
+// Slow enough to notice without nagging. Dropped entirely for anyone who has asked for
+// less movement.
+@keyframes setup-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(201, 169, 110, 0.7); }
+  70% { box-shadow: 0 0 0 5px rgba(201, 169, 110, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(201, 169, 110, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .setup-dot { animation: none; }
+}
+
 .shell {
   display: flex;
   min-height: 100vh;
@@ -48,6 +60,22 @@
     margin-top: 0.75rem;
     padding-top: 0.75rem;
     border-top: 1px solid rgba(242, 237, 225, 0.12);
+  }
+
+  // The nav item the setup checklist is asking for next. Brightened and given a pulsing
+  // dot, so the two agree about where to go without a modal tour over the top of the app.
+  .nav-link.setup-target {
+    opacity: 1;
+    border-left-color: var(--hr-accent);
+  }
+
+  .setup-dot {
+    width: 6px;
+    height: 6px;
+    margin-left: auto;
+    border-radius: 50%;
+    background: var(--hr-accent);
+    animation: setup-pulse 2s ease-out infinite;
   }
 
   // Unread count on the Messages link. Pushed right so it reads as a count rather than as

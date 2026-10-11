@@ -18,6 +18,7 @@ using FrierenHR.Application.Features.Timesheet;
 using FrierenHR.Core.RulesEngine;
 using FrierenHR.Infrastructure.Data;
 using FrierenHR.Infrastructure.Data.Auditing;
+using FrierenHR.Infrastructure.External;
 using FrierenHR.Infrastructure.Repositories;
 using FrierenHR.WebAPI.Common;
 using FrierenHR.WebAPI.Hubs;
@@ -137,6 +138,15 @@ builder.Services.AddScoped<IHolidayService, HolidayService>();
 builder.Services.AddScoped<IShiftService, ShiftService>();
 builder.Services.AddScoped<IWorkingCalendarProvider, WorkingCalendarProvider>();
 
+// The holiday feed is the only outbound call the API makes. A short timeout, because a slow
+// third party must not hold a request open: the screen it serves has a working fallback.
+builder.Services.AddHttpClient<IHolidayFeed, NagerHolidayFeed>(client =>
+{
+    client.BaseAddress = new Uri(
+        builder.Configuration["Holidays:FeedBaseUrl"] ?? "https://date.nager.at/");
+    client.Timeout = TimeSpan.FromSeconds(10);
+});
+
 // Attendance corrections and the audit trail.
 builder.Services.AddScoped<IAttendanceCorrectionRepository, AttendanceCorrectionRepository>();
 builder.Services.AddScoped<IAttendanceCorrectionService, AttendanceCorrectionService>();
@@ -146,6 +156,9 @@ builder.Services.AddScoped<IAuditService, AuditService>();
 // Sign-up. Writes a company and its first administrator in one transaction.
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
+// Setup progress is read from the company's own data, so it cannot report a step as done
+// that is not, and it un-ticks if the thing is removed.
+builder.Services.AddScoped<ISetupProgressService, SetupProgressService>();
 
 // Payroll. Payslips are priced from the payroll export, so the hours on a payslip and the
 // hours on the export can never disagree.
@@ -201,6 +214,10 @@ app.UseCors("AngularApp");
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// After authentication, since it reads a claim, and before the endpoints it is protecting.
+app.UseMiddleware<PasswordChangeRequiredMiddleware>();
+
 app.UseRateLimiter();
 app.MapControllers();
 app.MapHub<ChatHub>("/hubs/chat").RequireAuthorization();

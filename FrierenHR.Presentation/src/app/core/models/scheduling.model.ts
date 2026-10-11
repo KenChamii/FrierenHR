@@ -88,6 +88,24 @@ export interface ResolvedShiftDto { shift: ShiftDto | null; source: string; }
 
 // --- Working days ---
 
+/** A holiday fetched for review. Nothing is saved until the list is imported. */
+export interface HolidaySuggestionDto {
+  date: string;
+  name: string;
+  suggestedType: HolidayType;
+  /** The company already has a company-wide holiday on this date. */
+  alreadyRecorded: boolean;
+}
+
+export interface HolidaySuggestionsDto {
+  year: number;
+  countryCode: string;
+  source: string;
+  /** Why the list still needs reading before it is saved. */
+  caveat: string;
+  holidays: HolidaySuggestionDto[];
+}
+
 export interface NonWorkingDayDto { date: string; reason: string; }
 
 export interface WorkingDaysDto {

@@ -30,6 +30,9 @@ public class EmployeeService : IEmployeeService
             Role = dto.Role,
             MonthlyRate = dto.MonthlyRate,
             StandardMonthlyHours = dto.StandardMonthlyHours,
+            // HR chose this password, so HR knows it. The account can do nothing but change
+            // it until the person sets one of their own.
+            MustChangePassword = true,
         };
         await _employeeRepository.AddAsync(entity, ct);
         await _employeeRepository.SaveChangesAsync(ct);
@@ -77,7 +80,7 @@ public class EmployeeService : IEmployeeService
     private static EmployeeDto ToDto(FrierenHR.Core.Entities.Employee e) => new(e.Id, e.CompanyId, e.DepartmentId, e.Department?.Name,
         e.ManagerId, e.Manager is null ? null : $"{e.Manager.FirstName} {e.Manager.LastName}",
         e.FirstName, e.LastName, e.Email, e.HireDate, e.TenureMonths(), e.Role, e.IsActive,
-        e.MonthlyRate, e.StandardMonthlyHours);
+        e.MonthlyRate, e.StandardMonthlyHours, e.MustChangePassword);
 
     public async Task ChangePasswordAsync(Guid id, ChangePasswordDto dto, CancellationToken ct = default)
     {
@@ -90,8 +93,36 @@ public class EmployeeService : IEmployeeService
         PasswordPolicy.Validate(dto.NewPassword);
 
         entity.PasswordHash = PasswordHasher.Hash(dto.NewPassword);
+        // Whoever set the previous password no longer knows this one.
+        entity.MustChangePassword = false;
         entity.UpdatedAt = DateTime.UtcNow;
         _employeeRepository.Update(entity);
         await _employeeRepository.SaveChangesAsync(ct);
+    }
+
+    public async Task<ResetPasswordResultDto> ResetPasswordAsync(
+        Guid employeeId, Guid companyId, CancellationToken ct = default)
+    {
+        var entity = await _employeeRepository.GetByIdAsync(employeeId, ct)
+            ?? throw new InvalidOperationException($"Employee '{employeeId}' not found.");
+
+        // Checked here as well as at the endpoint, because this hands back a working
+        // credential and must not depend on a caller remembering to scope it.
+        if (entity.CompanyId != companyId)
+            throw new InvalidOperationException("That employee is not in your company.");
+
+        var temporary = TemporaryPassword.Generate();
+
+        entity.PasswordHash = PasswordHasher.Hash(temporary);
+        entity.MustChangePassword = true;
+        entity.UpdatedAt = DateTime.UtcNow;
+
+        _employeeRepository.Update(entity);
+        await _employeeRepository.SaveChangesAsync(ct);
+
+        // Returned once, and never stored in readable form. Losing it means another reset,
+        // which is the correct trade: a retrievable password is a stored password.
+        return new ResetPasswordResultDto(
+            entity.Id, $"{entity.FirstName} {entity.LastName}", temporary);
     }
 }

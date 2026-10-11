@@ -9,7 +9,8 @@ namespace FrierenHR.Application.Common.DTOs;
 public record EmployeeDto(Guid Id, Guid CompanyId, Guid? DepartmentId, string? DepartmentName,
     Guid? ManagerId, string? ManagerName, string FirstName, string LastName, string Email,
     DateTime HireDate, int TenureMonths, EmployeeRole Role, bool IsActive,
-    decimal? MonthlyRate = null, decimal StandardMonthlyHours = 174m);
+    decimal? MonthlyRate = null, decimal StandardMonthlyHours = 174m,
+    bool MustChangePassword = false);
 
 public record CreateEmployeeDto(Guid CompanyId, Guid? DepartmentId, Guid? ManagerId,
     string FirstName, string LastName, string Email, string Password, DateTime HireDate, EmployeeRole Role,
@@ -20,3 +21,9 @@ public record UpdateEmployeeDto(Guid? DepartmentId, Guid? ManagerId, string Firs
     decimal? MonthlyRate = null, decimal StandardMonthlyHours = 174m);
 
 public record ChangePasswordDto(string CurrentPassword, string NewPassword);
+
+/// <summary>
+/// The temporary password, returned once at the moment it is issued. It is not stored in
+/// readable form anywhere, so if HR loses it the only remedy is another reset.
+/// </summary>
+public record ResetPasswordResultDto(Guid EmployeeId, string EmployeeName, string TemporaryPassword);

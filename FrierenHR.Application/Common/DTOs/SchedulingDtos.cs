@@ -15,6 +15,23 @@ public record SaveHolidayDto(
 /// <summary>Result of importing a year's holidays in one go.</summary>
 public record HolidayImportResultDto(int Added, int Skipped, List<string> Messages);
 
+/// <param name="AlreadyRecorded">
+/// True when the company already has a holiday on that date, so the review screen can show
+/// it as nothing to do rather than offering to add a duplicate.
+/// </param>
+/// <param name="SuggestedType">
+/// Always Regular. The feed does not distinguish a Regular holiday from a Special
+/// Non-Working one, and that distinction drives pay, so it is a starting point to correct
+/// rather than an answer.
+/// </param>
+public record HolidaySuggestionDto(
+    DateOnly Date, string Name, HolidayType SuggestedType, bool AlreadyRecorded);
+
+/// <param name="Source">Named so the screen can say where the list came from.</param>
+/// <param name="Caveat">Why the list still needs reading before it is saved.</param>
+public record HolidaySuggestionsDto(
+    int Year, string CountryCode, string Source, string Caveat, List<HolidaySuggestionDto> Holidays);
+
 // --- Shifts ---
 
 public record ShiftDto(

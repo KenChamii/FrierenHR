@@ -1,0 +1,32 @@
+@if (dismissed()) {
+  <!-- Kept retrievable. Something dismissed once should not be gone for good, and the
+       routine is exactly what people forget after a fortnight away. -->
+  <p class="guide-recall">
+    <button type="button" (click)="show()">Show me how this works</button>
+  </p>
+} @else {
+  <section class="guide">
+    <header class="guide-head">
+      <div>
+        <span class="exhibit">How this works</span>
+        <h3>Your week, in five minutes</h3>
+      </div>
+      <button pButton type="button" severity="secondary" [text]="true" label="Hide"
+              (click)="dismiss()"></button>
+    </header>
+
+    <ul class="items">
+      @for (item of items(); track item.title) {
+        <li>
+          <div class="body">
+            <span class="title">{{ item.title }}</span>
+            <span class="text">{{ item.body }}</span>
+          </div>
+          <a [routerLink]="item.route" class="go">
+            {{ item.action }} <span aria-hidden="true">&rarr;</span>
+          </a>
+        </li>
+      }
+    </ul>
+  </section>
+}

@@ -3,8 +3,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import {
   AttendanceCorrectionDto, AuditPageDto, CreateAttendanceCorrectionDto,
-  DecideAttendanceCorrectionDto, HolidayDto, HolidayImportResultDto, ResolvedShiftDto,
-  SaveHolidayDto, SaveShiftDto, ShiftDto, WorkingDaysDto,
+  DecideAttendanceCorrectionDto, HolidayDto, HolidayImportResultDto, HolidaySuggestionsDto,
+  ResolvedShiftDto, SaveHolidayDto, SaveShiftDto, ShiftDto, WorkingDaysDto,
 } from '../models/scheduling.model';
 
 @Injectable({ providedIn: 'root' })
@@ -20,6 +20,12 @@ export class HolidayService {
 
   import(holidays: SaveHolidayDto[]) {
     return this.http.post<HolidayImportResultDto>(`${this.baseUrl}/import`, holidays);
+  }
+
+  /** A year's public holidays for review. Saves nothing; import() is what writes. */
+  suggestions(year: number, countryCode = 'PH') {
+    const params = new HttpParams().set('year', year).set('countryCode', countryCode);
+    return this.http.get<HolidaySuggestionsDto>(`${this.baseUrl}/suggestions`, { params });
   }
 
   delete(id: string) { return this.http.delete<void>(`${this.baseUrl}/${id}`); }

@@ -6,13 +6,18 @@ import { TagModule } from 'primeng/tag';
 import { DialogModule } from 'primeng/dialog';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { EmployeeDto } from '../../../core/models/employee.model';
+import { EmployeeDto, ResetPasswordResultDto } from '../../../core/models/employee.model';
 import { EmployeeFormComponent } from './employee-form/employee-form.component';
+import { MessageModule } from 'primeng/message';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-employee-list',
   standalone: true,
-  imports: [CommonModule, TableModule, ButtonModule, TagModule, DialogModule, EmployeeFormComponent],
+  imports: [
+    CommonModule, TableModule, ButtonModule, TagModule, DialogModule, MessageModule,
+    TooltipModule, EmployeeFormComponent,
+  ],
   templateUrl: './employee-list.component.html',
   styleUrl: './employee-list.component.scss',
 })
@@ -21,6 +26,11 @@ export class EmployeeListComponent implements OnInit {
   readonly loading = signal(true);
   readonly dialogVisible = signal(false);
   readonly editingEmployee = signal<EmployeeDto | null>(null);
+
+  /** Held only until the dialog closes. The password cannot be fetched again. */
+  readonly issuedPassword = signal<ResetPasswordResultDto | null>(null);
+  readonly resettingId = signal<string | null>(null);
+  readonly error = signal<string | null>(null);
 
   constructor(private employeeService: EmployeeService, public authService: AuthService) {}
 
@@ -40,6 +50,41 @@ export class EmployeeListComponent implements OnInit {
   openEdit(employee: EmployeeDto): void { this.editingEmployee.set(employee); this.dialogVisible.set(true); }
 
   onSaved(): void { this.dialogVisible.set(false); this.load(); }
+
+  /**
+   * Issues a new temporary password for somebody who cannot sign in. There is no email, so
+   * it is shown to HR once and passed on by hand.
+   */
+  resetPassword(employee: EmployeeDto): void {
+    this.error.set(null);
+    this.resettingId.set(employee.id);
+
+    this.employeeService.resetPassword(employee.id).subscribe({
+      next: result => {
+        this.resettingId.set(null);
+        this.issuedPassword.set(result);
+        this.load();
+      },
+      error: err => {
+        this.resettingId.set(null);
+        this.error.set(err?.error?.message ?? 'Could not reset that password.');
+      },
+    });
+  }
+
+  dismissIssuedPassword(): void { this.issuedPassword.set(null); }
+
+  async copyIssuedPassword(): Promise<void> {
+    const issued = this.issuedPassword();
+    if (!issued) return;
+
+    try {
+      await navigator.clipboard.writeText(issued.temporaryPassword);
+    } catch {
+      // Clipboard access can be refused. The password is on screen either way, so there is
+      // nothing to recover from and nothing worth interrupting anyone about.
+    }
+  }
 
   severityFor(role: string): 'success' | 'info' | 'warn' {
     return role === 'HRAdmin' ? 'warn' : role === 'Manager' ? 'info' : 'success';

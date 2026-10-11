@@ -1,0 +1,84 @@
+.guide {
+  margin-bottom: 1.75rem;
+  border: 1px solid var(--hr-border);
+  background: var(--hr-surface);
+}
+
+.guide-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--hr-border);
+
+  h3 {
+    margin: 0.3rem 0 0;
+    font-weight: 300;
+    letter-spacing: -0.01em;
+  }
+}
+
+// Two columns on a wide screen: these are things to read once, not a sequence to follow,
+// so a single tall list would overstate how much there is to learn.
+.items {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1.125rem 1.5rem;
+    border-right: 1px solid var(--hr-border);
+    border-bottom: 1px solid var(--hr-border);
+  }
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+
+  .title { font-size: 0.95rem; }
+
+  .text {
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: var(--hr-text-muted);
+  }
+}
+
+.go {
+  margin-top: auto;
+  font-family: var(--hr-font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--hr-accent);
+  text-decoration: none;
+
+  &:hover { text-decoration: underline; }
+}
+
+// A quiet way back after dismissing, rather than making it unrecoverable.
+.guide-recall {
+  margin: 0 0 1.25rem;
+
+  button {
+    border: none;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: var(--hr-font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--hr-text-muted);
+
+    &:hover { color: var(--hr-accent); text-decoration: underline; }
+  }
+}

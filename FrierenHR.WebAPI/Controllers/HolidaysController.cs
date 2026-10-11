@@ -41,6 +41,31 @@ public class HolidaysController : ControllerBase
         catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
     }
 
+    // GET /api/holidays/suggestions?year=2026&countryCode=PH
+    //
+    // Returns a year's public holidays for review and saves nothing. The import endpoint
+    // below is what writes, once an administrator has corrected the types.
+    [HttpGet("suggestions")]
+    [Authorize(Roles = "HRAdmin")]
+    public async Task<ActionResult<HolidaySuggestionsDto>> Suggestions(
+        [FromQuery] int? year, [FromQuery] string? countryCode, CancellationToken ct)
+    {
+        var companyId = User.GetCompanyId();
+        if (companyId is null) return Forbid();
+
+        try
+        {
+            return Ok(await _holidayService.GetSuggestionsAsync(
+                companyId.Value, year ?? DateTime.UtcNow.Year, countryCode ?? "PH", ct));
+        }
+        catch (InvalidOperationException ex)
+        {
+            // Covers both a bad year and an unreachable feed. Neither is the server's fault
+            // in a way the caller can act on beyond reading the message.
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
     [HttpPost]
     [Authorize(Roles = "HRAdmin")]
     public async Task<ActionResult<HolidayDto>> Save(SaveHolidayDto dto, CancellationToken ct)

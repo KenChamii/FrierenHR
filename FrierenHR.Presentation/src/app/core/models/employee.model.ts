@@ -8,6 +8,8 @@ export interface EmployeeDto {
   monthlyRate?: number | null;
   /** Hours a full month is treated as, used to derive the hourly rate. */
   standardMonthlyHours?: number;
+  /** True while the account is still on a password HR chose. */
+  mustChangePassword?: boolean;
 }
 export interface CreateEmployeeDto {
   companyId: string; departmentId?: string; managerId?: string;
@@ -19,3 +21,13 @@ export interface UpdateEmployeeDto {
   monthlyRate?: number | null; standardMonthlyHours?: number;
 }
 export interface ChangePasswordDto { currentPassword: string; newPassword: string; }
+
+/** A replacement token, since the previous one still says a change is required. */
+export interface ChangePasswordResultDto { token: string; }
+
+/** Shown once. The password is not stored in readable form, so it cannot be fetched again. */
+export interface ResetPasswordResultDto {
+  employeeId: string;
+  employeeName: string;
+  temporaryPassword: string;
+}
