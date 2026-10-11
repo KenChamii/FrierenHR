@@ -1,0 +1,14 @@
+{
+  // Cloudflare Workers deployment for the built Angular app. There is no Worker script: this
+  // serves static files only, which is all a compiled SPA needs.
+  "name": "frierenhr",
+  "compatibility_date": "2026-10-11",
+  "assets": {
+    // Where the Angular "application" builder puts the browser bundle.
+    "directory": "./dist/frieren-hr.presentation/browser",
+
+    // Angular resolves routes in the browser, so a request for /dashboard matches no file.
+    // Without this it would be a 404 on refresh and on any shared link.
+    "not_found_handling": "single-page-application"
+  }
+}
