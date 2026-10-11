@@ -49,6 +49,15 @@
   }
 }
 
+// Sits under the unlock button and says what unlocking costs, so nobody discovers the
+// re-approval afterwards.
+.reopen-note {
+  margin: 0.625rem 0 0;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--hr-text-muted);
+}
+
 // A locked week is a state, so it gets a rule rather than a filled panel.
 .locked-note {
   display: flex;

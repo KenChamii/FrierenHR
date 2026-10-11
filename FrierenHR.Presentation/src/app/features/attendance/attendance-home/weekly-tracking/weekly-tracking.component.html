@@ -1,0 +1,87 @@
+<section class="week">
+  <header class="week-head">
+    <div class="week-nav">
+      <button pButton type="button" severity="secondary" [text]="true" icon="pi pi-chevron-left"
+              aria-label="Previous week" (click)="shiftWeek(-1)"></button>
+      <span class="week-label">{{ weekLabel() }}</span>
+      <button pButton type="button" severity="secondary" [text]="true" icon="pi pi-chevron-right"
+              aria-label="Next week" (click)="shiftWeek(1)"></button>
+      <button pButton type="button" severity="secondary" [outlined]="true" label="This week"
+              (click)="thisWeek()"></button>
+    </div>
+    <div class="week-total">
+      <span class="n mono">{{ weekHours() }}</span>
+      <span class="l">hours this week</span>
+    </div>
+  </header>
+
+  @if (error()) { <p-message severity="error" [text]="error()!" styleClass="w-full mb-2" /> }
+  @if (notice()) { <p-message severity="success" [text]="notice()!" styleClass="w-full mb-2" /> }
+
+  @if (loading()) {
+    <p class="muted">Loading the week.</p>
+  } @else {
+    <ul class="days">
+      @for (row of rows(); track row.date) {
+        <li class="day" [class.off]="!row.enabled" [class.non-working]="row.nonWorking">
+          <label class="day-toggle">
+            <input type="checkbox" [checked]="row.enabled" (change)="toggle(row)"
+                   [attr.aria-label]="'Log hours for ' + row.weekday + ' ' + row.label" />
+            <span class="when">
+              <span class="wd">{{ row.weekday }}</span>
+              <span class="dd mono">{{ row.label }}</span>
+            </span>
+          </label>
+
+          @if (row.punchLogged) {
+            <span class="locked">Clocked in through the punch clock. Delete that entry to edit it here.</span>
+          } @else {
+            <div class="fields" [class.disabled]="!row.enabled">
+              <label class="field">
+                <span class="exhibit">Start</span>
+                <input pInputText type="time" [value]="row.start" [disabled]="!row.enabled"
+                       (change)="setStart(row, $any($event.target).value)" />
+              </label>
+              <label class="field">
+                <span class="exhibit">End</span>
+                <input pInputText type="time" [value]="row.end" [disabled]="!row.enabled"
+                       (change)="setEnd(row, $any($event.target).value)" />
+              </label>
+              <label class="field narrow">
+                <span class="exhibit">Break</span>
+                <p-inputNumber [ngModel]="row.breakMinutes" (ngModelChange)="setBreak(row, $event)"
+                               [ngModelOptions]="{ standalone: true }" [disabled]="!row.enabled"
+                               [min]="0" [max]="720" suffix=" m"></p-inputNumber>
+              </label>
+            </div>
+          }
+
+          <span class="day-total mono">{{ hoursLabel(row) }}</span>
+
+          @if (row.nonWorking && !row.punchLogged) {
+            <span class="tag mono">{{ row.nonWorkingReason }}</span>
+          }
+          @if (problemWith(row)) {
+            <span class="problem">{{ problemWith(row) }}</span>
+          }
+        </li>
+      }
+    </ul>
+
+    <footer class="week-foot">
+      <div class="foot-left">
+        <button pButton type="button" severity="secondary" [outlined]="true" label="Copy across"
+                [disabled]="!templateRow()" (click)="copyAcross()"></button>
+        <button pButton type="button" severity="secondary" [text]="true" label="Clear"
+                (click)="clearWeek()"></button>
+      </div>
+      <button pButton type="button" [label]="'Save ' + enabledCount() + ' day(s)'"
+              [loading]="saving()" [disabled]="!canSave()" (click)="save()"></button>
+    </footer>
+
+    <p class="hint">
+      Only ticked days are saved, and a day already logged is updated rather than duplicated.
+      Once the week's timesheet is submitted it locks, and a change needs a correction.
+    </p>
+  }
+</section>

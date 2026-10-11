@@ -1,3 +1,33 @@
 .attendance-grid { display: grid; grid-template-columns: 320px 1fr; gap: 1.5rem; align-items: start; }
 .attendance-side { display: flex; flex-direction: column; gap: 1.5rem; }
+.attendance-main { display: flex; flex-direction: column; gap: 1.5rem; }
 @media (max-width: 800px) { .attendance-grid { grid-template-columns: 1fr; } }
+
+// Underlined tabs rather than buttons, matching the hairline treatment used elsewhere.
+.tracking-tabs {
+  display: flex;
+  gap: 1.5rem;
+  margin: 0 0 1.5rem;
+  border-bottom: 1px solid var(--hr-border);
+}
+
+.tracking-tab {
+  padding: 0 0 0.625rem;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  background: none;
+  color: var(--hr-text-muted);
+  font-family: var(--hr-font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+
+  &:hover { color: var(--hr-text); }
+
+  &.active {
+    border-bottom-color: var(--hr-accent);
+    color: var(--hr-text);
+  }
+}

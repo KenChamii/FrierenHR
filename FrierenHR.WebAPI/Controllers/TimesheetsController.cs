@@ -22,6 +22,22 @@ public class TimesheetsController : ControllerBase
         catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
     }
 
+    // Reopens a submitted week so it can be edited, then submitted again for a fresh
+    // decision. Role is passed to the service rather than enforced only here, because the
+    // rule differs by status: an owner may recall a submission, but only HR may reopen an
+    // approved week.
+    [HttpPost("{id:guid}/reopen")]
+    public async Task<ActionResult<TimesheetDto>> Reopen(Guid id, CancellationToken ct)
+    {
+        var employeeId = User.GetEmployeeId();
+        if (employeeId is null) return Forbid();
+
+        var isHrAdmin = User.GetRole() == "HRAdmin";
+
+        try { return Ok(await _timesheetService.ReopenAsync(id, employeeId.Value, isHrAdmin, ct)); }
+        catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
+    }
+
     [HttpPost("{id:guid}/decide"), Authorize(Roles = "Manager,HRAdmin")]
     public async Task<ActionResult<TimesheetDto>> Decide(Guid id, DecideTimesheetDto dto, CancellationToken ct)
     {

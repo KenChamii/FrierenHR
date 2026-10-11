@@ -1,4 +1,5 @@
-import { Component, OnInit, signal, computed, effect } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
@@ -9,6 +10,7 @@ import { AttendanceService } from '../../../../core/services/attendance.service'
 import { AuthService } from '../../../../core/services/auth.service';
 import { AttendanceRefreshService } from '../../../../core/services/attendance-refresh.service';
 import { TimesheetDto, TimesheetStatus } from '../../../../core/models/timesheet.model';
+import { endOfWeek, startOfWeek, toLocalDateTime } from '../../../../core/utils/dates';
 
 @Component({
   selector: 'app-weekly-timesheet-widget',
@@ -18,45 +20,63 @@ import { TimesheetDto, TimesheetStatus } from '../../../../core/models/timesheet
   styleUrl: './weekly-timesheet-widget.component.scss',
 })
 export class WeeklyTimesheetWidgetComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
+
   readonly loading = signal(true);
   readonly submitting = signal(false);
   readonly timesheet = signal<TimesheetDto | null>(null);
   readonly hoursSoFar = signal(0);
   readonly errorMessage = signal<string | null>(null);
 
-  readonly weekStart = this.getWeekStart(new Date());
-  readonly weekEnd = new Date(this.weekStart.getTime() + 6 * 24 * 60 * 60 * 1000);
+  readonly weekStart = startOfWeek(new Date());
+  readonly weekEnd = endOfWeek(new Date());
 
   readonly totalHours = computed(() => this.timesheet()?.totalHours ?? this.hoursSoFar());
   readonly status = computed<TimesheetStatus>(() => this.timesheet()?.status ?? 'Draft');
   readonly canSubmit = computed(() => this.status() === 'Draft' || this.status() === 'Rejected');
+
+  /**
+   * An employee may recall their own submission while it is still awaiting a decision.
+   * Reopening an approved week is HR's, since somebody has already acted on it, and the
+   * server enforces that regardless of what this shows.
+   */
+  readonly canReopen = computed(() =>
+    this.status() === 'Submitted'
+    || (this.status() === 'Approved' && this.authService.currentRole() === 'HRAdmin'));
+
+  readonly reopening = signal(false);
 
   constructor(
     private timesheetService: TimesheetService,
     private attendanceService: AttendanceService,
     public authService: AuthService,
     private refreshService: AttendanceRefreshService,
-  ) {
-    // Keeps "hours so far" live when a clock-in/shift-log widget elsewhere on the page saves.
-    effect(() => {
-      this.refreshService.version();
-      this.load();
-    });
-  }
+  ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.load();
+
+    // Keeps "hours so far" live when a clock-in or shift widget on the page saves.
+    this.refreshService.changes$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.load());
+  }
 
   load(): void {
     const employeeId = this.authService.currentEmployeeId();
     if (!employeeId) { this.loading.set(false); return; }
     this.loading.set(true);
 
-    this.timesheetService.getForWeek(employeeId, this.weekStart.toISOString()).subscribe({
+    // Sent as a local date with no zone suffix. toISOString() turned local Monday midnight
+    // into the previous Sunday in UTC+8, and the server's week-start rule then moved that
+    // back another six days, so this read an entirely different week.
+    this.timesheetService.getForWeek(employeeId, toLocalDateTime(this.weekStart)).subscribe({
       next: (ts) => {
         this.timesheet.set(ts);
         if (ts) { this.loading.set(false); return; }
         // Nothing submitted yet this week — total so far comes straight from attendance logs.
-        this.attendanceService.getByEmployee(employeeId, this.weekStart.toISOString(), this.weekEnd.toISOString()).subscribe({
+        this.attendanceService.getByEmployee(
+          employeeId, toLocalDateTime(this.weekStart), toLocalDateTime(this.weekEnd)).subscribe({
           next: (logs) => {
             this.hoursSoFar.set(logs.reduce((sum, l) => sum + (l.hoursWorked ?? 0), 0));
             this.loading.set(false);
@@ -73,9 +93,29 @@ export class WeeklyTimesheetWidgetComponent implements OnInit {
     if (!employeeId) return;
     this.submitting.set(true);
     this.errorMessage.set(null);
-    this.timesheetService.submit({ employeeId, weekStartDate: this.weekStart.toISOString() }).subscribe({
+    this.timesheetService.submit({ employeeId, weekStartDate: toLocalDateTime(this.weekStart) }).subscribe({
       next: (ts) => { this.timesheet.set(ts); this.submitting.set(false); this.refreshService.notifyChanged(); },
       error: (err) => { this.submitting.set(false); this.errorMessage.set(err?.error?.message ?? 'Could not submit this week.'); },
+    });
+  }
+
+  reopen(): void {
+    const id = this.timesheet()?.id;
+    if (!id) return;
+
+    this.reopening.set(true);
+    this.errorMessage.set(null);
+    this.timesheetService.reopen(id).subscribe({
+      next: ts => {
+        this.timesheet.set(ts);
+        this.reopening.set(false);
+        // The week has just unlocked, so the grid and history beside it can accept edits.
+        this.refreshService.notifyChanged();
+      },
+      error: err => {
+        this.reopening.set(false);
+        this.errorMessage.set(err?.error?.message ?? 'Could not reopen this week.');
+      },
     });
   }
 
@@ -88,12 +128,4 @@ export class WeeklyTimesheetWidgetComponent implements OnInit {
     }
   }
 
-  private getWeekStart(date: Date): Date {
-    const d = new Date(date);
-    const day = d.getDay(); // 0 = Sunday
-    const diff = day === 0 ? -6 : 1 - day; // shift back to Monday
-    d.setDate(d.getDate() + diff);
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }
 }

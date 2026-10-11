@@ -63,6 +63,44 @@ public class TimesheetService : ITimesheetService
         return await ToDtoAsync(timesheet, employee, ct);
     }
 
+    public async Task<TimesheetDto> ReopenAsync(
+        Guid id, Guid requestedByEmployeeId, bool requesterIsHrAdmin, CancellationToken ct = default)
+    {
+        var timesheet = await _timesheetRepository.GetByIdAsync(id, ct)
+            ?? throw new InvalidOperationException($"Timesheet '{id}' not found.");
+
+        var isOwner = timesheet.EmployeeId == requestedByEmployeeId;
+        if (!isOwner && !requesterIsHrAdmin)
+            throw new InvalidOperationException("You can only reopen your own timesheet.");
+
+        switch (timesheet.Status)
+        {
+            case TimesheetStatus.Draft:
+            case TimesheetStatus.Rejected:
+                // Already editable. Saying so beats a silent no-op that looks like a failure.
+                throw new InvalidOperationException("That week is already open for changes.");
+
+            case TimesheetStatus.Approved when !requesterIsHrAdmin:
+                // Somebody has already acted on an approved week, possibly paid against it.
+                // Undoing that is HR's decision, not the employee's.
+                throw new InvalidOperationException(
+                    "This week has been approved. Ask HR to reopen it.");
+        }
+
+        timesheet.Status = TimesheetStatus.Draft;
+        timesheet.SubmittedAt = null;
+        timesheet.DecidedAt = null;
+        timesheet.DecidedByEmployeeId = null;
+        timesheet.Comment = null;
+        timesheet.UpdatedAt = DateTime.UtcNow;
+
+        _timesheetRepository.Update(timesheet);
+        await _timesheetRepository.SaveChangesAsync(ct);
+
+        var owner = await _employeeRepository.GetByIdAsync(timesheet.EmployeeId, ct);
+        return await ToDtoAsync(timesheet, owner, ct);
+    }
+
     public async Task<TimesheetDto> DecideAsync(Guid id, DecideTimesheetDto dto, CancellationToken ct = default)
     {
         var timesheet = await _timesheetRepository.GetByIdAsync(id, ct)
