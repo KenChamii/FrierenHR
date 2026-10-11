@@ -81,4 +81,13 @@ public interface IMessagingRepository
     Task<List<ConversationDto>> GetConversationsForEmployeeAsync(Guid employeeId, CancellationToken ct = default);
     Task<Message> AddMessageAsync(Message message, CancellationToken ct = default);
     Task<List<MessageDto>> GetHistoryAsync(Guid conversationId, int skip, int take, CancellationToken ct = default);
+
+    /// <summary>
+    /// Everyone in a conversation. Needed to notify a recipient who is signed in but has that
+    /// conversation closed, and so is in no hub group to broadcast to.
+    /// </summary>
+    Task<List<Guid>> GetParticipantIdsAsync(Guid conversationId, CancellationToken ct = default);
+
+    /// <summary>Marks a conversation read up to now, for the caller only.</summary>
+    Task MarkReadAsync(Guid conversationId, Guid employeeId, CancellationToken ct = default);
 }

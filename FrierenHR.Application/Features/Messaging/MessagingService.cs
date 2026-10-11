@@ -97,4 +97,10 @@ public class MessagingService : IMessagingService
 
     public Task<List<MessageDto>> GetHistoryAsync(Guid conversationId, int skip, int take, CancellationToken ct = default) =>
         _messagingRepository.GetHistoryAsync(conversationId, skip, take, ct);
+
+    public Task<List<Guid>> GetParticipantIdsAsync(Guid conversationId, CancellationToken ct = default) =>
+        _messagingRepository.GetParticipantIdsAsync(conversationId, ct);
+
+    public Task MarkReadAsync(Guid conversationId, Guid employeeId, CancellationToken ct = default) =>
+        _messagingRepository.MarkReadAsync(conversationId, employeeId, ct);
 }

@@ -72,6 +72,25 @@ public class MessagingRepository : IMessagingRepository
         return message;
     }
 
+    public async Task<List<Guid>> GetParticipantIdsAsync(Guid conversationId, CancellationToken ct = default) =>
+        await _context.ConversationParticipants.AsNoTracking()
+            .Where(p => p.ConversationId == conversationId)
+            .Select(p => p.EmployeeId)
+            .ToListAsync(ct);
+
+    public async Task MarkReadAsync(Guid conversationId, Guid employeeId, CancellationToken ct = default)
+    {
+        var participant = await _context.ConversationParticipants
+            .FirstOrDefaultAsync(p => p.ConversationId == conversationId && p.EmployeeId == employeeId, ct);
+
+        // Nothing to do if the caller is not in the conversation. Silent rather than an error:
+        // marking something you cannot see as read is a no-op, not a failure.
+        if (participant is null) return;
+
+        participant.LastReadAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync(ct);
+    }
+
     public async Task<List<MessageDto>> GetHistoryAsync(Guid conversationId, int skip, int take, CancellationToken ct = default) =>
         await _context.Messages.AsNoTracking()
             .Where(m => m.ConversationId == conversationId)

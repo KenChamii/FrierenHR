@@ -13,4 +13,10 @@ public interface IMessagingService
     Task<List<ConversationDto>> GetConversationsAsync(Guid employeeId, CancellationToken ct = default);
     Task<MessageDto> SendMessageAsync(SendMessageDto dto, CancellationToken ct = default);
     Task<List<MessageDto>> GetHistoryAsync(Guid conversationId, int skip, int take, CancellationToken ct = default);
+
+    /// <summary>Everyone in a conversation, so recipients can be notified individually.</summary>
+    Task<List<Guid>> GetParticipantIdsAsync(Guid conversationId, CancellationToken ct = default);
+
+    /// <summary>Clears the caller's unread marker for a conversation.</summary>
+    Task MarkReadAsync(Guid conversationId, Guid employeeId, CancellationToken ct = default);
 }

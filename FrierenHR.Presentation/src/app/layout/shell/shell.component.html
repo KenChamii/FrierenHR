@@ -9,6 +9,11 @@
         @if (visible(item)) {
           <a [routerLink]="item.path" routerLinkActive="active" class="nav-link">
             <i [class]="item.icon"></i><span>{{ item.label }}</span>
+            @if (showsUnread(item)) {
+              <span class="nav-badge" [attr.aria-label]="unreadMessages() + ' unread conversation(s)'">
+                {{ unreadMessages() }}
+              </span>
+            }
           </a>
         }
       }

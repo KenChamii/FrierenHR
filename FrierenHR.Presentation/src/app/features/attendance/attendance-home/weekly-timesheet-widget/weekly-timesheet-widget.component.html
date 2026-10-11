@@ -33,5 +33,24 @@
       <i class="pi pi-lock"></i>
       {{ status() === 'Submitted' ? 'Awaiting approval — attendance for this week is locked.' : 'Approved — attendance for this week is locked.' }}
     </p>
+
+    @if (canReopen()) {
+      <p-button
+        [label]="status() === 'Submitted' ? 'Unlock to edit' : 'Reopen week'"
+        icon="pi pi-lock-open"
+        severity="secondary"
+        [outlined]="true"
+        [loading]="reopening()"
+        styleClass="w-full"
+        (onClick)="reopen()"
+      />
+      <p class="reopen-note">
+        {{ status() === 'Submitted'
+          ? 'Withdraws your submission so you can change the week. It needs approving again once you resubmit.'
+          : 'Undoes the approval and returns the week to draft. It needs approving again once resubmitted.' }}
+      </p>
+    } @else {
+      <p class="reopen-note">Ask HR to reopen this week if it needs changing.</p>
+    }
   }
 </p-card>

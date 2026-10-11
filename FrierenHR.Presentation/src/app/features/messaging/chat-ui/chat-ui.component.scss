@@ -50,6 +50,24 @@
 
 .header-badge { min-width: 20px; height: 20px; font-size: 0.65rem; }
 
+// A dot rather than a count. The server reports unread as a flag, not an exact number, so a
+// badge reading "1" on a conversation holding six new messages would be a lie.
+.unread-dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--hr-accent);
+}
+
+// An unread conversation is marked by weight and a rule, not by colour alone.
+.conversation-item.unread {
+  box-shadow: inset 2px 0 0 var(--hr-accent);
+
+  .name { font-weight: 500; }
+  .preview { color: var(--hr-text); }
+}
+
 .new-message-box {
   display: flex;
   flex-direction: column;
