@@ -26,6 +26,7 @@ using Microsoft.AspNetCore.SignalR;
 using FrierenHR.WebAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -47,7 +48,7 @@ builder.Services.AddScoped<ICurrentUser, HttpContextCurrentUser>();
 builder.Services.AddScoped<AuditSaveChangesInterceptor>();
 
 builder.Services.AddDbContext<FrierenHRDbContext>((sp, options) => options
-    .UseSqlServer(connectionString)
+    .UseNpgsql(connectionString)
     .AddInterceptors(sp.GetRequiredService<AuditSaveChangesInterceptor>()));
 
 builder.Services.AddScoped<TokenService>();
@@ -173,6 +174,26 @@ builder.Services.AddScoped<ILeaveForecastService, LeaveForecastService>();
 builder.Services.AddScoped<IPayrollExportService, PayrollExportService>();
 builder.Services.AddScoped<ILeaveLiabilityService, LeaveLiabilityService>();
 
+// True when TLS is terminated by something in front of this process, which is the case for
+// every containerised deployment and false when running from Visual Studio.
+var behindReverseProxy = builder.Configuration.GetValue<bool>("Hosting:BehindReverseProxy");
+
+if (behindReverseProxy)
+{
+    builder.Services.Configure<ForwardedHeadersOptions>(options =>
+    {
+        options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+
+        // The proxy is a sibling container on a Docker network, so its address is assigned at
+        // runtime and cannot be listed ahead of time. Clearing both lists makes the headers
+        // trusted from any caller, which is only acceptable because this container is not
+        // published directly: the proxy is the sole route to it. Publishing the API's own port
+        // would let a client forge its source address and defeat the rate limiter below.
+        options.KnownNetworks.Clear();
+        options.KnownProxies.Clear();
+    });
+}
+
 // Allowed origins come from config so pointing at a different frontend is not a code change.
 var corsOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
     ?? new[] { "http://localhost:4200" };
@@ -192,7 +213,24 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<FrierenHRDbContext>();
     await db.Database.MigrateAsync();
+
     if (app.Environment.IsDevelopment()) await DbSeeder.SeedAsync(db);
+
+    // Demo data for a public deployment. Opt-in, and the seeder itself refuses a database
+    // that already holds a company, so turning this on cannot disturb existing records.
+    if (builder.Configuration.GetValue<bool>("Demo:Seed"))
+    {
+        var demoPassword = builder.Configuration["Demo:Password"];
+        if (string.IsNullOrWhiteSpace(demoPassword))
+            throw new InvalidOperationException(
+                "Demo:Seed is on but Demo:Password is not set. Set Demo__Password to the " +
+                "password every demo account should share, or turn Demo__Seed off.");
+
+        await DemoDataSeeder.SeedAsync(
+            db,
+            scope.ServiceProvider.GetRequiredService<IRegistrationService>(),
+            demoPassword);
+    }
 }
 
 if (app.Environment.IsDevelopment())
@@ -201,7 +239,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// Must run before anything that reads the scheme or the caller's address. The rate limiter
+// partitions by remote IP, and without this every request behind the proxy shares one
+// partition, so a single visitor could exhaust the login limit for everyone.
+if (behindReverseProxy) app.UseForwardedHeaders();
+
+// Behind a proxy the TLS hop already happened and this process is reached over plain HTTP on
+// an internal network, so redirecting here would bounce a request that is already secure.
+if (!behindReverseProxy) app.UseHttpsRedirection();
+
 app.UseStaticFiles(); // serves wwwroot/uploads for chat attachments
 
 app.UseRouting();

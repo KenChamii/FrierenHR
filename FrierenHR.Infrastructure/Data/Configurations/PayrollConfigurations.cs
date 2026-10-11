@@ -19,9 +19,12 @@ public class PayrollDeductionConfiguration : IEntityTypeConfiguration<PayrollDed
 
         // One name per company, among the active ones. Two live "Provident fund" lines would
         // quietly double the deduction.
+        //
+        // The filter is raw SQL and so is dialect-specific: double-quoted identifiers and a
+        // real boolean, which is PostgreSQL. A different provider needs this rewritten.
         builder.HasIndex(x => new { x.CompanyId, x.Name })
             .IsUnique()
-            .HasFilter("[IsActive] = 1");
+            .HasFilter("\"IsActive\" = true");
     }
 }
 

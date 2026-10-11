@@ -50,9 +50,10 @@ public class ShiftConfiguration : IEntityTypeConfiguration<Shift>
         builder.HasIndex(x => new { x.CompanyId, x.Name }).IsUnique();
 
         // A filtered unique index: at most one default per company, with the rest unaffected.
+        // Raw SQL, so PostgreSQL syntax. See the note in PayrollConfigurations.
         builder.HasIndex(x => x.CompanyId)
             .IsUnique()
-            .HasFilter("[IsDefault] = 1")
+            .HasFilter("\"IsDefault\" = true")
             .HasDatabaseName("IX_Shifts_CompanyId_SingleDefault");
     }
 }
