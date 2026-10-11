@@ -10,6 +10,9 @@ export class TimesheetService {
 
   submit(dto: SubmitTimesheetDto) { return this.http.post<TimesheetDto>(`${this.baseUrl}/submit`, dto); }
   decide(id: string, dto: DecideTimesheetDto) { return this.http.post<TimesheetDto>(`${this.baseUrl}/${id}/decide`, dto); }
+
+  /** Returns a week to draft so it can be edited, then submitted again for a fresh decision. */
+  reopen(id: string) { return this.http.post<TimesheetDto>(`${this.baseUrl}/${id}/reopen`, {}); }
   getByEmployee(employeeId: string) { return this.http.get<TimesheetDto[]>(`${this.baseUrl}/by-employee/${employeeId}`); }
   getForWeek(employeeId: string, weekStartDate: string) {
     return this.http.get<TimesheetDto | null>(`${this.baseUrl}/by-employee/${employeeId}/week`, { params: { weekStartDate } });

@@ -25,6 +25,7 @@ export class ChatUiComponent implements OnInit, OnDestroy {
   readonly draft = signal('');
   readonly loadingConversations = signal(true);
   readonly loadingHistory = signal(false);
+  readonly sendError = signal<string | null>(null);
 
   // "New Message" picker state — without this there was no way to start a conversation at
   // all; the page could only ever show conversations that already existed via a direct API call.
@@ -41,10 +42,9 @@ export class ChatUiComponent implements OnInit, OnDestroy {
     this.conversations().find((c) => c.id === this.activeConversationId()),
   );
 
-  // Sum of unread counts across every conversation, shown as the badge next to "Chats".
-  readonly totalUnread = computed(() =>
-    this.conversations().reduce((sum, c) => sum + (c.unreadCount ?? 0), 0),
-  );
+  // Conversations with something unread, shown as the badge next to "Chats". Taken from the
+  // messaging service so it reflects what has arrived live, not only the last page load.
+  readonly totalUnread = computed(() => this.messagingService.unreadCount());
 
   // Messages bucketed under "Today" / "Yesterday" / date dividers, like a real chat app.
   readonly groupedMessages = computed(() => {
@@ -76,14 +76,15 @@ export class ChatUiComponent implements OnInit, OnDestroy {
   ) {}
 
   async ngOnInit(): Promise<void> {
-    // Load the list first, independently of the realtime hub — a slow/unreachable hub
-    // (backend down, cert issue on localhost, etc.) must not block the conversation list
-    // from ever rendering.
+    // The list loads independently of the hub. An unreachable hub must not stop the
+    // conversations from rendering.
     this.loadConversations();
     try {
       await this.messagingService.connect();
     } catch (err) {
-      console.error('Chat hub connection failed; messages will still load, but live updates are unavailable.', err);
+      this.sendError.set(
+        'Not connected to the chat service. Check that the API is running, then reload.');
+      console.error('Chat hub connection failed.', err);
     }
   }
 
@@ -92,14 +93,23 @@ export class ChatUiComponent implements OnInit, OnDestroy {
     if (!employeeId) { this.loadingConversations.set(false); return; }
     this.loadingConversations.set(true);
     this.messagingService.getConversations(employeeId).subscribe({
-      next: (list) => { this.conversations.set(list); this.loadingConversations.set(false); },
+      next: (list) => {
+        this.conversations.set(list);
+        // Seeded from the server so the badge is right before anything arrives live.
+        this.messagingService.seedUnread(list);
+        this.loadingConversations.set(false);
+      },
       error: () => this.loadingConversations.set(false),
     });
   }
 
   async ngOnDestroy(): Promise<void> {
-    if (this.activeConversationId()) await this.messagingService.leaveConversation(this.activeConversationId()!);
-    await this.messagingService.disconnect();
+    // The group is left, but the connection stays up. It is what delivers the unread badge
+    // on every other screen, so tearing it down here would switch notifications off the
+    // moment somebody navigated away from Messages.
+    if (this.activeConversationId()) {
+      await this.messagingService.leaveConversation(this.activeConversationId()!);
+    }
   }
 
   openNewMessage(): void {
@@ -110,6 +120,7 @@ export class ChatUiComponent implements OnInit, OnDestroy {
     if (!companyId) return;
     this.employeeService.getByCompany(companyId).subscribe({
       next: (list) => this.coworkers.set(list.filter((e) => e.id !== myId)),
+      error: () => this.sendError.set('Could not load your coworkers.'),
     });
   }
 
@@ -133,14 +144,29 @@ export class ChatUiComponent implements OnInit, OnDestroy {
   }
 
   async selectConversation(conversation: ConversationDto): Promise<void> {
-    if (this.activeConversationId()) await this.messagingService.leaveConversation(this.activeConversationId()!);
+    if (this.activeConversationId()) {
+      await this.messagingService.leaveConversation(this.activeConversationId()!);
+    }
+
     this.activeConversationId.set(conversation.id);
+    this.sendError.set(null);
     this.loadingHistory.set(true);
+
     this.messagingService.getHistory(conversation.id).subscribe({
       next: (msgs) => { this.history.set(msgs.slice().reverse()); this.loadingHistory.set(false); },
       error: () => this.loadingHistory.set(false),
     });
-    await this.messagingService.joinConversation(conversation.id);
+
+    try {
+      // Joining also marks the conversation read, so the badge clears on open.
+      await this.messagingService.joinConversation(conversation.id);
+      this.markConversationRead(conversation.id);
+    } catch (err) {
+      // The hub's own reason when it rejected the join, rather than assuming the connection
+      // is down. Those are different problems and need different fixes.
+      this.sendError.set(this.messageFor(err, 'Could not open this conversation for live updates.'));
+      console.error('Could not join the conversation.', err);
+    }
   }
 
   async send(): Promise<void> {
@@ -150,9 +176,46 @@ export class ChatUiComponent implements OnInit, OnDestroy {
     const attachment = this.pendingAttachment();
     // A message needs text or an attachment (matches the hub's own guard) — not neither.
     if ((!body && !attachment) || !conversationId || !senderEmployeeId || this.uploadingAttachment()) return;
+
+    this.sendError.set(null);
     this.draft.set('');
     this.pendingAttachment.set(null);
-    await this.messagingService.sendMessage(conversationId, senderEmployeeId, body, attachment);
+
+    try {
+      await this.messagingService.sendMessage(conversationId, senderEmployeeId, body, attachment);
+    } catch (err) {
+      // The draft is put back rather than lost. A message that silently disappears is worse
+      // than one that visibly failed.
+      this.draft.set(body);
+      this.pendingAttachment.set(attachment ?? null);
+      this.sendError.set(this.messageFor(err));
+      console.error('Could not send the message.', err);
+    }
+  }
+
+  /**
+   * A HubException's message reaches the client as the error's message, so a rejection the
+   * server explained is shown as written. Anything else is a transport failure, which the
+   * raw text describes badly.
+   */
+  private messageFor(error: unknown, fallback = 'Could not send that message. Check your connection and try again.'): string {
+    const message = error instanceof Error ? error.message : '';
+    const isTransportNoise = !message
+      || message.includes('Failed to invoke')
+      || message.includes('connection')
+      || message.includes('Connection');
+
+    return isTransportNoise ? fallback : message;
+  }
+
+  private markConversationRead(conversationId: string): void {
+    this.conversations.update(list =>
+      list.map(c => (c.id === conversationId ? { ...c, unreadCount: 0 } : c)));
+  }
+
+  hasUnread(conversation: ConversationDto): boolean {
+    return this.messagingService.unreadConversationIds().has(conversation.id)
+      || (conversation.unreadCount ?? 0) > 0;
   }
 
   // Uploads immediately on selection so the person finds out right away if it's too big or

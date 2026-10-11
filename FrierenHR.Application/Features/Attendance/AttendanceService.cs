@@ -17,12 +17,17 @@ public class AttendanceService : IAttendanceService
     private readonly ITimesheetRepository _timesheetRepository;
     private readonly IShiftService _shiftService;
     private readonly IWorkingCalendarProvider _workingCalendar;
+    private readonly IUnitOfWork _unitOfWork;
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+
+    /// <summary>Days a single request may cover. One week, with a little room either side.</summary>
+    private const int MaxDaysPerWeekRequest = 8;
 
     public AttendanceService(IAttendanceRepository attendanceRepository, IEmployeeRepository employeeRepository,
         IRuleConfigRepository ruleConfigRepository, IRuleEvaluator ruleEvaluator, ITimesheetRepository timesheetRepository,
-        IShiftService shiftService, IWorkingCalendarProvider workingCalendar)
+        IShiftService shiftService, IWorkingCalendarProvider workingCalendar, IUnitOfWork unitOfWork)
     {
+        _unitOfWork = unitOfWork;
         _attendanceRepository = attendanceRepository;
         _employeeRepository = employeeRepository;
         _ruleConfigRepository = ruleConfigRepository;
@@ -177,6 +182,35 @@ public class AttendanceService : IAttendanceService
         await _attendanceRepository.AddAsync(log, ct);
         await _attendanceRepository.SaveChangesAsync(ct);
         return ToDto(log, employee);
+    }
+
+    public async Task<List<AttendanceLogDto>> LogWeekAsync(LogWeekDto dto, CancellationToken ct = default)
+    {
+        if (dto.Days is null || dto.Days.Count == 0)
+            throw new InvalidOperationException("There is nothing to save.");
+
+        if (dto.Days.Count > MaxDaysPerWeekRequest)
+            throw new InvalidOperationException($"A single save covers at most {MaxDaysPerWeekRequest} days.");
+
+        // Caught here rather than by the last write silently overwriting the first.
+        var duplicate = dto.Days.GroupBy(d => d.Date.Date).FirstOrDefault(g => g.Count() > 1);
+        if (duplicate is not null)
+            throw new InvalidOperationException($"{duplicate.Key:MMM d} appears more than once.");
+
+        // One transaction, so a week is never left half saved. LogShiftAsync is reused rather
+        // than reimplemented, which keeps the punch-clock collision check, the week lock and
+        // the break validation identical for one day and for seven.
+        return await _unitOfWork.ExecuteAsync(async token =>
+        {
+            var saved = new List<AttendanceLogDto>(dto.Days.Count);
+            foreach (var day in dto.Days.OrderBy(d => d.Date))
+            {
+                saved.Add(await LogShiftAsync(
+                    new LogShiftDto(dto.EmployeeId, day.Date, day.StartTime, day.EndTime, day.BreakMinutes),
+                    token));
+            }
+            return saved;
+        }, ct);
     }
 
     public async Task DeleteAsync(Guid id, CancellationToken ct = default)

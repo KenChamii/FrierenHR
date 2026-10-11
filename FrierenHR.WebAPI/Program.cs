@@ -11,6 +11,7 @@ using FrierenHR.Application.Features.Employee;
 using FrierenHR.Application.Features.Leave;
 using FrierenHR.Application.Features.Messaging;
 using FrierenHR.Application.Features.Onboarding;
+using FrierenHR.Application.Features.Payroll;
 using FrierenHR.Application.Features.Reporting;
 using FrierenHR.Application.Features.RulesConfig;
 using FrierenHR.Application.Features.Timesheet;
@@ -20,6 +21,7 @@ using FrierenHR.Infrastructure.Data.Auditing;
 using FrierenHR.Infrastructure.Repositories;
 using FrierenHR.WebAPI.Common;
 using FrierenHR.WebAPI.Hubs;
+using Microsoft.AspNetCore.SignalR;
 using FrierenHR.WebAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -99,6 +101,9 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
+// Lets the chat hub address a person by employee id, for notifying recipients who do not
+// have the conversation open.
+builder.Services.AddSingleton<IUserIdProvider, EmployeeUserIdProvider>();
 
 // Reports unhealthy when the database is unreachable, which is the failure a load balancer
 // most needs to see. Written inline to avoid a package reference just for AddDbContextCheck.
@@ -142,6 +147,13 @@ builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 
+// Payroll. Payslips are priced from the payroll export, so the hours on a payslip and the
+// hours on the export can never disagree.
+builder.Services.AddScoped<IPayrollDeductionRepository, PayrollDeductionRepository>();
+builder.Services.AddScoped<IPayslipRepository, PayslipRepository>();
+builder.Services.AddScoped<IPayrollDeductionService, PayrollDeductionService>();
+builder.Services.AddScoped<IPayslipService, PayslipService>();
+
 // Reporting. Read-only, so these compose the repositories above rather than owning data.
 builder.Services.AddScoped<IAvailabilityService, AvailabilityService>();
 builder.Services.AddScoped<ILeaveForecastService, LeaveForecastService>();
@@ -178,9 +190,17 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles(); // serves wwwroot/uploads for chat attachments
+
+app.UseRouting();
+
+// Before authentication, not after. A browser preflight carries no credentials, so with CORS
+// placed later the preflight reached the authorization middleware first and was rejected
+// before any CORS header was written. The browser reports that as a bare "Failed to fetch",
+// which is what the SignalR negotiate request was hitting.
+app.UseCors("AngularApp");
+
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseCors("AngularApp");
 app.UseRateLimiter();
 app.MapControllers();
 app.MapHub<ChatHub>("/hubs/chat").RequireAuthorization();

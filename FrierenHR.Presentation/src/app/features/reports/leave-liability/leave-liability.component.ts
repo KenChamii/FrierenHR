@@ -7,7 +7,8 @@ import { MessageModule } from 'primeng/message';
 import { TableModule } from 'primeng/table';
 import { ReportingService } from '../../../core/services/reporting.service';
 import { LiabilityDto } from '../../../core/models/reporting.model';
-import { saveBlob, toIsoDate } from '../../../core/utils/download';
+import { saveBlob } from '../../../core/utils/download';
+import { toIsoDate } from '../../../core/utils/dates';
 
 @Component({
   selector: 'app-leave-liability',

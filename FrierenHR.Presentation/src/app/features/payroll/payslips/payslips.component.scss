@@ -1,0 +1,91 @@
+@use '../../../../styles/admin-page';
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+
+  label { display: flex; flex-direction: column; gap: 0.3rem; }
+}
+
+.skipped {
+  margin-bottom: 1.25rem;
+  padding: 0.875rem 1rem;
+  border-left: 2px solid var(--hr-accent);
+  background: var(--hr-accent-soft);
+
+  ul { margin: 0.4rem 0 0; padding-left: 1.1rem; }
+  li { font-size: 0.85rem; }
+}
+
+:host ::ng-deep .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+:host ::ng-deep td.muted { color: var(--hr-text-muted); }
+
+// The payslip itself reads as a document: one column of labels, one of amounts, ruled.
+.slip .facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.75rem;
+  margin: 0;
+  padding: 1.25rem;
+  border-bottom: 1px solid var(--hr-border);
+
+  dt {
+    font-family: var(--hr-font-mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--hr-text-muted);
+  }
+
+  dd { margin: 0.2rem 0 0; font-size: 0.9rem; }
+}
+
+.lines {
+  width: 100%;
+  border-collapse: collapse;
+
+  td {
+    padding: 0.55rem 1.25rem;
+    font-size: 0.875rem;
+    vertical-align: baseline;
+  }
+
+  .basis {
+    font-size: 0.65rem;
+    letter-spacing: 0.04em;
+    color: var(--hr-text-muted);
+  }
+
+  .amount {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .deduction .amount { color: var(--hr-danger, #8c3b2e); }
+
+  .subtotal td {
+    border-top: 1px solid var(--hr-border);
+    font-family: var(--hr-font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  // The figure everybody actually looks for.
+  .net td {
+    border-top: 2px solid var(--hr-text);
+    padding-top: 0.8rem;
+    padding-bottom: 1.25rem;
+    font-size: 1.05rem;
+  }
+
+  .net .amount { font-size: 1.4rem; }
+}

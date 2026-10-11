@@ -26,7 +26,10 @@
       <p>Loading…</p>
     } @else {
       @for (conversation of conversations(); track conversation.id) {
-        <button type="button" class="conversation-item" [class.active]="conversation.id === activeConversationId()" (click)="selectConversation(conversation)">
+        <button type="button" class="conversation-item"
+                [class.active]="conversation.id === activeConversationId()"
+                [class.unread]="hasUnread(conversation)"
+                (click)="selectConversation(conversation)">
           <span class="avatar" [style.background]="avatarColor(conversation.name)">{{ initials(conversation.name) }}</span>
           <span class="conversation-text">
             <span class="row-1">
@@ -35,7 +38,7 @@
             </span>
             <span class="row-2">
               <span class="preview">{{ conversation.lastMessagePreview ?? 'No messages yet' }}</span>
-              @if (conversation.unreadCount > 0) { <span class="unread-badge">{{ conversation.unreadCount }}</span> }
+              @if (hasUnread(conversation)) { <span class="unread-dot" aria-label="Unread"></span> }
             </span>
           </span>
         </button>
@@ -107,6 +110,9 @@
       }
       @if (attachmentError()) {
         <div class="attachment-error-banner">{{ attachmentError() }}</div>
+      }
+      @if (sendError()) {
+        <div class="attachment-error-banner">{{ sendError() }}</div>
       }
 
       <div class="composer">

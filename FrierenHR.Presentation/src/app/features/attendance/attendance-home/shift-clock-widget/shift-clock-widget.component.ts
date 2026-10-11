@@ -7,6 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { AttendanceService } from '../../../../core/services/attendance.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { AttendanceRefreshService } from '../../../../core/services/attendance-refresh.service';
+import { toLocalDateTime, todayIso } from '../../../../core/utils/dates';
 
 type Handle = 'start' | 'end';
 
@@ -65,7 +66,7 @@ export class ShiftClockWidgetComponent implements OnInit {
   refresh(): void {
     const employeeId = this.authService.currentEmployeeId();
     if (!employeeId) { this.loading.set(false); return; }
-    const today = new Date().toISOString().slice(0, 10);
+    const today = todayIso();
     this.loading.set(true);
     this.attendanceService.getByEmployee(employeeId, today).subscribe({
       next: (logs) => {
@@ -173,7 +174,7 @@ export class ShiftClockWidgetComponent implements OnInit {
     this.errorMessage.set(null);
     this.attendanceService.logShift({
       employeeId,
-      date: new Date().toISOString(),
+      date: toLocalDateTime(new Date()),
       startTime: this.toTimeSpanString(this.startMinutes()),
       endTime: this.toTimeSpanString(this.endMinutes()),
       breakMinutes: this.breakMinutes(),

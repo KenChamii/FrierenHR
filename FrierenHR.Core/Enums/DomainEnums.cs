@@ -39,3 +39,16 @@ public enum WeekDays
 
 /// <summary>What happened to a record, as written to the audit trail.</summary>
 public enum AuditAction { Created = 0, Updated = 1, Deleted = 2 }
+
+/// <summary>How a configured deduction works out its amount.</summary>
+public enum DeductionKind
+{
+    /// <summary>The same amount every period, such as a loan repayment.</summary>
+    FixedAmount = 0,
+
+    /// <summary>A share of gross pay, such as a contribution expressed as a percentage.</summary>
+    PercentOfGross = 1
+}
+
+/// <summary>Whether a payslip line adds to pay or subtracts from it.</summary>
+public enum PayslipLineKind { Earning = 0, Deduction = 1 }

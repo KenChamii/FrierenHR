@@ -11,6 +11,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { LeaveRefreshService } from '../../../../core/services/leave-refresh.service';
 import { LEAVE_TYPES } from '../../../../core/models/enums.model';
 import { LeaveRequestDto } from '../../../../core/models/leave.model';
+import { toLocalDateTime } from '../../../../core/utils/dates';
 
 @Component({
   selector: 'app-leave-request-form',
@@ -49,7 +50,8 @@ export class LeaveRequestFormComponent {
     const raw = this.form.getRawValue();
     this.leaveService.requestLeave({
       employeeId, leaveType: raw.leaveType as any,
-      startDate: (raw.startDate as Date).toISOString(), endDate: (raw.endDate as Date).toISOString(),
+      // Local, not UTC: a request for the 5th was being sent as the 4th from UTC+8.
+      startDate: toLocalDateTime(raw.startDate as Date), endDate: toLocalDateTime(raw.endDate as Date),
       reason: raw.reason || undefined,
     }).subscribe({
       next: (created) => {

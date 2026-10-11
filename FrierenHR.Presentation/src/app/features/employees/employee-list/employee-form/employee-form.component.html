@@ -1,18 +1,27 @@
-<form [formGroup]="form" (ngSubmit)="submit()" class="employee-form">
+<!--
+  autocomplete is set on every field on purpose. This form creates somebody else's account,
+  but to a browser an email input followed by a password input looks like a sign-in form, so
+  Chrome filled it with the signed-in administrator's own saved credentials.
+
+  new-password is the token that stops credential fill; off alone is ignored on a password.
+-->
+<form [formGroup]="form" (ngSubmit)="submit()" class="employee-form" autocomplete="off">
   @if (errorMessage()) { <small class="p-error">{{ errorMessage() }}</small> }
 
   <label for="firstName">First name</label>
-  <input pInputText id="firstName" formControlName="firstName" class="w-full" />
+  <input pInputText id="firstName" formControlName="firstName" class="w-full" autocomplete="off" />
 
   <label for="lastName">Last name</label>
-  <input pInputText id="lastName" formControlName="lastName" class="w-full" />
+  <input pInputText id="lastName" formControlName="lastName" class="w-full" autocomplete="off" />
 
   <label for="email">Email</label>
-  <input pInputText id="email" formControlName="email" class="w-full" />
+  <input pInputText id="email" formControlName="email" class="w-full" autocomplete="off"
+         name="employee-email" />
 
   @if (!employee) {
     <label for="password">Temporary password</label>
-    <p-password formControlName="password" [feedback]="false" [toggleMask]="true" inputStyleClass="w-full" styleClass="w-full" />
+    <p-password formControlName="password" [feedback]="false" [toggleMask]="true"
+                inputStyleClass="w-full" styleClass="w-full" autocomplete="new-password" />
     <small class="field-hint">At least 8 characters, with at least one letter and one number.</small>
   }
 
@@ -30,6 +39,17 @@
 
   <label for="role">Role</label>
   <p-dropdown [options]="roles" formControlName="role" styleClass="w-full" />
+
+  <label for="monthlyRate">Monthly rate</label>
+  <p-inputNumber inputId="monthlyRate" formControlName="monthlyRate" mode="decimal"
+                 [min]="0" [maxFractionDigits]="2" placeholder="Leave empty if not set"
+                 styleClass="w-full" inputStyleClass="w-full" />
+  <small class="field-hint">Gross, before deductions. Without it this employee gets no payslip.</small>
+
+  <label for="standardMonthlyHours">Standard hours per month</label>
+  <p-inputNumber inputId="standardMonthlyHours" formControlName="standardMonthlyHours"
+                 [min]="1" [maxFractionDigits]="2" styleClass="w-full" inputStyleClass="w-full" />
+  <small class="field-hint">Divides the monthly rate into an hourly one. 174 is a full-time month.</small>
 
   <div class="actions">
     <p-button label="Cancel" [text]="true" type="button" (onClick)="cancelled.emit()" />

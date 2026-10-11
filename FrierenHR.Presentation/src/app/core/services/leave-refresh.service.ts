@@ -1,12 +1,9 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable } from '@angular/core';
+import { RefreshNotifier } from './refresh-notifier';
 
-/** Same pattern as AttendanceRefreshService: lets the leave request form tell the
- * "My Requests" history tab to reload after a successful submission, since they're
- * sibling tab components with no direct reference to each other. */
+/**
+ * The same thing for the Leave page: lets the request form tell the "My requests" tab to
+ * reload after a submission, since they are sibling tabs with no reference to each other.
+ */
 @Injectable({ providedIn: 'root' })
-export class LeaveRefreshService {
-  readonly version = signal(0);
-  notifyChanged(): void {
-    this.version.update((v) => v + 1);
-  }
-}
+export class LeaveRefreshService extends RefreshNotifier {}

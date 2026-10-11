@@ -1,12 +1,32 @@
 <h2>Attendance</h2>
+
+<nav class="tracking-tabs" role="tablist">
+  <button type="button" role="tab" class="tracking-tab" [class.active]="tab() === 'week'"
+          [attr.aria-selected]="tab() === 'week'" (click)="select('week')">
+    This week
+  </button>
+  <button type="button" role="tab" class="tracking-tab" [class.active]="tab() === 'today'"
+          [attr.aria-selected]="tab() === 'today'" (click)="select('today')">
+    Today
+  </button>
+</nav>
+
 <div class="attendance-grid">
   <div class="attendance-side">
-    <app-clock-in-widget />
-    <app-shift-clock-widget />
+    @if (tab() === 'today') {
+      <app-clock-in-widget />
+      <app-shift-clock-widget />
+    }
     <app-weekly-timesheet-widget />
     @if (authService.currentRole() === 'Manager' || authService.currentRole() === 'HRAdmin') {
       <app-pending-timesheets-widget />
     }
   </div>
-  <app-attendance-history />
+
+  <div class="attendance-main">
+    @if (tab() === 'week') {
+      <app-weekly-tracking />
+    }
+    <app-attendance-history />
+  </div>
 </div>

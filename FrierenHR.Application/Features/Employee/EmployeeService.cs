@@ -27,7 +27,9 @@ public class EmployeeService : IEmployeeService
             Email = dto.Email,
             PasswordHash = PasswordHasher.Hash(dto.Password),
             HireDate = dto.HireDate,
-            Role = dto.Role
+            Role = dto.Role,
+            MonthlyRate = dto.MonthlyRate,
+            StandardMonthlyHours = dto.StandardMonthlyHours,
         };
         await _employeeRepository.AddAsync(entity, ct);
         await _employeeRepository.SaveChangesAsync(ct);
@@ -63,6 +65,8 @@ public class EmployeeService : IEmployeeService
         entity.LastName = dto.LastName;
         entity.Role = dto.Role;
         entity.IsActive = dto.IsActive;
+        entity.MonthlyRate = dto.MonthlyRate;
+        entity.StandardMonthlyHours = dto.StandardMonthlyHours;
         entity.UpdatedAt = DateTime.UtcNow;
 
         _employeeRepository.Update(entity);
@@ -72,7 +76,8 @@ public class EmployeeService : IEmployeeService
 
     private static EmployeeDto ToDto(FrierenHR.Core.Entities.Employee e) => new(e.Id, e.CompanyId, e.DepartmentId, e.Department?.Name,
         e.ManagerId, e.Manager is null ? null : $"{e.Manager.FirstName} {e.Manager.LastName}",
-        e.FirstName, e.LastName, e.Email, e.HireDate, e.TenureMonths(), e.Role, e.IsActive);
+        e.FirstName, e.LastName, e.Email, e.HireDate, e.TenureMonths(), e.Role, e.IsActive,
+        e.MonthlyRate, e.StandardMonthlyHours);
 
     public async Task ChangePasswordAsync(Guid id, ChangePasswordDto dto, CancellationToken ct = default)
     {

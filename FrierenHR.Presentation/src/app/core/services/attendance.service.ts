@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { AttendanceLogDto, ClockInDto, ClockOutDto, LogShiftDto, OtComputationResultDto } from '../models/attendance.model';
+import {
+  AttendanceLogDto, ClockInDto, ClockOutDto, LogShiftDto, LogWeekDto, OtComputationResultDto,
+} from '../models/attendance.model';
 
 @Injectable({ providedIn: 'root' })
 export class AttendanceService {
@@ -11,6 +13,7 @@ export class AttendanceService {
   clockIn(dto: ClockInDto) { return this.http.post<AttendanceLogDto>(`${this.baseUrl}/clock-in`, dto); }
   clockOut(dto: ClockOutDto) { return this.http.post<AttendanceLogDto>(`${this.baseUrl}/clock-out`, dto); }
   logShift(dto: LogShiftDto) { return this.http.post<AttendanceLogDto>(`${this.baseUrl}/log-shift`, dto); }
+  logWeek(dto: LogWeekDto) { return this.http.post<AttendanceLogDto[]>(`${this.baseUrl}/log-week`, dto); }
   deleteLog(id: string) { return this.http.delete<void>(`${this.baseUrl}/${id}`); }
   getByEmployee(employeeId: string, from?: string, to?: string) {
     const params: Record<string, string> = {};

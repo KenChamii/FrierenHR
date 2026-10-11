@@ -93,10 +93,7 @@ export interface LiabilityDto {
 }
 
 /** Colour and label for an availability cell, kept next to the type it describes. */
-export const AVAILABILITY_LEGEND: ReadonlyArray<{
-  value: DayAvailability;
-  label: string;
-}> = [
+export const AVAILABILITY_LEGEND: { value: DayAvailability; label: string }[] = [
   { value: 'Working', label: 'In' },
   { value: 'OnLeave', label: 'On leave' },
   { value: 'RestDay', label: 'Rest day' },

@@ -40,6 +40,16 @@ public class AttendanceController : ControllerBase
         catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
     }
 
+    // Saves a whole week in one request. The alternative, one call per day, can half-fail and
+    // leave a week that is neither what it was nor what the person entered.
+    [HttpPost("log-week")]
+    public async Task<ActionResult<List<AttendanceLogDto>>> LogWeek(LogWeekDto dto, CancellationToken ct)
+    {
+        if (!User.IsSelfOrRole(dto.EmployeeId, "HRAdmin")) return Forbid();
+        try { return Ok(await _attendanceService.LogWeekAsync(dto, ct)); }
+        catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
+    }
+
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {

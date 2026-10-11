@@ -1,0 +1,111 @@
+<div class="page">
+  <header class="page-head">
+    <div>
+      <span class="exhibit">Payroll setup</span>
+      <h2>Deductions</h2>
+      <p class="sub">The lines subtracted from every payslip. Nothing statutory is built in:
+        contributions differ by country and change by circular, so they are entered here and
+        stay under your control.</p>
+    </div>
+  </header>
+
+  @if (error()) { <p-message severity="error" [text]="error()!" /> }
+  @if (notice()) { <p-message severity="success" [text]="notice()!" /> }
+
+  <section class="box">
+    <div class="box-h">
+      <span class="exhibit">{{ editingId() ? 'Edit line' : 'Add a line' }}</span>
+    </div>
+
+    <form class="form" [formGroup]="form" (ngSubmit)="save()">
+      <label class="field wide">
+        <span class="exhibit">Name</span>
+        <input pInputText formControlName="name" placeholder="Provident fund" />
+      </label>
+
+      <label class="field">
+        <span class="exhibit">Kind</span>
+        <p-dropdown [options]="kinds" optionLabel="label" optionValue="value"
+                    formControlName="kind"></p-dropdown>
+      </label>
+
+      <label class="field">
+        <span class="exhibit">
+          {{ form.controls.kind.value === 'PercentOfGross' ? 'Percent' : 'Amount' }}
+        </span>
+        <p-inputNumber formControlName="value" mode="decimal" [min]="0" [maxFractionDigits]="2">
+        </p-inputNumber>
+      </label>
+
+      <label class="field narrow">
+        <span class="exhibit">Order</span>
+        <p-inputNumber formControlName="sortOrder" [min]="0" [showButtons]="true"></p-inputNumber>
+      </label>
+
+      <div class="actions">
+        <button pButton type="submit" [label]="editingId() ? 'Save' : 'Add'"
+                [loading]="saving()"></button>
+        @if (editingId()) {
+          <button pButton type="button" severity="secondary" [text]="true" label="Cancel"
+                  (click)="cancelEdit()"></button>
+        }
+      </div>
+    </form>
+
+    <p class="hint">
+      Percentages are always taken on gross pay, never on the running balance, so the order
+      lines appear in changes how the payslip reads but never what it pays.
+    </p>
+  </section>
+
+  <section class="box">
+    <div class="box-h">
+      <span class="exhibit">Current lines</span>
+      <span class="count mono">{{ list().length }}</span>
+    </div>
+
+    @if (loading()) {
+      <p class="empty">Loading.</p>
+    } @else if (!list().length) {
+      <p class="empty">No deductions yet. Without any, net pay equals gross pay.</p>
+    } @else {
+      <p-table [value]="list()" styleClass="p-datatable-sm">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Name</th>
+            <th>Kind</th>
+            <th class="num">Value</th>
+            <th class="num">Order</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr [class.retired]="!row.isActive">
+            <td>{{ row.name }}</td>
+            <td class="muted">{{ labelFor(row.kind) }}</td>
+            <td class="num mono">{{ valueLabel(row) }}</td>
+            <td class="num mono muted">{{ row.sortOrder }}</td>
+            <td>
+              <p-tag [value]="row.isActive ? 'Active' : 'Retired'"
+                     [severity]="row.isActive ? 'success' : 'secondary'"></p-tag>
+            </td>
+            <td class="num">
+              <button pButton type="button" [text]="true" icon="pi pi-pencil"
+                      (click)="edit(row)" aria-label="Edit"></button>
+              @if (row.isActive) {
+                <button pButton type="button" [text]="true" severity="danger" label="Retire"
+                        (click)="retire(row)"></button>
+              }
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+
+      <p class="hint">
+        Retiring a line keeps it off future payslips without removing it from ones already
+        issued, which would leave an old payslip unable to explain its own total.
+      </p>
+    }
+  </section>
+</div>

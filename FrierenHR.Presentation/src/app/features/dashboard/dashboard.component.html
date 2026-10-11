@@ -52,27 +52,29 @@
 </div>
 
 <div class="stat-grid">
-  <p-card styleClass="stat-card accent">
-    <div class="stat-icon"><i class="pi pi-users"></i></div>
-    <div class="stat-value">{{ stats().totalEmployees }}</div>
-    <div class="stat-label">Total Employees</div>
-  </p-card>
+  @if (canSeeCompanyFigures()) {
+    <p-card styleClass="stat-card accent">
+      <div class="stat-icon"><i class="pi pi-users"></i></div>
+      <div class="stat-value">{{ stats().totalEmployees }}</div>
+      <div class="stat-label">Total Employees</div>
+    </p-card>
+
+    <p-card styleClass="stat-card">
+      <div class="stat-icon info"><i class="pi pi-calendar-minus"></i></div>
+      <div class="stat-value">{{ stats().onLeaveToday }}</div>
+      <div class="stat-label">On Leave Today</div>
+    </p-card>
+  }
 
   <p-card styleClass="stat-card">
     <div class="stat-icon warning"><i class="pi pi-hourglass"></i></div>
-    <div class="stat-value">{{ stats().pendingLeaveRequests }}</div>
-    <div class="stat-label">Pending Leave Requests</div>
+    <div class="stat-value">{{ stats().awaitingMyDecision }}</div>
+    <div class="stat-label">Awaiting My Decision</div>
   </p-card>
 
   <p-card styleClass="stat-card">
-    <div class="stat-icon info"><i class="pi pi-calendar-minus"></i></div>
-    <div class="stat-value">{{ stats().onLeaveToday }}</div>
-    <div class="stat-label">On Leave Today</div>
-  </p-card>
-
-  <p-card styleClass="stat-card">
-    <div class="stat-icon success"><i class="pi pi-check-square"></i></div>
-    <div class="stat-value">{{ stats().openApprovals }}</div>
-    <div class="stat-label">Open Approvals</div>
+    <div class="stat-icon success"><i class="pi pi-calendar-plus"></i></div>
+    <div class="stat-value">{{ stats().myLeaveBalance }}</div>
+    <div class="stat-label">My Leave Balance</div>
   </p-card>
 </div>

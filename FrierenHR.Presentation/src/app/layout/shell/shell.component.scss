@@ -50,6 +50,23 @@
     border-top: 1px solid rgba(242, 237, 225, 0.12);
   }
 
+  // Unread count on the Messages link. Pushed right so it reads as a count rather than as
+  // part of the label.
+  .nav-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    margin-left: auto;
+    padding: 0 5px;
+    background: var(--hr-accent);
+    color: #17241d;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+
   .nav-link {
     display: flex;
     align-items: center;

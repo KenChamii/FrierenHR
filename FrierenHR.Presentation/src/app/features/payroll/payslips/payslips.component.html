@@ -1,0 +1,147 @@
+<div class="page">
+  <header class="page-head">
+    <div>
+      <span class="exhibit">Payments</span>
+      <h2>Payslips</h2>
+      <p class="sub">Priced from the hours on record, at the rate held against each employee.
+        A payslip keeps the figures it was issued with, so a later correction never rewrites it.</p>
+    </div>
+  </header>
+
+  @if (isHr()) {
+    <section class="controls">
+      <label>
+        <span class="exhibit">From</span>
+        <input pInputText type="date" [(ngModel)]="from" name="from" />
+      </label>
+      <label>
+        <span class="exhibit">To</span>
+        <input pInputText type="date" [(ngModel)]="to" name="to" />
+      </label>
+      <button pButton type="button" severity="secondary" [outlined]="true" label="View period"
+              (click)="loadPeriod()"></button>
+      <button pButton type="button" label="Generate" [loading]="generating()"
+              (click)="generate()"></button>
+      <button pButton type="button" severity="secondary" [text]="true" label="My payslips"
+              (click)="loadMine()"></button>
+    </section>
+  }
+
+  @if (error()) { <p-message severity="error" [text]="error()!" /> }
+
+  @if (skipped().length) {
+    <section class="skipped">
+      <span class="exhibit">Left out of this run</span>
+      <ul>
+        @for (reason of skipped(); track reason) { <li>{{ reason }}</li> }
+      </ul>
+    </section>
+  }
+
+  <section class="box">
+    <div class="box-h">
+      <span class="exhibit">{{ scope() === 'mine' ? 'Your payslips' : 'This period' }}</span>
+      <span class="count mono">{{ rows().length }} record(s)</span>
+    </div>
+
+    @if (loading()) {
+      <p class="empty">Loading.</p>
+    } @else if (!rows().length) {
+      <p class="empty">
+        @if (scope() === 'mine') {
+          No payslips yet. They appear once HR runs payroll for a period you worked.
+        } @else {
+          Nothing issued for this period yet. Generate to create them.
+        }
+      </p>
+    } @else {
+      <p-table [value]="rows()" [paginator]="rows().length > 25" [rows]="25"
+               styleClass="p-datatable-sm">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Pay period</th>
+            @if (scope() === 'period') { <th>Employee</th> }
+            <th class="num">Gross</th>
+            <th class="num">Net pay</th>
+            <th class="num">Monthly rate</th>
+            <th></th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td>{{ row.periodStart | date: 'MMM d' }} &ndash; {{ row.periodEnd | date: 'MMM d, y' }}</td>
+            @if (scope() === 'period') { <td>{{ row.employeeName }}</td> }
+            <td class="num mono muted">{{ row.grossPay | number: '1.2-2' }}</td>
+            <td class="num mono">{{ row.netPay | number: '1.2-2' }}</td>
+            <td class="num mono muted">{{ row.monthlyRate | number: '1.2-2' }}</td>
+            <td class="num">
+              <button pButton type="button" [text]="true" label="View" (click)="open(row)"></button>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </section>
+
+  @if (selected(); as slip) {
+    <section class="box slip">
+      <div class="box-h">
+        <span class="exhibit">
+          {{ slip.employeeName }} &middot;
+          {{ slip.periodStart | date: 'MMM d' }} &ndash; {{ slip.periodEnd | date: 'MMM d, y' }}
+        </span>
+        <button pButton type="button" [text]="true" severity="secondary" label="Close"
+                (click)="close()"></button>
+      </div>
+
+      <dl class="facts">
+        <div><dt>Monthly rate</dt><dd class="mono">{{ slip.monthlyRate | number: '1.2-2' }}</dd></div>
+        <div><dt>Hourly rate</dt><dd class="mono">{{ slip.hourlyRate | number: '1.2-2' }}</dd></div>
+        <div><dt>Regular hours</dt><dd class="mono">{{ slip.regularHours }}</dd></div>
+        <div><dt>Payable overtime</dt><dd class="mono">{{ slip.payableOvertimeHours }}</dd></div>
+        @if (slip.departmentName) {
+          <div><dt>Department</dt><dd>{{ slip.departmentName }}</dd></div>
+        }
+        <div><dt>Issued</dt><dd class="mono">{{ slip.generatedAt | date: 'd MMM y, HH:mm' }}</dd></div>
+      </dl>
+
+      <table class="lines">
+        <tbody>
+          @for (line of earnings(); track line.label) {
+            <tr>
+              <td class="label">{{ line.label }}</td>
+              <td class="basis mono">{{ line.basis }}</td>
+              <td class="amount mono">{{ line.amount | number: '1.2-2' }}</td>
+            </tr>
+          }
+          <tr class="subtotal">
+            <td class="label">Gross pay</td>
+            <td></td>
+            <td class="amount mono">{{ slip.grossPay | number: '1.2-2' }}</td>
+          </tr>
+
+          @for (line of deductions(); track line.label) {
+            <tr class="deduction">
+              <td class="label">{{ line.label }}</td>
+              <td class="basis mono">{{ line.basis }}</td>
+              <td class="amount mono">&minus;{{ line.amount | number: '1.2-2' }}</td>
+            </tr>
+          }
+          @if (deductions().length) {
+            <tr class="subtotal">
+              <td class="label">Total deductions</td>
+              <td></td>
+              <td class="amount mono">&minus;{{ slip.totalDeductions | number: '1.2-2' }}</td>
+            </tr>
+          }
+
+          <tr class="net">
+            <td class="label">Net pay</td>
+            <td></td>
+            <td class="amount mono">{{ slip.netPay | number: '1.2-2' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  }
+</div>

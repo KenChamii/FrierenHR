@@ -11,6 +11,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { AttendanceCorrectionService } from '../../../core/services/scheduling.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { AttendanceCorrectionDto, CorrectionStatus } from '../../../core/models/scheduling.model';
+import { todayIso } from '../../../core/utils/dates';
 
 @Component({
   selector: 'app-corrections',
@@ -39,7 +40,7 @@ export class CorrectionsComponent implements OnInit {
   readonly canApprove = computed(() => ['Manager', 'HRAdmin'].includes(this.auth.currentRole() ?? ''));
 
   /** A correction cannot be for a future date, so the picker is capped at today. */
-  readonly today = new Date().toISOString().slice(0, 10);
+  readonly today = todayIso();
 
   /** Typed per row, so declining with a reason does not need a dialog. */
   comments: Record<string, string> = {};

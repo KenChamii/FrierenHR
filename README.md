@@ -32,14 +32,74 @@ The facts include whether the day is a holiday and which kind, so holiday pay is
 | Module | What it covers |
 | --- | --- |
 | Leave | Balances per type, scheduled accrual, requests routed through approval chains |
-| Attendance | Clock in and out with break minutes, late grace measured against the employee's shift |
+| Attendance | A week grid for logging a remote schedule, a punch clock and a shift dial for today |
 | Scheduling | Per-company holiday calendar and shift definitions, with rest days feeding leave day counts |
 | Corrections | A missed clock-in is a request with a reason, decided by a manager, and approving writes the row |
 | Audit | Every change to a record, captured by a save interceptor rather than by each service |
-| Timesheets | Weekly hours from attendance, submitted once, overtime at the configured multiplier |
+| Timesheets | Weekly hours from attendance, submitted to lock the week, reopenable for changes |
+| Payroll | Payslips priced from the hours on record, with deduction lines a company defines |
 | Approvals | Chains defined per company, automatic escalation when a level sits too long |
-| Messaging | Direct and group conversations over SignalR, with attachment type and size limits from config |
+| Messaging | Direct and group conversations over SignalR, with unread badges and attachment limits from config |
 | People | Employees, departments and reporting lines, scoped so one company never sees another's records |
+| Reports | Who is out, projected balances, a payroll period export and the leave liability figure |
+| Onboarding | Self-service sign-up that creates a company, its first administrator and a working configuration |
+
+## Time tracking
+
+Three ways in, because logging a fixed remote schedule and recording a walk-in shift are different jobs:
+
+- **This week.** A Monday to Sunday grid with start, end and break per day. Fill one day, press copy across, and the rest of the working week follows, skipping rest days and holidays. The whole week saves in one transaction, so it is never left half written.
+- **Today.** The punch clock, and a 24-hour dial for setting a shift by dragging its start and end.
+
+A day the punch clock already recorded is read-only in the grid rather than silently overwritten, which mirrors the rule the service enforces anyway.
+
+Submitting a week locks its attendance, so it cannot be edited out from under an approver. The lock is not a dead end: an employee can withdraw their own submission while it is still pending, and HR can reopen a week that has already been approved. Either returns it to draft, and resubmitting starts the approval again, so a changed week cannot slip past someone who already looked at it.
+
+## Payslips
+
+Pay is a monthly rate held against the employee, divided by their standard monthly hours to give an hourly rate. A payslip is then regular hours plus payable overtime at that rate, less whatever deduction lines the company has defined.
+
+The hours come from the payroll export rather than a second pass over the attendance logs, so a payslip and the export can never disagree about a period.
+
+Three things worth knowing:
+
+**Nothing statutory is built in.** There are no SSS, PhilHealth, Pag-IBIG or withholding tables in this codebase. They differ by country and change by circular, so a hardcoded table would be confidently wrong within a year. Deductions are named lines an administrator enters as a fixed amount or a percentage of gross. With none configured, net equals gross.
+
+**A payslip keeps the figures it was issued with.** Correcting an attendance log or changing a rate afterwards must not quietly rewrite what somebody was paid, so the hours, the rate and every line are stored rather than recomputed on each view. Re-running a period replaces that period's payslips, enforced by a unique index.
+
+**An employee with no rate is skipped by name.** The run returns a list of who was left out and why, rather than issuing a payslip saying they earned nothing.
+
+## Reports
+
+Four read-only views, all derived on request rather than stored, so a corrected attendance log or an approved leave request changes them with nothing to recalculate.
+
+| Report | Question it answers | Who can see it |
+| --- | --- | --- |
+| Who is out | Who is unavailable over the next fortnight, and which days are thinnest on cover | Manager, HRAdmin |
+| Projected balance | How many leave days somebody will have by a chosen month, and how many the cap will forfeit | Your own; HR can see anyone's |
+| Payroll period | Hours, overtime, minutes late after grace and leave taken, per employee, exportable as CSV | HRAdmin |
+| Leave liability | What unused leave would cost if it were paid out, by employee and by department | HRAdmin |
+
+Two decisions worth knowing about:
+
+The availability grid reads each employee's own calendar, so a rest day and a public holiday appear as themselves rather than as absence, and coverage percentages ignore days nobody was expected in. A closed office is not a staffing crisis.
+
+The liability report takes the daily rate as a parameter rather than reading one from configuration. No salary is held against an employee, and the global config row is not company-scoped, so a rate taken from either would be quietly wrong for every tenant but one.
+
+## Getting an account
+
+Sign-up creates a company and its first HR administrator together, in one transaction, from the landing page. The two cannot be separated: every other route to creating an employee requires an HRAdmin token for that company, so a company committed on its own would be a tenant nobody could ever log into.
+
+A new company starts with a working configuration rather than an empty one, since nothing knows the working day without a shift and every request needs a manual decision without rules:
+
+- A 9 to 6 default shift with a one-hour break, resting weekends
+- Leave accruing 1.25 days a month after six months, capped at 15
+- Single days auto-approved, anything longer routed to a manager
+- Overtime at 1.25, with 15 minutes of grace on lateness
+
+All of it is editable afterwards on the Shifts and Rules screens.
+
+The order the rest of the setup is done in matters, because several screens read what earlier ones wrote. See [docs/getting-started.md](docs/getting-started.md) for that order, and for the handful of things that catch people out.
 
 ## Architecture
 
@@ -49,7 +109,8 @@ FrierenHR.Application     Feature services and their contracts, one folder per c
 FrierenHR.Infrastructure  EF Core mappings, migrations, repositories over SQL Server
 FrierenHR.WebAPI          Controllers, JWT auth, SignalR hub, nightly accrual job
 FrierenHR.Presentation    Angular app, one feature area per module
-FrierenHR.Tests           xUnit, currently covering the rules engine and password hashing
+FrierenHR.Tests           xUnit, covering the rules engine, the working calendar, leave
+                          projection, payslip arithmetic, CSV output and password hashing
 ```
 
 Dependencies point inward. `Core` references nothing, which is why the rules engine can be tested without a database or a web host. See `docs/adr/` for the reasoning behind the main structural choices.
@@ -85,17 +146,29 @@ In Development the app applies pending migrations and seeds demo data on startup
 dotnet test
 ```
 
-The suite covers the rules engine end to end: every supported operator, missing and non-numeric fields, priority ordering across stacked rules, and each action type including the accrual cap. Password hashing and the password policy are covered too.
+The suite covers the pieces that hold real logic and no dependencies:
+
+- **Rules engine**, end to end: every supported operator, missing and non-numeric fields, priority ordering across stacked rules, and each action type including the accrual cap.
+- **Working calendar**: working-day counts across weekends and holidays, duplicate dates, and inverted ranges.
+- **Leave projection**: the cap biting part way through a month, a balance already above a lowered cap, and the month forfeiture first begins.
+- **Payslip arithmetic**: overtime priced at the plain rate because it arrives pre-multiplied, percentages all taken on gross so their order cannot change net pay, and deductions exceeding gross leaving zero rather than a negative payslip.
+- **CSV output**: quoting a name containing a comma, a decimal under a comma locale, and the byte order mark that keeps accented names readable in Excel.
+- **Password hashing** and the password policy.
 
 ## Known limitations
 
 Recorded deliberately rather than left to be discovered.
 
 - **No refresh tokens.** Access tokens last eight hours and logout is client-side only, so there is no server-side revocation. Acceptable for an internal tool, not for anything public facing.
-- **No refresh on the lateness flag.** Minutes late are computed against the employee's shift and fed to the rules engine, but nothing stores the result yet, so lateness can be configured and evaluated without being reported on.
+- **No password reset.** Changing a password requires knowing the current one, so a forgotten administrator password has no route back in.
+- **No payslip documents.** Payslips are figures on a screen, not generated PDFs, so there is nothing to attach or archive yet.
+- **One pay rate per employee, with no history.** A raise reprices every period that is regenerated afterwards, including old ones. Effective-dated compensation is the fix, and is not built.
+- **A split day cannot be entered.** The week grid holds one entry per day with a break as a duration, so 09:00 to 12:00 and 16:00 to 20:00 has to go through a correction. The model allows several entries per day, so this is a UI limit rather than a schema one.
 - **List endpoints are unpaginated.** `Repository<T>.GetAllAsync` returns whole tables. Fine at seed scale, wrong for employee lists and message history in production.
 - **Photos and attachments go to local disk.** `LocalDiskPhotoStorageService` writes under `wwwroot/uploads`, which does not survive a container restart. The interface is there to swap in blob storage.
-- **Dashboard figures are approximate.** Three of the four counts derive from one approver-scoped query rather than company-wide ones.
+- **Unread is a flag, not a count.** The conversation query reports whether anything is unread, not how many, so the sidebar badge counts conversations rather than messages.
+- **The overtime multiplier on the payroll export is per employee, not per day.** A rule keyed on a particular day's holiday cannot be represented in a one-row-per-employee format; that would be a different report.
+- **`ApprovalEscalation` rules are not evaluated.** They can be configured and are validated, but escalation reads `ApprovalChainStep.EscalateAfterDays` directly. The rules screen marks the type as not wired rather than implying it works.
 
 ## Licence
 

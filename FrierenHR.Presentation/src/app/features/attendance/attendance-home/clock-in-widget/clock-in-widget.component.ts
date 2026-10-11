@@ -6,6 +6,7 @@ import { AttendanceService } from '../../../../core/services/attendance.service'
 import { AuthService } from '../../../../core/services/auth.service';
 import { AttendanceRefreshService } from '../../../../core/services/attendance-refresh.service';
 import { AttendanceLogDto } from '../../../../core/models/attendance.model';
+import { todayIso } from '../../../../core/utils/dates';
 
 @Component({
   selector: 'app-clock-in-widget',
@@ -30,7 +31,7 @@ export class ClockInWidgetComponent implements OnInit {
   refresh(): void {
     const employeeId = this.authService.currentEmployeeId();
     if (!employeeId) { this.loading.set(false); return; }
-    const today = new Date().toISOString().slice(0, 10);
+    const today = todayIso();
     this.loading.set(true);
     this.attendanceService.getByEmployee(employeeId, today).subscribe({
       next: (logs) => { this.openLog.set(logs.find(l => !l.timeOut) ?? null); this.loading.set(false); },
