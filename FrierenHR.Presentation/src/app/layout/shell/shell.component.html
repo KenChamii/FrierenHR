@@ -1,10 +1,17 @@
 <div class="shell">
-  <aside class="sidebar">
+  <!-- Catches the tap outside the drawer. Inert above the breakpoint, where the sidebar is
+       part of the layout rather than floating over it. -->
+  <div class="scrim" [class.open]="menuOpen()" (click)="closeMenu()" aria-hidden="true"></div>
+
+  <aside class="sidebar" [class.open]="menuOpen()">
     <div class="brand">
       <div class="brand-mark"><i class="pi pi-sitemap"></i></div>
       <span>FrierenHR</span>
+      <button class="drawer-close" type="button" (click)="closeMenu()" aria-label="Close menu">
+        <i class="pi pi-times"></i>
+      </button>
     </div>
-    <nav>
+    <nav id="app-nav">
       @for (item of navItems; track item.path) {
         @if (visible(item)) {
           <a [routerLink]="item.path" routerLinkActive="active" class="nav-link"
@@ -31,6 +38,10 @@
 
   <div class="main">
     <header class="topbar">
+      <button class="menu-toggle" type="button" (click)="toggleMenu()"
+              [attr.aria-expanded]="menuOpen()" aria-label="Menu" aria-controls="app-nav">
+        <i class="pi pi-bars"></i>
+      </button>
       <div class="search">
         <i class="pi pi-search"></i>
         <input type="text" placeholder="Search…" />
