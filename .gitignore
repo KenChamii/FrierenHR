@@ -377,3 +377,7 @@ FrierenHR.Presentation/.angular/
 # Local secrets, in case anyone ever adds one of these by hand
 appsettings.Local.json
 *.user
+# Deployment secrets. .env holds the database password and the token signing key.
+.env
+.env.*
+!.env.example
