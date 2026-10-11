@@ -43,6 +43,16 @@ export class LoginComponent {
         // — the login response doesn't carry it, and downstream screens
         // (Employees, Dashboard) need it to scope their API calls.
         this.authService.setSession(result);
+
+        // An account on a temporary password may reach nothing but the change endpoint, so
+        // looking up its own record here would only produce a 403 on the way to the same
+        // screen the guard sends it to.
+        if (result.mustChangePassword) {
+          this.loading.set(false);
+          this.router.navigateByUrl('/set-password');
+          return;
+        }
+
         this.employeeService.getById(result.employeeId).subscribe({
           next: (employee) => {
             this.authService.updateCompanyId(employee.companyId);

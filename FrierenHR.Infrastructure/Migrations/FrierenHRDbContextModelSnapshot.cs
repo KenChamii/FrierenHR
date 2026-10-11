@@ -495,6 +495,9 @@ namespace FrierenHR.Infrastructure.Migrations
                     b.Property<decimal?>("MonthlyRate")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<bool>("MustChangePassword")
+                        .HasColumnType("bit");
+
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");

@@ -19,6 +19,15 @@ public class Employee : BaseEntity, ICompanyScoped
     public string LastName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string PasswordHash { get; set; } = string.Empty;
+
+    /// <summary>
+    /// True while the account still carries a password somebody else chose. Set when HR
+    /// creates an account or issues a reset, cleared when the person sets their own.
+    ///
+    /// Until it is cleared the application lets them change their password and nothing else,
+    /// so an administrator's knowledge of the temporary password is short-lived.
+    /// </summary>
+    public bool MustChangePassword { get; set; }
     public DateTime HireDate { get; set; }
 
     /// <summary>

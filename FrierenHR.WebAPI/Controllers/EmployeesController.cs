@@ -1,6 +1,8 @@
 ﻿using FrierenHR.Application.Common.DTOs;
+using FrierenHR.Application.Common.Interfaces;
 using FrierenHR.Application.Features.Employee;
 using FrierenHR.WebAPI.Common;
+using FrierenHR.WebAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,7 +14,21 @@ namespace FrierenHR.WebAPI.Controllers;
 public class EmployeesController : ControllerBase
 {
     private readonly IEmployeeService _employeeService;
-    public EmployeesController(IEmployeeService employeeService) => _employeeService = employeeService;
+    private readonly IEmployeeRepository _employeeRepository;
+    private readonly TokenService _tokenService;
+
+    public EmployeesController(
+        IEmployeeService employeeService,
+        IEmployeeRepository employeeRepository,
+        TokenService tokenService)
+    {
+        _employeeService = employeeService;
+        _employeeRepository = employeeRepository;
+        _tokenService = tokenService;
+    }
+
+    /// <summary>A replacement token, since the old one still says a change is required.</summary>
+    public record ChangePasswordResultDto(string Token);
 
     [HttpGet]
     public async Task<ActionResult<List<EmployeeDto>>> GetByCompany([FromQuery] Guid companyId, CancellationToken ct)
@@ -64,14 +80,42 @@ public class EmployeesController : ControllerBase
         catch (InvalidOperationException ex) { return NotFound(new { message = ex.Message }); }
     }
 
-    // Self-service only — you change your own password by proving you know the current one.
-    // An HRAdmin-triggered "reset someone's password" flow (for forgotten passwords) is a
-    // different, separate feature and isn't what this endpoint is for.
+    // Issues a new temporary password and returns it once, for somebody who cannot sign in.
+    // There is no email, so HR passes it on and the account must change it immediately.
+    [HttpPost("{id:guid}/reset-password"), Authorize(Roles = "HRAdmin")]
+    public async Task<ActionResult<ResetPasswordResultDto>> ResetPassword(Guid id, CancellationToken ct)
+    {
+        var callerCompanyId = User.GetCompanyId();
+        if (callerCompanyId is null) return Forbid();
+
+        // Resetting your own password this way would hand you a credential without proving
+        // you know the current one. Use change-password instead.
+        if (User.GetEmployeeId() == id)
+            return BadRequest(new { message = "Change your own password from your profile instead." });
+
+        try { return Ok(await _employeeService.ResetPasswordAsync(id, callerCompanyId.Value, ct)); }
+        catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
+    }
+
+    // Self-service — you change your own password by proving you know the current one. This
+    // is also the only endpoint an account on a temporary password may reach.
     [HttpPost("{id:guid}/change-password")]
-    public async Task<IActionResult> ChangePassword(Guid id, ChangePasswordDto dto, CancellationToken ct)
+    public async Task<ActionResult<ChangePasswordResultDto>> ChangePassword(
+        Guid id, ChangePasswordDto dto, CancellationToken ct)
     {
         if (User.GetEmployeeId() != id) return Forbid();
-        try { await _employeeService.ChangePasswordAsync(id, dto, ct); return NoContent(); }
+
+        try
+        {
+            await _employeeService.ChangePasswordAsync(id, dto, ct);
+
+            // A fresh token, because the one in hand still carries mustChangePassword and
+            // would keep the account locked out of everything it just earned access to.
+            var employee = await _employeeRepository.GetByIdAsync(id, ct);
+            if (employee is null) return NotFound();
+
+            return Ok(new ChangePasswordResultDto(_tokenService.GenerateToken(employee)));
+        }
         catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
     }
 }

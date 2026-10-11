@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { passwordChangeGuard } from './core/guards/password-change.guard';
 import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
@@ -15,10 +16,17 @@ export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent) },
   // Sign-up creates a company and its first HRAdmin together, so it needs no account.
   { path: 'register', loadComponent: () => import('./features/auth/register/register.component').then(m => m.RegisterComponent) },
+  // Outside the shell: an account on a temporary password can reach nothing else, so there
+  // is no navigation to show it.
+  {
+    path: 'set-password',
+    loadComponent: () => import('./features/auth/set-password/set-password.component').then(m => m.SetPasswordComponent),
+    canActivate: [authGuard],
+  },
   {
     path: '',
     loadComponent: () => import('./layout/shell/shell.component').then(m => m.ShellComponent),
-    canActivate: [authGuard],
+    canActivate: [authGuard, passwordChangeGuard],
     children: [
       { path: 'dashboard', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
       { path: 'employees', loadComponent: () => import('./features/employees/employee-list/employee-list.component').then(m => m.EmployeeListComponent) },
