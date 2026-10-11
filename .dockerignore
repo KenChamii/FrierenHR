@@ -1,0 +1,16 @@
+# Keeps the build context small and stops local build output and secrets reaching an image.
+**/bin/
+**/obj/
+**/node_modules/
+**/dist/
+**/.angular/
+**/.vs/
+**/.vscode/
+**/.git/
+**/.github/
+**/*.user
+**/appsettings.Development.json
+**/appsettings.*.local.json
+**/.env
+**/.env.*
+**/wwwroot/uploads/

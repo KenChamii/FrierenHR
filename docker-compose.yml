@@ -1,0 +1,67 @@
+# The whole stack, as the host will run it.
+#   docker compose up --build
+# Then open http://localhost:8080
+#
+# Copy .env.example to .env first. Compose reads it for the values below.
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-frierenhr}
+      POSTGRES_USER: ${POSTGRES_USER:-frierenhr}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      # Exposed so Visual Studio and dotnet ef can reach the same database the stack uses.
+      # Host side is 5433 to stay clear of a natively installed PostgreSQL. The API reaches
+      # it as db:5432 over the compose network either way.
+      - "${DB_PORT:-5433}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-frierenhr} -d ${POSTGRES_DB:-frierenhr}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: FrierenHR.WebAPI/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      # nginx terminates TLS and forwards. Tells the API to trust the forwarded headers and
+      # to stop issuing HTTPS redirects of its own.
+      Hosting__BehindReverseProxy: "true"
+      ConnectionStrings__DefaultConnection: >-
+        Host=db;Port=5432;Database=${POSTGRES_DB:-frierenhr};Username=${POSTGRES_USER:-frierenhr};Password=${POSTGRES_PASSWORD}
+      Jwt__Key: ${JWT_KEY:?set JWT_KEY in .env, at least 32 characters}
+      Jwt__Issuer: ${JWT_ISSUER:-FrierenHR}
+      Jwt__Audience: ${JWT_AUDIENCE:-FrierenHR}
+      # nginx serves the browser, so the API is never called cross-origin here. Kept as an
+      # empty list rather than removed, so a setup that does need it has somewhere to put it.
+      Cors__AllowedOrigins__0: ${CORS_ORIGIN:-http://localhost:8080}
+      # Seeds a demo company on an empty database. Leave unset in anything real.
+      Demo__Seed: ${DEMO_SEED:-false}
+      Demo__Password: ${DEMO_PASSWORD:-}
+    volumes:
+      # Chat attachments survive a redeploy only because of this.
+      - uploads:/app/wwwroot/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./FrierenHR.Presentation
+      dockerfile: Dockerfile
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  db-data:
+  uploads:
