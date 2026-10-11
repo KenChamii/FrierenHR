@@ -26,6 +26,9 @@ public class FrierenHRDbContext : DbContext
     public DbSet<Shift> Shifts => Set<Shift>();
     public DbSet<AttendanceCorrection> AttendanceCorrections => Set<AttendanceCorrection>();
     public DbSet<AuditEntry> AuditEntries => Set<AuditEntry>();
+    public DbSet<PayrollDeduction> PayrollDeductions => Set<PayrollDeduction>();
+    public DbSet<Payslip> Payslips => Set<Payslip>();
+    public DbSet<PayslipLine> PayslipLines => Set<PayslipLine>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
