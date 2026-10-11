@@ -1,8 +1,13 @@
-// Production. Empty apiUrl makes every call same-origin and relative, so the deployed
-// frontend talks to whatever host serves it and the API hostname is never baked into the
-// bundle. The reverse proxy in front of the container routes /api and /hubs to the API.
+// Production.
+//
+// The API is deployed as its own service on its own domain, so the full URL is baked in at
+// build time. That makes every call cross-origin, which is why the API's Cors:AllowedOrigins
+// has to list wherever this bundle is served from.
+//
+// Running the docker-compose stack instead puts nginx in front of both, serving the app and
+// proxying /api to the API on one origin. For that, set these back to '' and '/hubs/chat'.
 export const environment = {
   production: true,
-  apiUrl: '',
-  hubUrl: '/hubs/chat'
+  apiUrl: 'https://frierenhr.onrender.com',
+  hubUrl: 'https://frierenhr.onrender.com/hubs/chat'
 };
