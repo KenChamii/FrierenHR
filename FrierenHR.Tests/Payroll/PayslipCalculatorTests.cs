@@ -101,11 +101,14 @@ public class PayslipCalculatorTests
             () => PayslipCalculator.Calculate(-1m, 80m, 0m, []));
     }
 
+    // Written as double literals on purpose. An int literal in InlineData cannot be
+    // converted to a double? parameter by xUnit's reflection, which fails at run time
+    // rather than at compile time.
     [Theory]
-    [InlineData(34_800, 174, 200)]
-    [InlineData(30_000, 174, 172.41)]
-    [InlineData(null, 174, 0)]      // no rate recorded
-    [InlineData(30_000, 0, 0)]      // no divisor, so no derivable rate
+    [InlineData(34_800d, 174d, 200d)]
+    [InlineData(30_000d, 174d, 172.41d)]
+    [InlineData(null, 174d, 0d)]     // no rate recorded
+    [InlineData(30_000d, 0d, 0d)]    // no divisor, so no derivable rate
     public void The_hourly_rate_comes_from_the_monthly_rate_and_the_standard_hours(
         double? monthly, double hours, double expected)
     {
