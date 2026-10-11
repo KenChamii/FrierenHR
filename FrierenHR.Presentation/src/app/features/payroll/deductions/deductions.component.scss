@@ -1,0 +1,31 @@
+@use '../../../../styles/admin-page';
+
+.form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  padding: 1.25rem;
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    width: 11rem;
+  }
+
+  .field.wide { width: 18rem; }
+  .field.narrow { width: 7rem; }
+
+  .actions { display: flex; gap: 0.5rem; }
+}
+
+:host ::ng-deep .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+:host ::ng-deep td.muted { color: var(--hr-text-muted); }
+
+// A retired line stays legible but clearly out of use.
+:host ::ng-deep tr.retired td { opacity: 0.55; }

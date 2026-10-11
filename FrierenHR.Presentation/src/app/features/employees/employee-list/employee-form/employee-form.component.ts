@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { DropdownModule } from 'primeng/dropdown';
+import { InputNumberModule } from 'primeng/inputnumber';
 import { DatePickerModule } from 'primeng/datepicker';
 import { ButtonModule } from 'primeng/button';
 import { EmployeeService } from '../../../../core/services/employee.service';
@@ -12,11 +13,12 @@ import { CompanyService } from '../../../../core/services/company.service';
 import { EmployeeDto } from '../../../../core/models/employee.model';
 import { DepartmentDto } from '../../../../core/models/company.model';
 import { EMPLOYEE_ROLES } from '../../../../core/models/enums.model';
+import { toLocalDateTime } from '../../../../core/utils/dates';
 
 @Component({
   selector: 'app-employee-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, InputTextModule, PasswordModule, DropdownModule, DatePickerModule, ButtonModule],
+  imports: [CommonModule, ReactiveFormsModule, InputTextModule, PasswordModule, DropdownModule, InputNumberModule, DatePickerModule, ButtonModule],
   templateUrl: './employee-form.component.html',
   styleUrl: './employee-form.component.scss',
 })
@@ -45,6 +47,10 @@ export class EmployeeFormComponent implements OnInit {
     role: ['Employee', Validators.required],
     departmentId: [null as string | null],
     managerId: [null as string | null],
+    // Optional. An employee with no rate simply does not get a payslip, and the run says so
+    // by name rather than pricing them at zero.
+    monthlyRate: [null as number | null, Validators.min(0)],
+    standardMonthlyHours: [174, [Validators.required, Validators.min(1)]],
   });
 
   // Mirrors PasswordPolicy on the backend (min 8 chars, at least one letter and one digit) —
@@ -57,6 +63,8 @@ export class EmployeeFormComponent implements OnInit {
         firstName: this.employee.firstName, lastName: this.employee.lastName,
         hireDate: new Date(this.employee.hireDate), role: this.employee.role,
         departmentId: this.employee.departmentId ?? null, managerId: this.employee.managerId ?? null,
+        monthlyRate: this.employee.monthlyRate ?? null,
+        standardMonthlyHours: this.employee.standardMonthlyHours ?? 174,
       });
       this.form.get('email')?.disable();
       this.form.get('password')?.clearValidators();
@@ -66,10 +74,16 @@ export class EmployeeFormComponent implements OnInit {
 
     const companyId = this.authService.currentCompanyId();
     if (companyId) {
-      this.companyService.getDepartments(companyId).subscribe({ next: (list) => this.departments.set(list) });
+      // Both lookups report their own failure. Without this an unreachable API left the
+      // dropdowns silently empty, which reads as "this company has no departments".
+      this.companyService.getDepartments(companyId).subscribe({
+        next: (list) => this.departments.set(list),
+        error: () => this.errorMessage.set('Could not load departments.'),
+      });
       this.employeeService.getByCompany(companyId).subscribe({
         // Can't be your own manager when editing — otherwise a manager loop would be trivial to create.
         next: (list) => this.managers.set(this.employee ? list.filter((e) => e.id !== this.employee!.id) : list),
+        error: () => this.errorMessage.set('Could not load the manager list.'),
       });
     }
   }
@@ -84,12 +98,14 @@ export class EmployeeFormComponent implements OnInit {
       ? this.employeeService.update(this.employee.id, {
           departmentId: raw.departmentId ?? undefined, managerId: raw.managerId ?? undefined,
           firstName: raw.firstName!, lastName: raw.lastName!, role: raw.role as any, isActive: true,
+          monthlyRate: raw.monthlyRate ?? null, standardMonthlyHours: raw.standardMonthlyHours ?? 174,
         })
       : this.employeeService.create({
           companyId: this.authService.currentCompanyId() ?? '',
           departmentId: raw.departmentId ?? undefined, managerId: raw.managerId ?? undefined,
           firstName: raw.firstName!, lastName: raw.lastName!, email: raw.email!,
-          password: raw.password!, hireDate: (raw.hireDate as Date).toISOString(), role: raw.role as any,
+          password: raw.password!, hireDate: toLocalDateTime(raw.hireDate as Date), role: raw.role as any,
+          monthlyRate: raw.monthlyRate ?? null, standardMonthlyHours: raw.standardMonthlyHours ?? 174,
         });
 
     request$.subscribe({

@@ -59,6 +59,17 @@ export const routes: Routes = [
         canActivate: [roleGuard],
         data: { roles: ['HRAdmin'] },
       },
+      // Payslips are self-service: the endpoint returns the caller's own unless they are HR.
+      {
+        path: 'payslips',
+        loadComponent: () => import('./features/payroll/payslips/payslips.component').then(m => m.PayslipsComponent),
+      },
+      {
+        path: 'payroll-deductions',
+        loadComponent: () => import('./features/payroll/deductions/deductions.component').then(m => m.PayrollDeductionsComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['HRAdmin'] },
+      },
       // Reports. The forecast is a person's own balance, so it needs no role; the other three
       // read across the company and are gated here as well as at the API.
       {
