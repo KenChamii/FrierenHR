@@ -41,3 +41,38 @@ table,
   box-shadow: var(--hr-shadow) !important;
   border-radius: var(--hr-radius) !important;
 }
+
+/* ---------------------------------------------------------------------------
+   Narrow screens
+
+   Rules that would otherwise be repeated in sixteen component stylesheets. Each
+   one addresses a way a desktop layout fails on a phone rather than a general
+   preference, so they are deliberately few.
+   --------------------------------------------------------------------------- */
+
+/* A long word or an unbroken id in a cell can push the page wider than the screen,
+   which leaves every screen scrolling sideways over empty space. */
+body { overflow-x: hidden; }
+
+@media (max-width: 900px) {
+  /* A table of eight columns cannot usefully shrink to 360px. Giving it its own
+     horizontal scroll keeps the columns readable and keeps the page itself still.
+     Both class names are matched because PrimeNG renamed this wrapper. */
+  .p-datatable-wrapper,
+  .p-datatable-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .p-datatable table { min-width: 44rem; }
+
+  /* Dialogs are sized for a desktop and would otherwise hang off the edge. */
+  .p-dialog {
+    width: 95vw !important;
+    max-width: 95vw;
+    margin: 0.5rem;
+  }
+
+  /* A date picker wider than the viewport is unusable. */
+  .p-datepicker-panel { max-width: 95vw; }
+}

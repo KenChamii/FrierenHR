@@ -238,36 +238,104 @@
   min-width: 0;
 }
 
+// Hidden above the breakpoint, where the sidebar is always on screen.
+.menu-toggle,
+.drawer-close,
+.scrim {
+  display: none;
+}
+
 @media (max-width: 900px) {
+  // The sidebar leaves the flow and floats over the content, so the page keeps the full
+  // width whether the drawer is open or not.
   .shell { flex-direction: column; }
 
   .sidebar {
-    width: 100%;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.875rem 1rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 60;
+    width: min(280px, 82vw);
 
-    .brand { padding: 0 0.75rem 0 0; border-bottom: none; }
+    // Scrollable, because nineteen links do not fit on a short screen and a drawer that
+    // cuts off its last items is worse than no drawer.
+    overflow-y: auto;
+    overscroll-behavior: contain;
 
-    nav { flex-direction: row; flex-wrap: wrap; margin-top: 0; }
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
 
-    .nav-link {
-      padding: 0.5rem 0.75rem;
-      border-left: none;
-      border-bottom: 2px solid transparent;
-
-      &.active { border-bottom-color: var(--hr-accent); }
-
-      span { display: none; }
-      i { font-size: 1rem; }
-    }
-
-    .sidebar-footer { margin: 0 0 0 auto; padding-top: 0; border-top: none; }
+    &.open { transform: translateX(0); }
   }
 
-  .topbar { padding: 0 1rem; }
-  .topbar .search { display: none; }
+  // Slides without animating for anyone who has asked for less movement.
+  @media (prefers-reduced-motion: reduce) {
+    .sidebar { transition: none; }
+  }
+
+  .scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(13, 26, 20, 0.5);
+
+    // Not rendered until open, so it cannot swallow taps on the content behind it.
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+
+    &.open { visibility: visible; opacity: 1; }
+  }
+
+  .drawer-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    margin-left: auto;
+    border: none;
+    background: none;
+    color: var(--hr-text-inverse);
+    opacity: 0.72;
+    cursor: pointer;
+  }
+
+  .menu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    flex: none;
+    border: 1px solid var(--hr-border);
+    background: transparent;
+    color: var(--hr-text);
+    cursor: pointer;
+  }
+
+  .topbar {
+    padding: 0 1rem;
+    gap: 0.75rem;
+
+    .search { display: none; }
+
+    // Pushed to the right so the hamburger owns the left edge.
+    .topbar-actions { margin-left: auto; }
+  }
+
   .content { padding: 1.25rem 1rem; }
+}
+
+// A phone, as opposed to a small tablet. The name and role beside the avatar are the first
+// thing worth dropping: the avatar still identifies who is signed in.
+@media (max-width: 560px) {
+  .topbar {
+    .user-meta { display: none; }
+    .divider { display: none; }
+  }
+
+  .content { padding: 1rem 0.875rem; }
 }

@@ -1,6 +1,8 @@
-import { Component, OnInit, computed, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { NavigationEnd, Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { filter } from 'rxjs';
 import { ButtonModule } from 'primeng/button';
 import { AuthService } from '../../core/services/auth.service';
 import { MessagingService } from '../../core/services/messaging.service';
@@ -22,6 +24,18 @@ interface NavItem { label: string; icon: string; path: string; roles?: string[];
 export class ShellComponent implements OnInit {
   private readonly messaging = inject(MessagingService);
   private readonly setup = inject(SetupService);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
+
+  /**
+   * Whether the navigation drawer is open. Only meaningful on a narrow screen: above the
+   * breakpoint the sidebar is always visible and this is ignored.
+   *
+   * Nineteen links do not fit across the top of a phone, and wrapping them into rows of
+   * icons costs most of the screen before any content appears. A drawer keeps the full
+   * labelled list and gives the content the whole viewport.
+   */
+  readonly menuOpen = signal(false);
 
   /** The nav item the setup checklist is pointing at, or null when setup is done. */
   readonly setupTarget = computed(() => this.setup.nextRoute());
@@ -57,6 +71,12 @@ export class ShellComponent implements OnInit {
     // Setup progress drives the pointer beside the nav item that comes next.
     this.setup.refresh();
 
+    // Closing on navigation rather than on click, so the drawer also closes when something
+    // else routes: the setup banner, a redirect, or the browser's back button.
+    this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.menuOpen.set(false));
+
     // Connected here rather than on the Messages screen, so a message that arrives while
     // somebody is on Leave or Attendance still lights up the sidebar.
     try {
@@ -70,6 +90,14 @@ export class ShellComponent implements OnInit {
       // Chat is not essential to the rest of the application. The Messages screen reports
       // the problem when somebody actually goes there.
     }
+  }
+
+  toggleMenu(): void {
+    this.menuOpen.update((open) => !open);
+  }
+
+  closeMenu(): void {
+    this.menuOpen.set(false);
   }
 
   /** True for the Messages link while anything is unread. */
