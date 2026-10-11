@@ -1,4 +1,5 @@
-import { Component, OnInit, effect, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -18,6 +19,8 @@ import { AttendanceLogDto } from '../../../../core/models/attendance.model';
   templateUrl: './attendance-history.component.html',
 })
 export class AttendanceHistoryComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
+
   readonly logs = signal<AttendanceLogDto[]>([]);
   readonly loading = signal(true);
   readonly errorMessage = signal<string | null>(null);
@@ -27,16 +30,16 @@ export class AttendanceHistoryComponent implements OnInit {
     private authService: AuthService,
     private confirmationService: ConfirmationService,
     private refreshService: AttendanceRefreshService,
-  ) {
-    // Reruns whenever any widget on the page calls notifyChanged() — including once
-    // immediately on creation, so this replaces the old ngOnInit() load call too.
-    effect(() => {
-      this.refreshService.version();
-      this.refresh();
-    });
-  }
+  ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.refresh();
+
+    // Reloads whenever another widget on the page saves or deletes an entry.
+    this.refreshService.changes$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.refresh());
+  }
 
   refresh(): void {
     const employeeId = this.authService.currentEmployeeId();

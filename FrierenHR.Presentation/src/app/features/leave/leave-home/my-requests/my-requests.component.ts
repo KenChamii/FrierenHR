@@ -1,4 +1,5 @@
-import { Component, effect, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
@@ -13,7 +14,9 @@ import { LeaveRequestDto } from '../../../../core/models/leave.model';
   imports: [CommonModule, TableModule, TagModule],
   templateUrl: './my-requests.component.html',
 })
-export class MyRequestsComponent {
+export class MyRequestsComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
+
   readonly requests = signal<LeaveRequestDto[]>([]);
   readonly loading = signal(true);
 
@@ -21,12 +24,15 @@ export class MyRequestsComponent {
     private leaveService: LeaveService,
     private authService: AuthService,
     private refreshService: LeaveRefreshService,
-  ) {
-    // Reruns on creation and whenever the request form notifies of a new submission.
-    effect(() => {
-      this.refreshService.version();
-      this.load();
-    });
+  ) {}
+
+  ngOnInit(): void {
+    this.load();
+
+    // Reloads whenever the request form reports a new submission.
+    this.refreshService.changes$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.load());
   }
 
   load(): void {
