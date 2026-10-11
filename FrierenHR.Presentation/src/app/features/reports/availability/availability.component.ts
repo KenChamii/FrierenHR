@@ -11,7 +11,7 @@ import { DepartmentDto } from '../../../core/models/company.model';
 import {
   AVAILABILITY_LEGEND, AvailabilityDayDto, AvailabilityDto, DayAvailability,
 } from '../../../core/models/reporting.model';
-import { toIsoDate } from '../../../core/utils/download';
+import { toIsoDate } from '../../../core/utils/dates';
 
 @Component({
   selector: 'app-availability',

@@ -6,7 +6,7 @@ import { MessageModule } from 'primeng/message';
 import { TagModule } from 'primeng/tag';
 import { ReportingService } from '../../../core/services/reporting.service';
 import { LeaveForecastDto, LeaveProjectionDto } from '../../../core/models/reporting.model';
-import { toIsoDate } from '../../../core/utils/download';
+import { toIsoDate } from '../../../core/utils/dates';
 
 @Component({
   selector: 'app-leave-forecast',
