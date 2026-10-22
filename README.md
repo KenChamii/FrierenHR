@@ -190,23 +190,4 @@ The suite covers the pieces that hold real logic and no dependencies:
 - **CSV output**: quoting a name containing a comma, a decimal under a comma locale, and the byte order mark that keeps accented names readable in Excel.
 - **Password hashing** and the password policy.
 
-## Known limitations
-
-Recorded deliberately rather than left to be discovered.
-
-- **No refresh tokens.** Access tokens last eight hours and logout is client-side only, so there is no server-side revocation. Acceptable for an internal tool, not for anything public facing.
-- **No self-service password reset.** HR can issue a temporary password, which the holder is then forced to change before they can use anything else. There is no email, so that password is handed over in person, and the last remaining HR administrator locking themselves out still has no route back in.
-- **No payslip documents.** Payslips are figures on a screen, not generated PDFs, so there is nothing to attach or archive yet.
-- **One pay rate per employee, with no history.** A raise reprices every period that is regenerated afterwards, including old ones. Effective-dated compensation is the fix, and is not built.
-- **A split day cannot be entered.** The week grid holds one entry per day with a break as a duration, so 09:00 to 12:00 and 16:00 to 20:00 has to go through a correction. The model allows several entries per day, so this is a UI limit rather than a schema one.
-- **List endpoints are unpaginated.** `Repository<T>.GetAllAsync` returns whole tables. Fine at seed scale, wrong for employee lists and message history in production.
-- **Photos and attachments go to local disk.** `LocalDiskPhotoStorageService` writes under `wwwroot/uploads`, which does not survive a container restart. The interface is there to swap in blob storage.
-- **Unread is a flag, not a count.** The conversation query reports whether anything is unread, not how many, so the sidebar badge counts conversations rather than messages.
-- **The overtime multiplier on the payroll export is per employee, not per day.** A rule keyed on a particular day's holiday cannot be represented in a one-row-per-employee format; that would be a different report.
-- **Tenant isolation is enforced per endpoint, not globally.** There are no query filters on the context, so each controller checks the caller's company itself. Two places currently do not: `ApprovalChainsController.GetForCompany` trusts the company id in the route, and `IsSelfOrRole` admits a Manager or HRAdmin against any employee id, including another company's. Exploiting either needs a known GUID, but both are real. Global query filters are the fix.
-- **`ApprovalEscalation` rules are not evaluated.** They can be configured and are validated, but escalation reads `ApprovalChainStep.EscalateAfterDays` directly. The rules screen marks the type as not wired rather than implying it works.
-
-## Licence
-
-MIT.
 
