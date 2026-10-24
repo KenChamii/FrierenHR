@@ -6,7 +6,7 @@ Built with .NET 10, Angular 18 and PostgreSQL.
 
 **[Live demo](https://frierenhr.irreversiblechain.workers.dev)** — sign in as `hr@frierenhr.demo`, or create your own company from the landing page.
 
-![FrierenHR demo: landing page, company sign-up, rules, attendance, leave and the audit trail](docs/media/demo.gif)
+![FrierenHR demo: sign-up, sample data, rules, attendance, leave, approvals, messaging, payslips and the audit trail](docs/media/demo.gif)
 
 The demo runs on free hosting that sleeps when idle, so the first request after a quiet
 period takes up to a minute while the API and the database wake. It is seeded with one
@@ -176,6 +176,11 @@ There the frontend holds the API's absolute URL and the API allows that origin e
 
 Migrations are applied on startup. Demo data is seeded only when `Demo__Seed` is set, and
 the seeder refuses any database that already holds a company.
+
+Set `Demo__AllowSampleData` to `true` to show a **Load sample data** button on the dashboard of a
+newly created company. It fills that company with staff, leave, attendance, holidays and pending
+approvals so every screen has something on it, and refuses once the company has records of its own.
+Leave it off for a deployment people really run.
 
 ## Testing
 
