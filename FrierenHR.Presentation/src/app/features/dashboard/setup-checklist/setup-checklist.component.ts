@@ -23,6 +23,8 @@ export class SetupChecklistComponent implements OnInit {
 
   readonly visible = computed(() => this.setup.showChecklist());
   readonly progress = computed(() => this.setup.progress());
+  readonly sampleDataAvailable = this.setup.sampleDataAvailable;
+  readonly loadingSampleData = this.setup.loadingSampleData;
 
   readonly steps = computed(() => this.progress()?.steps ?? []);
 
@@ -47,4 +49,6 @@ export class SetupChecklistComponent implements OnInit {
   markDone(step: SetupStepDto): void { this.setup.acknowledge(step.key); }
 
   dismiss(): void { this.setup.dismiss(); }
+
+  loadSampleData(): void { this.setup.loadSampleData(); }
 }

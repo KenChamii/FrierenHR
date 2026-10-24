@@ -25,6 +25,7 @@ public static class DemoDataSeeder
 {
     public const string CompanyCode = "FRIEREN";
     public const string AdminEmail = "hr@frierenhr.demo";
+    public const string EmailDomain = "frierenhr.demo";
 
     /// <summary>Weeks of attendance history generated behind the current date.</summary>
     private const int HistoryWeeks = 3;
@@ -55,8 +56,27 @@ public static class DemoDataSeeder
             Email: AdminEmail,
             Password: password), ct);
 
-        var companyId = registered.CompanyId;
-        var adminId = registered.EmployeeId;
+        await PopulateAsync(context, registered.CompanyId, registered.EmployeeId, password, EmailDomain, ct);
+    }
+
+    /// <summary>
+    /// Adds the demo departments, staff and history to a company that already exists. Split from
+    /// <see cref="SeedAsync"/> so a company someone signed up for can load the same data on
+    /// request. Callers are responsible for checking the company is empty first.
+    /// </summary>
+    /// <param name="emailDomain">
+    /// Emails are unique across every company, so a second company loading this data needs its own
+    /// domain or it collides with the first.
+    /// </param>
+    public static async Task PopulateAsync(
+        FrierenHRDbContext context,
+        Guid companyId,
+        Guid adminId,
+        string password,
+        string emailDomain,
+        CancellationToken ct = default)
+    {
+        var domain = emailDomain;
 
         var defaultShift = await context.Shifts
             .Where(s => s.CompanyId == companyId && s.IsDefault)
@@ -87,38 +107,40 @@ public static class DemoDataSeeder
 
         var today = DateTime.UtcNow.Date;
 
+        // The leads report to the administrator, which is what puts their leave requests in the
+        // administrator's approvals inbox: a request is routed to the requester's own manager.
         var engineeringLead = NewEmployee(
-            companyId, engineering.Id, "Marco", "Villanueva", "marco@frierenhr.demo",
-            EmployeeRole.Manager, 110_000m, today.AddYears(-4), password);
+            companyId, engineering.Id, "Marco", "Villanueva", $"marco@{domain}",
+            EmployeeRole.Manager, 110_000m, today.AddYears(-4), password, adminId);
 
         var supportLead = NewEmployee(
-            companyId, support.Id, "Divina", "Santos", "divina@frierenhr.demo",
-            EmployeeRole.Manager, 88_000m, today.AddYears(-3), password);
+            companyId, support.Id, "Divina", "Santos", $"divina@{domain}",
+            EmployeeRole.Manager, 88_000m, today.AddYears(-3), password, adminId);
 
         context.Employees.AddRange(engineeringLead, supportLead);
         await context.SaveChangesAsync(ct);
 
         var staff = new List<Employee>
         {
-            NewEmployee(companyId, engineering.Id, "Jun", "Alcantara", "jun@frierenhr.demo",
+            NewEmployee(companyId, engineering.Id, "Jun", "Alcantara", $"jun@{domain}",
                 EmployeeRole.Employee, 62_000m, today.AddMonths(-20), password, engineeringLead.Id),
-            NewEmployee(companyId, engineering.Id, "Precious", "Lim", "precious@frierenhr.demo",
+            NewEmployee(companyId, engineering.Id, "Precious", "Lim", $"precious@{domain}",
                 EmployeeRole.Employee, 58_000m, today.AddMonths(-14), password, engineeringLead.Id),
-            NewEmployee(companyId, engineering.Id, "Rafael", "Ocampo", "rafael@frierenhr.demo",
+            NewEmployee(companyId, engineering.Id, "Rafael", "Ocampo", $"rafael@{domain}",
                 EmployeeRole.Employee, 45_000m, today.AddMonths(-4), password, engineeringLead.Id),
-            NewEmployee(companyId, support.Id, "Mariel", "Bautista", "mariel@frierenhr.demo",
+            NewEmployee(companyId, support.Id, "Mariel", "Bautista", $"mariel@{domain}",
                 EmployeeRole.Employee, 38_000m, today.AddMonths(-26), password, supportLead.Id),
-            NewEmployee(companyId, support.Id, "Kiko", "Dela Cruz", "kiko@frierenhr.demo",
+            NewEmployee(companyId, support.Id, "Kiko", "Dela Cruz", $"kiko@{domain}",
                 EmployeeRole.Employee, 36_000m, today.AddMonths(-9), password, supportLead.Id),
 
             // Deliberately hired five weeks ago: below the six-month tenure the starter accrual
             // rule requires, so the demo shows an employee the rules engine correctly skips.
-            NewEmployee(companyId, support.Id, "Trina", "Espinosa", "trina@frierenhr.demo",
+            NewEmployee(companyId, support.Id, "Trina", "Espinosa", $"trina@{domain}",
                 EmployeeRole.Employee, 34_000m, today.AddDays(-35), password, supportLead.Id),
 
             // No recorded pay, which is what makes payslip generation skip somebody rather
             // than price them at zero. Worth showing, because it is a real data gap.
-            NewEmployee(companyId, people.Id, "Noel", "Gatchalian", "noel@frierenhr.demo",
+            NewEmployee(companyId, people.Id, "Noel", "Gatchalian", $"noel@{domain}",
                 EmployeeRole.Employee, null, today.AddMonths(-7), password, adminId),
         };
 
@@ -130,8 +152,41 @@ public static class DemoDataSeeder
 
         context.LeaveBalances.AddRange(BuildLeaveBalances(everyone, today));
         context.Holidays.AddRange(BuildHolidays(companyId, today));
-        context.LeaveRequests.AddRange(BuildLeaveRequests(staff, engineeringLead, supportLead, today));
-        context.AttendanceLogs.AddRange(BuildAttendance(everyone, defaultShift, nightShift, today));
+        var leaveRequests = BuildLeaveRequests(staff, engineeringLead, supportLead, today);
+        context.LeaveRequests.AddRange(leaveRequests);
+
+        // Pending requests only show up on the approvals screen when they have a running
+        // approval behind them, so give them one rather than leaving that screen empty.
+        var chain = await context.ApprovalChains
+            .Include(c => c.Steps)
+            .FirstOrDefaultAsync(c => c.CompanyId == companyId, ct);
+
+        if (chain is null)
+        {
+            chain = new ApprovalChain
+            {
+                CompanyId = companyId,
+                Name = "Standard leave approval",
+                Steps =
+                [
+                    new ApprovalChainStep { StepOrder = 1, ApproverRole = EmployeeRole.Manager, EscalateAfterDays = 3 },
+                    new ApprovalChainStep { StepOrder = 2, ApproverRole = EmployeeRole.HRAdmin, EscalateAfterDays = 3 },
+                ],
+            };
+            context.ApprovalChains.Add(chain);
+        }
+
+        context.ApprovalInstances.AddRange(leaveRequests
+            .Where(r => r.Status == LeaveStatus.Pending)
+            .Select(r => new ApprovalInstance
+            {
+                LeaveRequestId = r.Id,
+                ApprovalChainId = chain.Id,
+                CurrentStepOrder = chain.Steps.Min(step => step.StepOrder),
+                Status = ApprovalStatus.Pending,
+                StepStartedAt = r.RequestedAt,
+            }));
+        context.AttendanceLogs.AddRange(BuildAttendance(everyone, defaultShift, nightShift, support.Id, today));
 
         await context.SaveChangesAsync(ct);
     }
@@ -241,7 +296,7 @@ public static class DemoDataSeeder
         // Waiting on a manager, which is what puts a number on the approvals tile.
         requests.Add(new LeaveRequest
         {
-            EmployeeId = staff[1].Id,
+            EmployeeId = engineeringLead.Id,
             LeaveType = LeaveType.Vacation,
             StartDate = today.AddDays(6),
             EndDate = today.AddDays(8),
@@ -254,7 +309,7 @@ public static class DemoDataSeeder
 
         requests.Add(new LeaveRequest
         {
-            EmployeeId = staff[3].Id,
+            EmployeeId = supportLead.Id,
             LeaveType = LeaveType.Emergency,
             StartDate = today.AddDays(1),
             EndDate = today.AddDays(1),
@@ -321,14 +376,14 @@ public static class DemoDataSeeder
     /// 15-minute grace, occasional overtime, and one day left open as a missing clock-out.
     /// </summary>
     private static List<AttendanceLog> BuildAttendance(
-        List<Employee> employees, Shift dayShift, Shift nightShift, DateTime today)
+        List<Employee> employees, Shift dayShift, Shift nightShift, Guid supportDepartmentId, DateTime today)
     {
         var logs = new List<AttendanceLog>();
         var random = new Random(RandomSeed);
 
         foreach (var employee in employees)
         {
-            var shift = IsSupportStaff(employee) ? nightShift : dayShift;
+            var shift = employee.DepartmentId == supportDepartmentId ? nightShift : dayShift;
 
             for (var dayOffset = HistoryWeeks * 7; dayOffset >= 1; dayOffset--)
             {
@@ -372,11 +427,6 @@ public static class DemoDataSeeder
 
         return logs;
     }
-
-    /// <summary>Support staff are the ones on the night shift in this demo company.</summary>
-    private static bool IsSupportStaff(Employee employee) =>
-        employee.Email is "mariel@frierenhr.demo" or "kiko@frierenhr.demo" or "trina@frierenhr.demo"
-            or "divina@frierenhr.demo";
 
     private static bool IsRestDay(DayOfWeek day, WeekDays restDays)
     {

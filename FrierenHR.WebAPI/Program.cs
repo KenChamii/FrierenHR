@@ -160,6 +160,7 @@ builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 // Setup progress is read from the company's own data, so it cannot report a step as done
 // that is not, and it un-ticks if the thing is removed.
 builder.Services.AddScoped<ISetupProgressService, SetupProgressService>();
+builder.Services.AddScoped<ISampleDataService, SampleDataService>();
 
 // Payroll. Payslips are priced from the payroll export, so the hours on a payslip and the
 // hours on the export can never disagree.
