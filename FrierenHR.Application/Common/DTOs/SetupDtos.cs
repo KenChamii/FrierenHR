@@ -13,3 +13,6 @@ public record SetupStepDto(
 /// <param name="NextRoute">The first unfinished required step, or null when there is none.</param>
 public record SetupProgressDto(
     int Completed, int Required, bool IsComplete, string? NextRoute, List<SetupStepDto> Steps);
+
+/// <param name="Available">The deployment allows sample data and this company is still empty.</param>
+public record SampleDataStatusDto(bool Available);

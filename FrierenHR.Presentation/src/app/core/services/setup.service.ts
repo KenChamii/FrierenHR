@@ -29,6 +29,10 @@ export class SetupService {
 
   readonly dismissed = signal(this.readDismissed());
 
+  /** True when the deployment offers sample data and this company is still empty. */
+  readonly sampleDataAvailable = signal(false);
+  readonly loadingSampleData = signal(false);
+
   /** Progress with manual acknowledgements folded in. */
   readonly progress = computed<SetupProgressDto | null>(() => {
     const progress = this.raw();
@@ -74,6 +78,20 @@ export class SetupService {
       // Silent. A checklist that cannot load is a missing nicety, not a failure worth
       // interrupting somebody's dashboard for.
       error: () => this.raw.set(null),
+    });
+
+    this.http.get<{ available: boolean }>(`${environment.apiUrl}/api/setup/sample-data`).subscribe({
+      next: status => this.sampleDataAvailable.set(status.available),
+      error: () => this.sampleDataAvailable.set(false),
+    });
+  }
+
+  /** Fills the company with sample staff, leave and attendance, then reloads so every screen shows it. */
+  loadSampleData(): void {
+    this.loadingSampleData.set(true);
+    this.http.post(`${environment.apiUrl}/api/setup/sample-data`, {}).subscribe({
+      next: () => window.location.reload(),
+      error: () => { this.loadingSampleData.set(false); this.refresh(); },
     });
   }
 

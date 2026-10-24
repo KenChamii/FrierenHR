@@ -24,6 +24,14 @@
   }
 }
 
+.head-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 // A hairline, not a chunky progress bar. It marks progress without demanding attention.
 .bar {
   height: 2px;

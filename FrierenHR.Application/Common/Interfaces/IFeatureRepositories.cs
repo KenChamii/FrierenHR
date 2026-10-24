@@ -58,7 +58,7 @@ public interface ITimesheetRepository : IRepository<Timesheet>
     Task<Timesheet?> GetForWeekAsync(Guid employeeId, DateTime weekStartDate, CancellationToken ct = default);
     Task<List<Timesheet>> GetByEmployeeAsync(Guid employeeId, CancellationToken ct = default);
     Task<List<Timesheet>> GetPendingForManagerAsync(Guid managerId, CancellationToken ct = default);
-    Task<List<Timesheet>> GetAllPendingAsync(CancellationToken ct = default);
+    Task<List<Timesheet>> GetAllPendingAsync(Guid companyId, CancellationToken ct = default);
 }
 
 public interface IApprovalRepository

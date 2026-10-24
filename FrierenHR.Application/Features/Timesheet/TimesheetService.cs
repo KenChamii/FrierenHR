@@ -141,9 +141,9 @@ public class TimesheetService : ITimesheetService
         var approver = await _employeeRepository.GetByIdAsync(approverId, ct)
             ?? throw new InvalidOperationException($"Employee '{approverId}' not found.");
 
-        // HRAdmin sees every pending submission company-wide; a Manager only sees their direct reports'.
+        // HRAdmin sees every pending submission in their own company; a Manager only sees their direct reports'.
         var pending = approver.Role == EmployeeRole.HRAdmin
-            ? await _timesheetRepository.GetAllPendingAsync(ct)
+            ? await _timesheetRepository.GetAllPendingAsync(approver.CompanyId, ct)
             : await _timesheetRepository.GetPendingForManagerAsync(approverId, ct);
 
         var result = new List<TimesheetDto>();

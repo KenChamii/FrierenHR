@@ -6,8 +6,16 @@
         <h3>Finish setting up {{ progress()!.completed }} of {{ progress()!.required }}</h3>
         <p class="sub">The order matters: each step feeds the next one.</p>
       </div>
-      <button pButton type="button" severity="secondary" [text]="true" label="Hide"
-              (click)="dismiss()"></button>
+      <div class="head-actions">
+        @if (sampleDataAvailable()) {
+          <!-- For a walkthrough: fills an empty company so every screen has something in it. -->
+          <button pButton type="button" severity="secondary" [outlined]="true"
+                  label="Load sample data" [loading]="loadingSampleData()"
+                  (click)="loadSampleData()"></button>
+        }
+        <button pButton type="button" severity="secondary" [text]="true" label="Hide"
+                (click)="dismiss()"></button>
+      </div>
     </header>
 
     <div class="bar" [attr.aria-label]="percent() + '% complete'">

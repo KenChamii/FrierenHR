@@ -173,7 +173,12 @@
   // element rather than on the host itself. Without a width here the host shrinks to its
   // content and the inner "w-full" has almost nothing to fill.
   .condition p-dropdown,
-  .condition p-multiselect,
+  .condition p-multiselect {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+  }
+
   .condition p-inputnumber,
   .condition .value-cell {
     display: block;
