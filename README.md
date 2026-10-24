@@ -6,6 +6,8 @@ Built with .NET 10, Angular 18 and PostgreSQL.
 
 **[Live demo](https://frierenhr.irreversiblechain.workers.dev)** — sign in as `hr@frierenhr.demo`, or create your own company from the landing page.
 
+![FrierenHR demo: landing page, company sign-up, rules, attendance, leave and the audit trail](docs/media/demo.gif)
+
 The demo runs on free hosting that sleeps when idle, so the first request after a quiet
 period takes up to a minute while the API and the database wake. It is seeded with one
 company that has staff, three weeks of attendance, leave in several states and holidays,
