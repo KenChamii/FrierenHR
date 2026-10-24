@@ -52,7 +52,13 @@ table,
    element. The host itself stays inline, so a control told to fill its container often had
    very little to fill. */
 p-dropdown.w-full,
-p-multiselect.w-full,
+p-multiselect.w-full {
+  /* These hosts are themselves the PrimeNG select element, a flex row of label and trigger.
+     display: block stacked the trigger under a label squeezed to its own text width. */
+  display: flex;
+  width: 100%;
+}
+
 p-inputnumber.w-full,
 p-calendar.w-full,
 p-datepicker.w-full {
