@@ -20,8 +20,8 @@ public class TimesheetRepository : Repository<Timesheet>, ITimesheetRepository
             .Where(t => t.Status == TimesheetStatus.Submitted && t.Employee!.ManagerId == managerId)
             .OrderBy(t => t.SubmittedAt).ToListAsync(ct);
 
-    public async Task<List<Timesheet>> GetAllPendingAsync(CancellationToken ct = default) =>
+    public async Task<List<Timesheet>> GetAllPendingAsync(Guid companyId, CancellationToken ct = default) =>
         await DbSet.AsNoTracking()
-            .Where(t => t.Status == TimesheetStatus.Submitted)
+            .Where(t => t.Status == TimesheetStatus.Submitted && t.Employee!.CompanyId == companyId)
             .OrderBy(t => t.SubmittedAt).ToListAsync(ct);
 }
