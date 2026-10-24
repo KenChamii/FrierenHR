@@ -19,8 +19,7 @@ public class TokenService
             new Claim(ClaimTypes.Email, employee.Email),
             new Claim(ClaimTypes.Role, employee.Role.ToString()),
             new Claim("companyId", employee.CompanyId.ToString()),
-            // Carried in the token so the restriction can be enforced on every request
-            // without a database read. A client-side check alone would be bypassable.
+            // Carried in the token so the restriction can be enforced on every request without a database read.
             new Claim("mustChangePassword", employee.MustChangePassword ? "true" : "false")
         };
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));

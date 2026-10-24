@@ -40,8 +40,7 @@ public class LeaveRepository : Repository<LeaveRequest>, ILeaveRepository
         var query = DbSet.Include(l => l.Employee).AsNoTracking()
             .Where(l => l.Status == LeaveStatus.Approved
                         && l.Employee!.CompanyId == companyId
-                        // Overlap, not containment: leave that starts before the window and
-                        // ends after it still covers every day in between.
+                        // Overlap, not containment: leave that starts before the window and ends after it still covers every day in between.
                         && l.StartDate <= to
                         && l.EndDate >= from);
 

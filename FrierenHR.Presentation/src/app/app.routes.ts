@@ -4,8 +4,7 @@ import { passwordChangeGuard } from './core/guards/password-change.guard';
 import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
-  // The landing page is the application's front door. pathMatch 'full' keeps it to the root
-  // URL only, so the shell below still owns /dashboard, /leave and the rest.
+  // The landing page is the application's front door.
   {
     path: '',
     pathMatch: 'full',
@@ -16,8 +15,7 @@ export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent) },
   // Sign-up creates a company and its first HRAdmin together, so it needs no account.
   { path: 'register', loadComponent: () => import('./features/auth/register/register.component').then(m => m.RegisterComponent) },
-  // Outside the shell: an account on a temporary password can reach nothing else, so there
-  // is no navigation to show it.
+  // Outside the shell: an account on a temporary password can reach nothing else, so there is no navigation to show it.
   {
     path: 'set-password',
     loadComponent: () => import('./features/auth/set-password/set-password.component').then(m => m.SetPasswordComponent),
@@ -78,8 +76,7 @@ export const routes: Routes = [
         canActivate: [roleGuard],
         data: { roles: ['HRAdmin'] },
       },
-      // Reports. The forecast is a person's own balance, so it needs no role; the other three
-      // read across the company and are gated here as well as at the API.
+      // Reports.
       {
         path: 'reports/leave-forecast',
         loadComponent: () => import('./features/reports/leave-forecast/leave-forecast.component').then(m => m.LeaveForecastComponent),

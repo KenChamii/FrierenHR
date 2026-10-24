@@ -93,7 +93,6 @@ public class RuleEvaluatorTests
     public void EvaluateFirstMatch_takes_the_first_matching_rule_in_the_order_given()
     {
         // Callers pass rules ordered by Priority, so the first match is the highest priority.
-        // This is how an exception for long-tenured staff sits above the general rule.
         var rules = new[] { Accrual(2.0m, 60), Accrual(1.25m, 0) };
 
         var senior = _evaluator.EvaluateFirstMatch(rules, nameof(RuleType.LeaveAccrual), new RuleContext().Set("tenureMonths", 72));
@@ -150,9 +149,7 @@ public class RuleEvaluatorTests
     [Fact]
     public void When_every_rule_is_broken_the_last_failure_is_reported()
     {
-        // Current behaviour, pinned deliberately: a mistyped field is reported only when no
-        // other rule matches. If a later rule matches, the mistake is invisible. Changing this
-        // is a decision, not a bug fix, so the test records what the engine does today.
+        // Current behaviour, pinned deliberately: a mistyped field is reported only when no other rule matches.
         var broken = Accrual(2.0m, 60);
         broken.Conditions[0].Field = "doesNotExist";
 

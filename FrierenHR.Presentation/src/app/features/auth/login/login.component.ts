@@ -38,15 +38,10 @@ export class LoginComponent {
     this.errorMessage.set(null);
     this.authService.login(this.form.getRawValue() as { email: string; password: string }).subscribe({
       next: (result) => {
-        // Establish the session first so the auth interceptor has a token
-        // to attach, then resolve companyId from the employee's own record
-        // — the login response doesn't carry it, and downstream screens
-        // (Employees, Dashboard) need it to scope their API calls.
+        // Establish the session first so the auth interceptor has a token to attach.
         this.authService.setSession(result);
 
-        // An account on a temporary password may reach nothing but the change endpoint, so
-        // looking up its own record here would only produce a 403 on the way to the same
-        // screen the guard sends it to.
+        // An account on a temporary password may reach nothing but the change endpoint.
         if (result.mustChangePassword) {
           this.loading.set(false);
           this.router.navigateByUrl('/set-password');
@@ -60,8 +55,7 @@ export class LoginComponent {
             this.router.navigateByUrl('/dashboard');
           },
           error: () => {
-            // Non-fatal: proceed logged-in even if this lookup fails; the
-            // affected screens will just show empty state until refreshed.
+            // Non-fatal: proceed logged-in even if this lookup fails; the affected screens will just show empty state until refreshed.
             this.loading.set(false);
             this.router.navigateByUrl('/dashboard');
           },

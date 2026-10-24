@@ -44,10 +44,7 @@
         <span class="count mono">{{ selectedSuggestions().length }} of {{ suggestions().length }} selected</span>
       </div>
 
-      <!--
-        The caveat is not decoration. The feed carries public holidays only, suggests every
-        one as Regular, and lags proclamations, and the type decides what a worked day pays.
-      -->
+      <!-- The caveat is not decoration. -->
       <p class="caveat">
         <strong>Check this before importing.</strong> {{ suggestionCaveat() }}
         <span class="source mono">Source: {{ suggestionSource() }}</span>

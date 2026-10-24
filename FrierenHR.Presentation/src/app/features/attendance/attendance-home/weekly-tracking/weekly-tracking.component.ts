@@ -97,8 +97,7 @@ export class WeeklyTrackingComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    // Local, not UTC. toISOString() would send the previous day from any zone ahead of UTC
-    // and pull the wrong week's logs.
+    // Local, not UTC.
     this.attendance.getByEmployee(employeeId, toLocalDateTime(start), toLocalDateTime(end)).subscribe({
       next: logs => {
         this.rows.set(this.buildRows(start, logs));
@@ -112,10 +111,7 @@ export class WeeklyTrackingComponent implements OnInit {
     });
   }
 
-  /**
-   * Rest days and holidays are a separate, optional call. The grid is usable without it, so a
-   * failure here greys nothing out rather than blocking the week.
-   */
+  /** Rest days and holidays are a separate, optional call. */
   private markNonWorkingDays(start: Date, end: Date): void {
     this.holidays.countWorkingDays(toIsoDate(start), toIsoDate(end)).subscribe({
       next: result => {
@@ -125,8 +121,7 @@ export class WeeklyTrackingComponent implements OnInit {
         this.rows.update(rows => rows.map(row => {
           const reason = nonWorking.get(row.date);
           return reason
-            // Left enabled only if something is already logged: working a holiday happens,
-            // and the row should not silently drop the hours that prove it.
+            // Left enabled only if something is already logged: working a holiday happens.
             ? { ...row, nonWorking: true, nonWorkingReason: reason }
             : row;
         }));
@@ -157,8 +152,7 @@ export class WeeklyTrackingComponent implements OnInit {
         nonWorking: false,
         nonWorkingReason: null,
         punchLogged: !!punch,
-        // Only days that already have an entry start switched on. Everything else is opt-in,
-        // so saving a week never invents hours nobody worked.
+        // Only days that already have an entry start switched on.
         enabled: !!manual,
       });
     }
@@ -196,10 +190,7 @@ export class WeeklyTrackingComponent implements OnInit {
     this.rows.update(rows => rows.map(r => (r.date === row.date ? { ...r, ...changes } : r)));
   }
 
-  /**
-   * Copies the first filled day onto every other working day. The point of the screen: a
-   * fixed remote schedule is one edit and one button, not seven.
-   */
+  /** Copies the first filled day onto every other working day. */
   copyAcross(): void {
     const template = this.templateRow();
     if (!template) { this.error.set('Fill in one day first, then copy it across.'); return; }
@@ -268,8 +259,7 @@ export class WeeklyTrackingComponent implements OnInit {
     const days: LogWeekDayDto[] = this.rows()
       .filter(row => row.enabled && !row.punchLogged)
       .map(row => ({
-        // Sent as a plain date. The server builds the times onto it, so a time zone offset
-        // on this value could move an entry to the previous day.
+        // Sent as a plain date.
         date: `${row.date}T00:00:00`,
         startTime: `${row.start}:00`,
         endTime: `${row.end}:00`,

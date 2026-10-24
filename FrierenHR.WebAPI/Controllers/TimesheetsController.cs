@@ -22,10 +22,7 @@ public class TimesheetsController : ControllerBase
         catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
     }
 
-    // Reopens a submitted week so it can be edited, then submitted again for a fresh
-    // decision. Role is passed to the service rather than enforced only here, because the
-    // rule differs by status: an owner may recall a submission, but only HR may reopen an
-    // approved week.
+    // Reopens a submitted week so it can be edited, then submitted again for a fresh decision.
     [HttpPost("{id:guid}/reopen")]
     public async Task<ActionResult<TimesheetDto>> Reopen(Guid id, CancellationToken ct)
     {

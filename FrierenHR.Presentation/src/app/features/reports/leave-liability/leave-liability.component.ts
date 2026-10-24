@@ -25,10 +25,7 @@ export class LeaveLiabilityComponent {
   readonly exporting = signal(false);
   readonly error = signal<string | null>(null);
 
-  /**
-   * Entered rather than read from configuration: no salary is held against an employee, so a
-   * single rate the user supplies is honest about what the figure is based on.
-   */
+  /** Entered rather than read from configuration: no salary is held against an employee. */
   dailyRate: number | null = null;
 
   run(): void {

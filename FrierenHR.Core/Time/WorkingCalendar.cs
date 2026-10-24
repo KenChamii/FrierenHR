@@ -2,24 +2,14 @@ using FrierenHR.Core.Enums;
 
 namespace FrierenHR.Core.Time;
 
-/// <summary>
-/// Decides which days count as worked, given a company's holidays and a shift's rest days.
-///
-/// Pure and immutable, with no database and no framework, so leave day counting can be tested
-/// directly and reused anywhere it is needed: leave requests, accrual proration, and the
-/// payroll export still to come.
-///
-/// Build one per employee per query rather than per day. Constructing it is cheap, but the
-/// holiday lookup it is built from is not.
-/// </summary>
+/// <summary>Decides which days count as worked, given a company's holidays and a shift's rest days.</summary>
 public sealed class WorkingCalendar
 {
     private readonly IReadOnlyDictionary<DateOnly, HolidayType> _holidays;
 
     public WorkingCalendar(IEnumerable<(DateOnly Date, HolidayType Type)> holidays, WeekDays restDays)
     {
-        // Last one wins if a company records the same date twice, which beats throwing at
-        // the point of use over a data-entry mistake.
+        // Last one wins if a company records the same date twice.
         var map = new Dictionary<DateOnly, HolidayType>();
         foreach (var (date, type) in holidays) map[date] = type;
 
@@ -44,11 +34,7 @@ public sealed class WorkingCalendar
 
     public bool IsWorkingDay(DateOnly date) => !IsRestDay(date) && !IsHoliday(date);
 
-    /// <summary>
-    /// Working days from start to end, both inclusive. Returns 0 when the range is inverted,
-    /// rather than throwing: an inverted range is a caller's validation problem, and a count
-    /// of zero is the honest answer to "how many working days are in no days".
-    /// </summary>
+    /// <summary>Working days from start to end, both inclusive.</summary>
     public int CountWorkingDays(DateOnly start, DateOnly endInclusive)
     {
         var count = 0;

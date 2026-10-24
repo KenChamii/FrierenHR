@@ -14,8 +14,7 @@ public class HolidaysController : ControllerBase
     private readonly IHolidayService _holidayService;
     public HolidaysController(IHolidayService holidayService) => _holidayService = holidayService;
 
-    // GET /api/holidays?year=2026 — the company's calendar for a year. Readable by everyone,
-    // because an employee planning leave needs to know which days are closed.
+    // GET /api/holidays?year=2026 — the company's calendar for a year.
     [HttpGet]
     public async Task<ActionResult<List<HolidayDto>>> GetForYear([FromQuery] int? year, CancellationToken ct)
     {
@@ -24,8 +23,7 @@ public class HolidaysController : ControllerBase
         return Ok(await _holidayService.GetForYearAsync(companyId.Value, year ?? DateTime.UtcNow.Year, ct));
     }
 
-    // GET /api/holidays/working-days?from=&to= — how many days a leave request would actually
-    // deduct, with the skipped days listed. Used by the request form before submitting.
+    // GET /api/holidays/working-days?from=&to= — how many days a leave request would actually deduct.
     [HttpGet("working-days")]
     public async Task<ActionResult<WorkingDaysDto>> CountWorkingDays(
         [FromQuery] DateOnly from, [FromQuery] DateOnly to, [FromQuery] Guid? employeeId, CancellationToken ct)
@@ -41,10 +39,7 @@ public class HolidaysController : ControllerBase
         catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
     }
 
-    // GET /api/holidays/suggestions?year=2026&countryCode=PH
-    //
-    // Returns a year's public holidays for review and saves nothing. The import endpoint
-    // below is what writes, once an administrator has corrected the types.
+    // GET /api/holidays/suggestions?year=2026&countryCode=PH.
     [HttpGet("suggestions")]
     [Authorize(Roles = "HRAdmin")]
     public async Task<ActionResult<HolidaySuggestionsDto>> Suggestions(
@@ -60,8 +55,7 @@ public class HolidaysController : ControllerBase
         }
         catch (InvalidOperationException ex)
         {
-            // Covers both a bad year and an unreachable feed. Neither is the server's fault
-            // in a way the caller can act on beyond reading the message.
+            // Covers both a bad year and an unreachable feed.
             return BadRequest(new { message = ex.Message });
         }
     }
@@ -79,8 +73,7 @@ public class HolidaysController : ControllerBase
         catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
     }
 
-    // POST /api/holidays/import — a year's calendar in one request. Duplicates are skipped
-    // rather than failing the batch, and the result says what happened to each.
+    // POST /api/holidays/import — a year's calendar in one request.
     [HttpPost("import")]
     [Authorize(Roles = "HRAdmin")]
     public async Task<ActionResult<HolidayImportResultDto>> Import(List<SaveHolidayDto> holidays, CancellationToken ct)

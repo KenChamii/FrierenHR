@@ -38,8 +38,7 @@ public class AttendanceCorrectionsController : ControllerBase
         return Ok(await _corrections.GetByEmployeeAsync(caller.Value, ct));
     }
 
-    // GET /api/attendance-corrections/pending — your inbox: reports for a manager, the whole
-    // company for HR.
+    // GET /api/attendance-corrections/pending — your inbox: reports for a manager, the whole company for HR.
     [HttpGet("pending")]
     [Authorize(Roles = "Manager,HRAdmin")]
     public async Task<ActionResult<List<AttendanceCorrectionDto>>> Pending(CancellationToken ct)

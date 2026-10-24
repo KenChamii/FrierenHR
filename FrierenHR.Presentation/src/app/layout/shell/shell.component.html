@@ -1,6 +1,5 @@
 <div class="shell">
-  <!-- Catches the tap outside the drawer. Inert above the breakpoint, where the sidebar is
-       part of the layout rather than floating over it. -->
+  <!-- Catches the tap outside the drawer. -->
   <div class="scrim" [class.open]="menuOpen()" (click)="closeMenu()" aria-hidden="true"></div>
 
   <aside class="sidebar" [class.open]="menuOpen()">
@@ -60,8 +59,7 @@
         </a>
       </div>
     </header>
-    <!-- Above the content, so moving between setup steps never needs a trip back to the
-         dashboard. It hides itself on the screen it is pointing at. -->
+    <!-- Above the content, so moving between setup steps never needs a trip back to the dashboard. -->
     <app-setup-banner />
 
     <main class="content">

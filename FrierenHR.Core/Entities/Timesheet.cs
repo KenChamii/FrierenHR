@@ -3,11 +3,7 @@ using FrierenHR.Core.Enums;
 
 namespace FrierenHR.Core.Entities;
 
-/// <summary>
-/// One employee's weekly timesheet — a submission wrapper around that week's AttendanceLogs.
-/// Submitting a week locks it (see AttendanceService) so entries can't be quietly edited or
-/// deleted out from under an approval. Rejecting unlocks it so the employee can fix and resubmit.
-/// </summary>
+/// <summary>One employee's weekly timesheet — a submission wrapper around that week's AttendanceLogs.</summary>
 public class Timesheet : BaseEntity
 {
     public Guid EmployeeId { get; set; }

@@ -16,9 +16,7 @@ public class RulesConfigController : ControllerBase
     private readonly IRuleConfigService _ruleConfigService;
     public RulesConfigController(IRuleConfigService ruleConfigService) => _ruleConfigService = ruleConfigService;
 
-    // GET /api/rules-config/schema — what a valid rule looks like per rule type. The rules
-    // screen builds its form from this, so the form can only offer fields and operators the
-    // evaluator actually implements. Static, so it needs no company scope.
+    // GET /api/rules-config/schema — what a valid rule looks like per rule type.
     [HttpGet("schema")]
     public ActionResult<IReadOnlyDictionary<RuleType, RuleTypeSchema>> GetSchema() =>
         Ok(_ruleConfigService.GetSchema());
@@ -38,17 +36,14 @@ public class RulesConfigController : ControllerBase
     {
         var companyId = User.GetCompanyId();
         if (companyId is null) return Forbid();
-        // Force the caller's own company regardless of what the request body says — same
-        // pattern as Employees/Departments, so nobody can write rules into another company.
+        // Force the caller's own company regardless of what the request body says — same pattern as Employees/Departments.
         if (dto.CompanyId != companyId) dto = dto with { CompanyId = companyId.Value };
 
         try { return Ok(await _ruleConfigService.SaveAsync(dto, ct)); }
         catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
     }
 
-    // POST /api/rules-config/seed-defaults — fills in a starter rule for any RuleType this
-    // company hasn't configured yet, so there's always something real to test against and
-    // tweak instead of starting from a blank JSON box. Safe to call more than once.
+    // POST /api/rules-config/seed-defaults — fills in a starter rule for any RuleType this company hasn't configured yet.
     [HttpPost("seed-defaults")]
     public async Task<ActionResult<List<RuleConfigDto>>> SeedDefaults(CancellationToken ct)
     {
@@ -57,8 +52,7 @@ public class RulesConfigController : ControllerBase
         return Ok(await _ruleConfigService.SeedDefaultsAsync(companyId.Value, ct));
     }
 
-    // POST /api/rules-config/test-evaluate — standalone eval: takes { companyId, ruleType, facts },
-    // loads active rules, builds a RuleContext from facts, runs EvaluateFirstMatch, returns the result.
+    // POST /api/rules-config/test-evaluate — standalone eval: takes { companyId, ruleType, facts }, loads active rules.
     [HttpPost("test-evaluate")]
     public async Task<ActionResult<RuleEvaluationResultDto>> TestEvaluate(TestEvaluateRequestDto dto, CancellationToken ct)
     {

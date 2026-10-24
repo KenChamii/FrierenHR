@@ -9,15 +9,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace FrierenHR.Infrastructure.Data.Auditing;
 
-/// <summary>
-/// Writes the audit trail from the change tracker, so a new feature is audited without its
-/// author remembering to do anything. Services stay free of audit code entirely.
-///
-/// Two deliberate limits. Properties listed in <see cref="IgnoredProperties"/> are skipped,
-/// because recording that UpdatedAt changed on every row is noise that buries the real
-/// edits. And a failure here is swallowed: losing an audit row is bad, but failing the
-/// user's save because the audit write failed is worse.
-/// </summary>
+/// <summary>Writes the audit trail from the change tracker.</summary>
 public sealed class AuditSaveChangesInterceptor : SaveChangesInterceptor
 {
     private static readonly HashSet<string> IgnoredProperties = new(StringComparer.Ordinal)
@@ -25,8 +17,7 @@ public sealed class AuditSaveChangesInterceptor : SaveChangesInterceptor
         // Timestamps change on every row and would bury the real edits.
         nameof(BaseEntity.CreatedAt),
         nameof(BaseEntity.UpdatedAt),
-        // Never copy a credential into a second table that is read by administrators and
-        // deliberately never deleted. That a password changed is recorded; the hash is not.
+        // Never copy a credential into a second table that is read by administrators and deliberately never deleted.
         nameof(Employee.PasswordHash),
     };
 
@@ -57,8 +48,7 @@ public sealed class AuditSaveChangesInterceptor : SaveChangesInterceptor
     {
         try
         {
-            // Materialise first: adding audit rows below mutates the tracker, and enumerating
-            // it while it changes throws.
+            // Materialise first: adding audit rows below mutates the tracker, and enumerating it while it changes throws.
             var tracked = context.ChangeTracker.Entries<BaseEntity>()
                 .Where(e => e.State is EntityState.Added or EntityState.Modified or EntityState.Deleted)
                 .Where(e => !ExcludedTypes.Contains(e.Entity.GetType()))

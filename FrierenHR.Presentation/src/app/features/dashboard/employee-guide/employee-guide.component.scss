@@ -19,8 +19,7 @@
   }
 }
 
-// Two columns on a wide screen: these are things to read once, not a sequence to follow,
-// so a single tall list would overstate how much there is to learn.
+// Two columns on a wide screen: these are things to read once, not a sequence to follow.
 .items {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));

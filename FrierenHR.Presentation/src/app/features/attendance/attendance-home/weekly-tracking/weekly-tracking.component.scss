@@ -57,8 +57,7 @@
 
   &:last-child { border-bottom: none; }
 
-  // A day that is not being logged recedes rather than disappears, so the week still reads
-  // as seven days.
+  // A day that is not being logged recedes rather than disappears, so the week still reads as seven days.
   &.off { background: var(--hr-surface-alt); }
   &.non-working .when .wd { color: var(--hr-accent); }
 }

@@ -3,13 +3,7 @@ using System.Text;
 
 namespace FrierenHR.Application.Common;
 
-/// <summary>
-/// Builds RFC 4180 CSV. Small on purpose: the alternative is a package for something the
-/// payroll export is the only caller of, and the quoting rules fit in one method.
-///
-/// Quoting is the part worth getting right. An employee called O'Brien, Maria breaks a naive
-/// export, and so does a decision comment containing a newline.
-/// </summary>
+/// <summary>Builds RFC 4180 CSV.</summary>
 public sealed class CsvBuilder
 {
     private readonly StringBuilder _builder = new();
@@ -33,10 +27,7 @@ public sealed class CsvBuilder
 
     public override string ToString() => _builder.ToString();
 
-    /// <summary>
-    /// Excel reads a bare UTF-8 file as the system code page, so a byte order mark is what
-    /// makes an accented name survive the round trip.
-    /// </summary>
+    /// <summary>Excel reads a bare UTF-8 file as the system code page.</summary>
     public byte[] ToUtf8WithBom() =>
         Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes(ToString())).ToArray();
 

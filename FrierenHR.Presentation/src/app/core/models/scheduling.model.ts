@@ -1,7 +1,4 @@
-// Mirrors FrierenHR.Application.Common.DTOs.SchedulingDtos. Dates and times arrive as ISO
-// strings because DateOnly and TimeOnly serialise as "2026-01-05" and "08:00:00"; they are
-// kept as strings here rather than converted, so a round trip never shifts a date by a time
-// zone it was never meant to have.
+// Mirrors FrierenHR.Application.Common.DTOs.SchedulingDtos.
 
 export type HolidayType = 'Regular' | 'SpecialNonWorking' | 'CompanySpecific';
 export type AuditAction = 'Created' | 'Updated' | 'Deleted';

@@ -42,11 +42,7 @@ export class DashboardComponent implements OnInit {
   readonly canSeeCompanyFigures = computed(() =>
     this.auth.currentRole() === 'Manager' || this.auth.currentRole() === 'HRAdmin');
 
-  /**
-   * Somebody with nobody reporting to them never has anything awaiting their decision, so
-   * the tile would read zero forever. They get their own pending requests instead, which is
-   * the thing they are actually waiting on.
-   */
+  /** Somebody with nobody reporting to them never has anything awaiting their decision, so the tile would read zero forever. */
   readonly approves = computed(() => this.canSeeCompanyFigures());
 
   // Kept public for the template's greeting.
@@ -60,8 +56,7 @@ export class DashboardComponent implements OnInit {
     const today = toIsoDate(new Date());
 
     forkJoin({
-      // Each call is allowed to fail on its own. One tile that cannot load should not blank
-      // the whole dashboard, which is what a bare forkJoin would do.
+      // Each call is allowed to fail on its own.
       headcount: this.guard(this.employees.getByCompany(companyId).pipe(map(list => list.length)), 0),
       awaiting: this.guard(this.leave.getPendingForApprover(employeeId).pipe(map(list => list.length)), 0),
       balance: this.guard(
@@ -71,8 +66,6 @@ export class DashboardComponent implements OnInit {
         this.leave.getByEmployee(employeeId).pipe(
           map(list => list.filter(r => r.status === 'Pending').length)), 0),
       // Counted from the availability report rather than from the approver's pending queue.
-      // The old code filtered that queue for status 'Approved', and since the queue only ever
-      // contains pending requests, the answer was always zero.
       onLeave: this.canSeeCompanyFigures()
         ? this.guard(
             this.reports.availability(today, today).pipe(

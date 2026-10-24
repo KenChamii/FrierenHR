@@ -2,27 +2,17 @@ using System.Security.Cryptography;
 
 namespace FrierenHR.Application.Common.Security;
 
-/// <summary>
-/// Generates the password HR hands to somebody for their first sign-in.
-///
-/// It only has to survive being read aloud or typed once, because the account is forced to
-/// change it immediately. So the alphabet leaves out the characters people misread, and the
-/// result is still drawn from a cryptographic source rather than Random.
-/// </summary>
+/// <summary>Generates the password HR hands to somebody for their first sign-in.</summary>
 public static class TemporaryPassword
 {
-    // No O/0, I/l/1, or S/5. A password that cannot be dictated over a phone gets written
-    // down somewhere instead, which is worse than a slightly smaller alphabet.
+    // No O/0, I/l/1, or S/5.
     private const string Letters = "ABCDEFGHJKMNPQRTUVWXYZabcdefghijkmnpqrtuvwxyz";
     private const string Digits = "23456789";
 
     private const int LetterCount = 8;
     private const int DigitCount = 3;
 
-    /// <summary>
-    /// Returns a password that satisfies <see cref="PasswordPolicy"/> by construction: it
-    /// always contains letters and digits, and is longer than the minimum.
-    /// </summary>
+    /// <summary>Returns a password that satisfies <see cref="PasswordPolicy"/> by construction.</summary>
     public static string Generate()
     {
         var characters = new char[LetterCount + DigitCount];

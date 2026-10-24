@@ -48,10 +48,7 @@ public record ResolvedShiftDto(ShiftDto? Shift, string Source);
 
 // --- Working days ---
 
-/// <summary>
-/// A day count with its working days shown, so "you asked for 5 days and 3 were deducted"
-/// can be explained rather than asserted.
-/// </summary>
+/// <summary>A day count with its working days shown, so "you asked for 5 days and 3 were deducted" can be explained rather than asserted.</summary>
 public record WorkingDaysDto(
     DateOnly From, DateOnly To, int CalendarDays, int WorkingDays,
     List<NonWorkingDayDto> NonWorkingDays);

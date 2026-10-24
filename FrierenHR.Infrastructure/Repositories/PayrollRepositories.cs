@@ -48,9 +48,7 @@ public class PayslipRepository : IPayslipRepository
     public async Task ReplaceForPeriodAsync(
         Guid companyId, DateOnly from, DateOnly to, List<Payslip> payslips, CancellationToken ct = default)
     {
-        // Removed rather than updated in place. A regenerated payslip may have a different
-        // set of lines, and reconciling them one by one is more ways to get it wrong than
-        // issuing the period again. Lines go with their payslip by cascade.
+        // Removed rather than updated in place.
         var existing = await _context.Payslips
             .Where(p => p.CompanyId == companyId && p.PeriodStart == from && p.PeriodEnd == to)
             .ToListAsync(ct);

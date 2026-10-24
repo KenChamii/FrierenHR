@@ -54,8 +54,7 @@ public class LeaveController : ControllerBase
         return Ok(await _leaveService.GetBalancesAsync(employeeId, ct));
     }
 
-    // Ops/admin action that recomputes accrual for every employee — not something any logged-in
-    // user should be able to trigger on demand (it's effectively free-form DB load).
+    // Ops/admin action that recomputes accrual for every employee.
     [HttpPost("run-accrual")]
     [Authorize(Roles = "HRAdmin")]
     public async Task<IActionResult> RunAccrual([FromServices] LeaveAccrualBackgroundService accrualService, CancellationToken ct)

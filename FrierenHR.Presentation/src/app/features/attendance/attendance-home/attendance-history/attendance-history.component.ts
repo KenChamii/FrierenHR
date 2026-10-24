@@ -65,8 +65,7 @@ export class AttendanceHistoryComponent implements OnInit {
     this.errorMessage.set(null);
     this.attendanceService.deleteLog(id).subscribe({
       next: () => this.refreshService.notifyChanged(),
-      // Most common failure here is the week already being locked (submitted/approved) —
-      // surface the backend's message instead of failing silently.
+      // Most common failure here is the week already being locked (submitted/approved).
       error: (err) => this.errorMessage.set(err?.error?.message ?? 'Could not delete this entry.'),
     });
   }

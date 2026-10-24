@@ -51,8 +51,7 @@
   </div>
 </div>
 
-<!-- Above the figures on purpose: on a new company those figures are all zero, and the
-     reason is that setup is not finished. -->
+<!-- Above the figures on purpose: on a new company those figures are all zero, and the reason is that setup is not finished. -->
 <app-setup-checklist />
 
 <!-- How the week works, for somebody who did not set the company up. -->
@@ -80,8 +79,7 @@
       <div class="stat-label">Awaiting My Decision</div>
     </p-card>
   } @else {
-    <!-- Somebody with no reports never has anything awaiting their decision, so that tile
-         read zero forever. What they are actually waiting on is their own requests. -->
+    <!-- Somebody with no reports never has anything awaiting their decision, so that tile read zero forever. -->
     <p-card styleClass="stat-card">
       <div class="stat-icon warning"><i class="pi pi-hourglass"></i></div>
       <div class="stat-value">{{ stats().myPendingRequests }}</div>

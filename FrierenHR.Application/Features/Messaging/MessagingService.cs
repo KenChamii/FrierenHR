@@ -36,9 +36,7 @@ public class MessagingService : IMessagingService
             }
         };
         var created = await _messagingRepository.CreateConversationAsync(conversation, ct);
-        // Direct conversations have no Name on the entity itself — show the other person's
-        // name in the immediate response, same as GetConversationsForEmployeeAsync does for
-        // the list view, so a freshly-started chat doesn't show up as "Direct chat".
+        // Direct conversations have no Name on the entity itself — show the other person's name in the immediate response.
         return new ConversationDto(created.Id, created.Type, otherName, null, null, 0);
     }
 

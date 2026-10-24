@@ -5,13 +5,7 @@ using FrierenHR.Core.Enums;
 
 namespace FrierenHR.Application.Features.Payroll;
 
-/// <summary>
-/// The deduction lines a company applies to every payslip.
-///
-/// Deliberately a plain list an administrator maintains, not a built-in tax table. Statutory
-/// contributions differ by country and change by circular, so anything hardcoded here would
-/// be wrong within a year and wrong silently.
-/// </summary>
+/// <summary>The deduction lines a company applies to every payslip.</summary>
 public class PayrollDeductionService : IPayrollDeductionService
 {
     /// <summary>A percentage deduction above this is almost certainly a typo.</summary>
@@ -65,8 +59,7 @@ public class PayrollDeductionService : IPayrollDeductionService
         var entity = await _repository.GetForCompanyAsync(id, companyId, ct)
             ?? throw new InvalidOperationException("That deduction was not found.");
 
-        // Deactivated rather than removed. Payslips already issued name their lines, and a
-        // deduction that disappears makes an old payslip impossible to explain.
+        // Deactivated rather than removed.
         entity.IsActive = false;
         entity.UpdatedAt = DateTime.UtcNow;
         _repository.Update(entity);

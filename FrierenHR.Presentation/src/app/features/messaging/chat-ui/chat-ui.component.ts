@@ -27,8 +27,7 @@ export class ChatUiComponent implements OnInit, OnDestroy {
   readonly loadingHistory = signal(false);
   readonly sendError = signal<string | null>(null);
 
-  // "New Message" picker state — without this there was no way to start a conversation at
-  // all; the page could only ever show conversations that already existed via a direct API call.
+  // "New Message" picker state — without this there was no way to start a conversation at all.
   readonly showNewMessage = signal(false);
   readonly coworkers = signal<EmployeeDto[]>([]);
   readonly selectedCoworkerId = signal<string | null>(null);
@@ -42,8 +41,7 @@ export class ChatUiComponent implements OnInit, OnDestroy {
     this.conversations().find((c) => c.id === this.activeConversationId()),
   );
 
-  // Conversations with something unread, shown as the badge next to "Chats". Taken from the
-  // messaging service so it reflects what has arrived live, not only the last page load.
+  // Conversations with something unread, shown as the badge next to "Chats".
   readonly totalUnread = computed(() => this.messagingService.unreadCount());
 
   // Messages bucketed under "Today" / "Yesterday" / date dividers, like a real chat app.
@@ -58,12 +56,10 @@ export class ChatUiComponent implements OnInit, OnDestroy {
     return groups;
   });
 
-  // Shades of the one green, not five hues. Avatars should tell people apart without
-  // introducing colours the rest of the palette does not use.
+  // Shades of the one green, not five hues.
   private readonly avatarPalette = ['#1f3a2e', '#2f5042', '#4a6b5c', '#173025', '#3a4a42'];
 
-  // Attachment picker state: a file is uploaded as soon as it's chosen (not on send) so the
-  // person sees the size/type error immediately instead of after typing a message and hitting send.
+  // Attachment picker state: a file is uploaded as soon as it's chosen (not on send) so the person sees the size/type error immediately instead of after typing a message and hitting send.
   readonly maxAttachmentSizeBytes = MAX_ATTACHMENT_SIZE_BYTES;
   readonly uploadingAttachment = signal(false);
   readonly pendingAttachment = signal<AttachmentUploadResultDto | null>(null);
@@ -76,8 +72,7 @@ export class ChatUiComponent implements OnInit, OnDestroy {
   ) {}
 
   async ngOnInit(): Promise<void> {
-    // The list loads independently of the hub. An unreachable hub must not stop the
-    // conversations from rendering.
+    // The list loads independently of the hub. An unreachable hub must not stop the conversations from rendering.
     this.loadConversations();
     try {
       await this.messagingService.connect();
@@ -104,9 +99,7 @@ export class ChatUiComponent implements OnInit, OnDestroy {
   }
 
   async ngOnDestroy(): Promise<void> {
-    // The group is left, but the connection stays up. It is what delivers the unread badge
-    // on every other screen, so tearing it down here would switch notifications off the
-    // moment somebody navigated away from Messages.
+    // The group is left, but the connection stays up.
     if (this.activeConversationId()) {
       await this.messagingService.leaveConversation(this.activeConversationId()!);
     }
@@ -134,8 +127,7 @@ export class ChatUiComponent implements OnInit, OnDestroy {
       next: (conversation) => {
         this.startingConversation.set(false);
         this.showNewMessage.set(false);
-        // Put it at the top of the list right away instead of waiting for a reload —
-        // it may already be there (existing chat), so replace rather than duplicate.
+        // Put it at the top of the list right away instead of waiting for a reload — it may already be there (existing chat).
         this.conversations.update((list) => [conversation, ...list.filter((c) => c.id !== conversation.id)]);
         this.selectConversation(conversation);
       },
@@ -162,8 +154,7 @@ export class ChatUiComponent implements OnInit, OnDestroy {
       await this.messagingService.joinConversation(conversation.id);
       this.markConversationRead(conversation.id);
     } catch (err) {
-      // The hub's own reason when it rejected the join, rather than assuming the connection
-      // is down. Those are different problems and need different fixes.
+      // The hub's own reason when it rejected the join, rather than assuming the connection is down.
       this.sendError.set(this.messageFor(err, 'Could not open this conversation for live updates.'));
       console.error('Could not join the conversation.', err);
     }
@@ -184,8 +175,7 @@ export class ChatUiComponent implements OnInit, OnDestroy {
     try {
       await this.messagingService.sendMessage(conversationId, senderEmployeeId, body, attachment);
     } catch (err) {
-      // The draft is put back rather than lost. A message that silently disappears is worse
-      // than one that visibly failed.
+      // The draft is put back rather than lost.
       this.draft.set(body);
       this.pendingAttachment.set(attachment ?? null);
       this.sendError.set(this.messageFor(err));
@@ -193,11 +183,7 @@ export class ChatUiComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * A HubException's message reaches the client as the error's message, so a rejection the
-   * server explained is shown as written. Anything else is a transport failure, which the
-   * raw text describes badly.
-   */
+  /** A HubException's message reaches the client as the error's message. */
   private messageFor(error: unknown, fallback = 'Could not send that message. Check your connection and try again.'): string {
     const message = error instanceof Error ? error.message : '';
     const isTransportNoise = !message
@@ -218,8 +204,7 @@ export class ChatUiComponent implements OnInit, OnDestroy {
       || (conversation.unreadCount ?? 0) > 0;
   }
 
-  // Uploads immediately on selection so the person finds out right away if it's too big or
-  // an unsupported type, rather than after they've written a message and hit send.
+  // Uploads immediately on selection so the person finds out right away if it's too big or an unsupported type.
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];

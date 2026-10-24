@@ -51,10 +51,7 @@ export class EmployeeListComponent implements OnInit {
 
   onSaved(): void { this.dialogVisible.set(false); this.load(); }
 
-  /**
-   * Issues a new temporary password for somebody who cannot sign in. There is no email, so
-   * it is shown to HR once and passed on by hand.
-   */
+  /** Issues a new temporary password for somebody who cannot sign in. */
   resetPassword(employee: EmployeeDto): void {
     this.error.set(null);
     this.resettingId.set(employee.id);
@@ -81,8 +78,7 @@ export class EmployeeListComponent implements OnInit {
     try {
       await navigator.clipboard.writeText(issued.temporaryPassword);
     } catch {
-      // Clipboard access can be refused. The password is on screen either way, so there is
-      // nothing to recover from and nothing worth interrupting anyone about.
+      // Clipboard access can be refused.
     }
   }
 

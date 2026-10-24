@@ -3,18 +3,12 @@ using FrierenHR.Application.Common.Interfaces;
 using FrierenHR.Core.Entities;
 using FrierenHR.Core.Enums;
 
-// FrierenHR.Application.Features.Employee is a namespace, so the bare name Employee resolves
-// to it rather than to the entity. The alias says which one is meant without repeating the
-// full path at every use.
+// FrierenHR.Application.Features.Employee is a namespace.
 using EmployeeEntity = FrierenHR.Core.Entities.Employee;
 
 namespace FrierenHR.Application.Features.Attendance.Corrections;
 
-/// <summary>
-/// A missed clock-in used to mean an administrator editing the attendance row by hand, which
-/// left no record of who changed it or why. A correction is a request with a reason, decided
-/// by the employee's manager, and the approval writes the row.
-/// </summary>
+/// <summary>A missed clock-in used to mean an administrator editing the attendance row by hand.</summary>
 public class AttendanceCorrectionService : IAttendanceCorrectionService
 {
     private const string CorrectionSource = "Correction";
@@ -52,8 +46,7 @@ public class AttendanceCorrectionService : IAttendanceCorrectionService
         if (worked <= 0)
             throw new InvalidOperationException("The break cannot be as long as the shift being claimed.");
 
-        // One open request per day. Without this, two requests for the same date would both
-        // be approved and the second would silently overwrite the first.
+        // One open request per day.
         var existing = await _corrections.GetPendingForDateAsync(dto.EmployeeId, dto.Date, ct);
         if (existing is not null)
             throw new InvalidOperationException($"A correction for {dto.Date:d MMM yyyy} is already awaiting a decision.");
@@ -104,10 +97,7 @@ public class AttendanceCorrectionService : IAttendanceCorrectionService
         return ToDto(correction, employee, approver);
     }
 
-    /// <summary>
-    /// Amends the day's existing row rather than adding a second one, because two rows for
-    /// one day would double the hours on the timesheet.
-    /// </summary>
+    /// <summary>Amends the day's existing row rather than adding a second one.</summary>
     private async Task ApplyToAttendanceAsync(AttendanceCorrection correction, CancellationToken ct)
     {
         var dayStart = correction.Date.ToDateTime(TimeOnly.MinValue);

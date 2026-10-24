@@ -20,8 +20,7 @@ public class ChatHub : Hub
         if (!Guid.TryParse(conversationId, out var parsedId))
             throw new HubException("That conversation id is not valid.");
 
-        // Same membership check as MessagingController.GetHistory: knowing an id must not be
-        // enough to start receiving a conversation's messages.
+        // Same membership check as MessagingController.GetHistory.
         var myConversations = await _messagingService.GetConversationsAsync(callerId);
         if (!myConversations.Any(c => c.Id == parsedId))
             throw new HubException("You are not part of that conversation.");
@@ -42,8 +41,7 @@ public class ChatHub : Hub
     {
         var callerId = RequireCaller();
 
-        // You can only send as yourself. The client still passes senderEmployeeId, but the
-        // hub decides from the authenticated connection rather than trusting it.
+        // You can only send as yourself.
         if (!Guid.TryParse(senderEmployeeId, out var claimedId) || claimedId != callerId)
             throw new HubException("You can only send messages as yourself.");
 
@@ -63,13 +61,10 @@ public class ChatHub : Hub
 
         var saved = await _messagingService.SendMessageAsync(dto);
 
-        // Anyone with this conversation open, including the sender, so their own message
-        // appears from the stored row and carries its real id and timestamp.
+        // Anyone with this conversation open, including the sender.
         await Clients.Group(conversationId).SendAsync("ReceiveMessage", saved);
 
-        // Everyone else in the conversation is signed in somewhere but in no group for it,
-        // so a group broadcast alone reaches nobody who is not already looking at the chat.
-        // This is what drives the unread badge.
+        // Everyone else in the conversation is signed in somewhere but in no group for it.
         var recipients = participants.Where(id => id != callerId).Select(id => id.ToString()).ToList();
         if (recipients.Count > 0)
             await Clients.Users(recipients).SendAsync("ConversationUpdated", saved);
@@ -83,10 +78,7 @@ public class ChatHub : Hub
         await _messagingService.MarkReadAsync(parsedId, callerId);
     }
 
-    /// <summary>
-    /// The employee id from the connection's own claims. Throws rather than returning, so a
-    /// rejected call surfaces on the client instead of looking like a message that vanished.
-    /// </summary>
+    /// <summary>The employee id from the connection's own claims.</summary>
     private Guid RequireCaller() =>
         Context.User?.GetEmployeeId()
         ?? throw new HubException("Your session is not valid. Please sign in again.");

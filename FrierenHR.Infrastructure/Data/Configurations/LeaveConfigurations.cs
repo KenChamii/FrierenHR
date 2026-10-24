@@ -13,8 +13,7 @@ public class LeaveRequestConfiguration : IEntityTypeConfiguration<LeaveRequest>
         builder.Property(x => x.Days).HasPrecision(6, 2);
         builder.HasOne(x => x.Employee).WithMany(e => e.LeaveRequests)
             .HasForeignKey(x => x.EmployeeId).OnDelete(DeleteBehavior.Cascade);
-        // Same self-reference shape as Employee.Manager — Restrict, or SQL Server
-        // rejects the table (this FK and EmployeeId's FK both point at Employees).
+        // Same self-reference shape as Employee.Manager — Restrict.
         builder.HasOne(x => x.DecidedByEmployee).WithMany()
             .HasForeignKey(x => x.DecidedByEmployeeId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(x => new { x.EmployeeId, x.Status }); // powers the approver-queue lookup in 3.6

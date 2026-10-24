@@ -11,8 +11,7 @@
   h2, h3 { font-weight: 300; letter-spacing: -0.015em; }
 }
 
-// An account nobody has taken ownership of yet. Worth seeing at a glance, since HR still
-// knows that password.
+// An account nobody has taken ownership of yet.
 .pending-password {
   font-family: var(--hr-font-mono);
   font-size: 0.6rem;

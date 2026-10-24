@@ -47,14 +47,12 @@ export class EmployeeFormComponent implements OnInit {
     role: ['Employee', Validators.required],
     departmentId: [null as string | null],
     managerId: [null as string | null],
-    // Optional. An employee with no rate simply does not get a payslip, and the run says so
-    // by name rather than pricing them at zero.
+    // Optional.
     monthlyRate: [null as number | null, Validators.min(0)],
     standardMonthlyHours: [174, [Validators.required, Validators.min(1)]],
   });
 
-  // Mirrors PasswordPolicy on the backend (min 8 chars, at least one letter and one digit) —
-  // this is just for fast feedback; the server re-validates regardless.
+  // Mirrors PasswordPolicy on the backend (min 8 chars, at least one letter and one digit).
   private readonly passwordValidators = [Validators.required, Validators.minLength(8), Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d).+$/)];
 
   ngOnInit(): void {
@@ -74,8 +72,7 @@ export class EmployeeFormComponent implements OnInit {
 
     const companyId = this.authService.currentCompanyId();
     if (companyId) {
-      // Both lookups report their own failure. Without this an unreachable API left the
-      // dropdowns silently empty, which reads as "this company has no departments".
+      // Both lookups report their own failure.
       this.companyService.getDepartments(companyId).subscribe({
         next: (list) => this.departments.set(list),
         error: () => this.errorMessage.set('Could not load departments.'),

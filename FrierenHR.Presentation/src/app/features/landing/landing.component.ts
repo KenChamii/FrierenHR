@@ -8,10 +8,7 @@ interface Module { index: string; name: string; blurb: string; }
 interface ChainStep { level: string; who: string; state: string; done?: boolean; final?: boolean; }
 interface Layer { name: string; owns: string; }
 
-/**
- * Public landing page, outside the authenticated shell. Figures are illustrative and come
- * from the arrays below rather than the API, so this page renders with no backend.
- */
+/** Public landing page, outside the authenticated shell. */
 @Component({
   selector: 'app-landing',
   standalone: true,

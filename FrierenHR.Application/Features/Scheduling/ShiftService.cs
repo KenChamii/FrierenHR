@@ -20,8 +20,7 @@ public class ShiftService : IShiftService
         var shifts = await _shiftRepository.GetByCompanyAsync(companyId, ct);
         var employees = await _employeeRepository.GetByCompanyAsync(companyId, ct);
 
-        // Counted here rather than in SQL because the list is per company and already loaded,
-        // and a count per row would be one query each.
+        // Counted here rather than in SQL because the list is per company and already loaded.
         return shifts
             .Select(s => ToDto(s, employees.Count(e => e.ShiftId == s.Id)))
             .ToList();
@@ -36,8 +35,7 @@ public class ShiftService : IShiftService
             : await _shiftRepository.GetForCompanyAsync(dto.Id.Value, dto.CompanyId, ct)
               ?? throw new InvalidOperationException($"Shift '{dto.Id}' not found for this company.");
 
-        // At most one default per company, enforced by a filtered unique index. Clearing the
-        // previous one here turns a constraint violation into the behaviour people expect.
+        // At most one default per company, enforced by a filtered unique index.
         if (dto.IsDefault)
         {
             var existingDefault = await _shiftRepository.GetDefaultAsync(dto.CompanyId, ct);
@@ -72,8 +70,7 @@ public class ShiftService : IShiftService
         var shift = await _shiftRepository.GetForCompanyAsync(id, companyId, ct)
             ?? throw new InvalidOperationException($"Shift '{id}' not found for this company.");
 
-        // The foreign keys are Restrict, so this would fail at the database with an opaque
-        // message. Say what to do instead.
+        // The foreign keys are Restrict, so this would fail at the database with an opaque message.
         var employees = await _employeeRepository.GetByCompanyAsync(companyId, ct);
         var assigned = employees.Count(e => e.ShiftId == id);
         if (assigned > 0)
@@ -116,8 +113,7 @@ public class ShiftService : IShiftService
         if (dto.BreakMinutes < 0 || dto.BreakMinutes > 12 * 60)
             throw new InvalidOperationException("Break minutes must be between 0 and 720.");
 
-        // Equal times would be a zero-length shift. Unequal in either direction is fine,
-        // because EndTime before StartTime means the shift crosses midnight.
+        // Equal times would be a zero-length shift.
         if (dto.StartTime == dto.EndTime)
             throw new InvalidOperationException("A shift cannot start and end at the same time.");
 

@@ -1,10 +1,4 @@
-<!--
-  autocomplete is set on every field on purpose. This form creates somebody else's account,
-  but to a browser an email input followed by a password input looks like a sign-in form, so
-  Chrome filled it with the signed-in administrator's own saved credentials.
-
-  new-password is the token that stops credential fill; off alone is ignored on a password.
--->
+<!-- autocomplete is set on every field on purpose. -->
 <form [formGroup]="form" (ngSubmit)="submit()" class="employee-form" autocomplete="off">
   @if (errorMessage()) { <small class="p-error">{{ errorMessage() }}</small> }
 

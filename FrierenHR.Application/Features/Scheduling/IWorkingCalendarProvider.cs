@@ -2,13 +2,7 @@ using FrierenHR.Core.Time;
 
 namespace FrierenHR.Application.Features.Scheduling;
 
-/// <summary>
-/// Builds a <see cref="WorkingCalendar"/> for a date range by combining the company's
-/// holidays with the rest days of the applicable shift.
-///
-/// Every feature that needs to know whether a day is worked goes through this, so leave day
-/// counting, accrual proration and the payroll export cannot answer the question differently.
-/// </summary>
+/// <summary>Builds a <see cref="WorkingCalendar"/> for a date range by combining the company's holidays with the rest days of the applicable shift.</summary>
 public interface IWorkingCalendarProvider
 {
     /// <summary>Holidays for the employee's company and department, with their shift's rest days.</summary>

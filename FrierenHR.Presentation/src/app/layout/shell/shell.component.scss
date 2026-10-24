@@ -1,5 +1,4 @@
-// Slow enough to notice without nagging. Dropped entirely for anyone who has asked for
-// less movement.
+// Slow enough to notice without nagging. Dropped entirely for anyone who has asked for less movement.
 @keyframes setup-pulse {
   0% { box-shadow: 0 0 0 0 rgba(201, 169, 110, 0.7); }
   70% { box-shadow: 0 0 0 5px rgba(201, 169, 110, 0); }
@@ -63,8 +62,7 @@
     border-top: 1px solid rgba(242, 237, 225, 0.12);
   }
 
-  // The nav item the setup checklist is asking for next. Brightened and given a pulsing
-  // dot, so the two agree about where to go without a modal tour over the top of the app.
+  // The nav item the setup checklist is asking for next.
   .nav-link.setup-target {
     opacity: 1;
     border-left-color: var(--hr-accent);
@@ -79,8 +77,7 @@
     animation: setup-pulse 2s ease-out infinite;
   }
 
-  // Unread count on the Messages link. Pushed right so it reads as a count rather than as
-  // part of the label.
+  // Unread count on the Messages link. Pushed right so it reads as a count rather than as part of the label.
   .nav-badge {
     display: inline-flex;
     align-items: center;
@@ -138,8 +135,7 @@
   flex-direction: column;
   min-width: 0;
 
-  // Bounded to the viewport so .content below can be the scrolling element. Without a
-  // height here it would grow to fit its content and nothing would ever scroll inside it.
+  // Bounded to the viewport so .content below can be the scrolling element.
   height: 100vh;
   height: 100dvh;
 }
@@ -243,10 +239,7 @@
   padding: 1.75rem;
   min-width: 0;
 
-  // The page scrolls here rather than at the window, which is what lets a screen ask for
-  // the height that is actually left over: the topbar and the setup banner have already
-  // taken theirs, so a full-height pane can say 100% instead of guessing with calc.
-  // min-height: 0 is what allows a flex child to shrink below its content and scroll.
+  // The page scrolls here rather than at the window.
   min-height: 0;
   overflow-y: auto;
 }
@@ -259,8 +252,7 @@
 }
 
 @media (max-width: 900px) {
-  // The sidebar leaves the flow and floats over the content, so the page keeps the full
-  // width whether the drawer is open or not.
+  // The sidebar leaves the flow and floats over the content.
   .shell { flex-direction: column; }
 
   .sidebar {
@@ -271,8 +263,7 @@
     z-index: 60;
     width: min(280px, 82vw);
 
-    // Scrollable, because nineteen links do not fit on a short screen and a drawer that
-    // cuts off its last items is worse than no drawer.
+    // Scrollable, because nineteen links do not fit on a short screen and a drawer that cuts off its last items is worse than no drawer.
     overflow-y: auto;
     overscroll-behavior: contain;
 
@@ -342,8 +333,7 @@
   .content { padding: 1.25rem 1rem; }
 }
 
-// A phone, as opposed to a small tablet. The name and role beside the avatar are the first
-// thing worth dropping: the avatar still identifies who is signed in.
+// A phone, as opposed to a small tablet.
 @media (max-width: 560px) {
   .topbar {
     .user-meta { display: none; }

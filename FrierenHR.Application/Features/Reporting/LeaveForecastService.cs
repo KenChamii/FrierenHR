@@ -10,11 +10,7 @@ using EmployeeEntity = FrierenHR.Core.Entities.Employee;
 
 namespace FrierenHR.Application.Features.Reporting;
 
-/// <summary>
-/// Projects a leave balance forward and says whether any of it will be forfeited.
-/// The accrual amount and cap come from the company's own rules, so the forecast and the
-/// monthly accrual run cannot disagree.
-/// </summary>
+/// <summary>Projects a leave balance forward and says whether any of it will be forfeited.</summary>
 public class LeaveForecastService : ILeaveForecastService
 {
     /// <summary>How far ahead to project when the caller does not say.</summary>
@@ -69,8 +65,7 @@ public class LeaveForecastService : ILeaveForecastService
     {
         var rule = FirstMatchingRule(employee, balance, accrualRules);
 
-        // No rule for this leave type is a normal configuration, not a fault: the balance
-        // simply stands still. Saying so beats showing a flat line with no explanation.
+        // No rule for this leave type is a normal configuration, not a fault: the balance simply stands still.
         if (rule?.Action.Amount is not { } monthlyAccrual || monthlyAccrual <= 0)
         {
             return new LeaveProjectionDto(
@@ -94,10 +89,7 @@ public class LeaveForecastService : ILeaveForecastService
             null);
     }
 
-    /// <summary>
-    /// Rules are evaluated one at a time rather than through EvaluateFirstMatch, because the
-    /// projection needs the matching rule's cap and the result object only carries the amount.
-    /// </summary>
+    /// <summary>Rules are evaluated one at a time rather than through EvaluateFirstMatch.</summary>
     private RuleDefinition? FirstMatchingRule(
         EmployeeEntity employee, LeaveBalance balance, List<RuleDefinition> rules)
     {

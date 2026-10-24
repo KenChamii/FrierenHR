@@ -18,10 +18,7 @@ public interface IPayslipRepository
     /// <summary>With its lines, for the detail view.</summary>
     Task<Payslip?> GetByIdAsync(Guid id, CancellationToken ct = default);
 
-    /// <summary>
-    /// Replaces any payslip already issued for the same employee and period, so regenerating
-    /// after a corrected timesheet produces one payslip rather than two.
-    /// </summary>
+    /// <summary>Replaces any payslip already issued for the same employee and period.</summary>
     Task ReplaceForPeriodAsync(
         Guid companyId, DateOnly from, DateOnly to, List<Payslip> payslips, CancellationToken ct = default);
 }

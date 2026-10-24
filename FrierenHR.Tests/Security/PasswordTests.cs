@@ -38,8 +38,7 @@ public class PasswordHasherTests
     [Fact]
     public void The_hash_records_its_iteration_count_and_salt()
     {
-        // Format is iterations.salt.hash, which is what lets the count be raised later without
-        // invalidating existing hashes.
+        // Format is iterations.salt.hash, which is what lets the count be raised later without invalidating existing hashes.
         var parts = PasswordHasher.Hash("Passw0rd").Split('.');
 
         Assert.Equal(3, parts.Length);

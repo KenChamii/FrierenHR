@@ -22,8 +22,5 @@ public record UpdateEmployeeDto(Guid? DepartmentId, Guid? ManagerId, string Firs
 
 public record ChangePasswordDto(string CurrentPassword, string NewPassword);
 
-/// <summary>
-/// The temporary password, returned once at the moment it is issued. It is not stored in
-/// readable form anywhere, so if HR loses it the only remedy is another reset.
-/// </summary>
+/// <summary>The temporary password, returned once at the moment it is issued.</summary>
 public record ResetPasswordResultDto(Guid EmployeeId, string EmployeeName, string TemporaryPassword);

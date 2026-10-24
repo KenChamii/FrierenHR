@@ -12,9 +12,7 @@ public class UnitOfWork : IUnitOfWork
     public async Task<T> ExecuteAsync<T>(
         Func<CancellationToken, Task<T>> work, CancellationToken ct = default)
     {
-        // Run through the execution strategy. A retrying strategy refuses to work with a
-        // transaction opened outside it, and retrying the whole block is the correct behaviour
-        // anyway: a transient failure part way through should replay from the start.
+        // Run through the execution strategy.
         var strategy = _context.Database.CreateExecutionStrategy();
 
         return await strategy.ExecuteAsync(async () =>

@@ -3,14 +3,7 @@ using FrierenHR.Core.Enums;
 
 namespace FrierenHR.Core.Entities;
 
-/// <summary>
-/// A named deduction a company applies to every payslip, such as a provident fund
-/// contribution or a staff loan repayment.
-///
-/// Defined per company rather than built in. Statutory contributions differ by country and
-/// change by circular, so hardcoding a table would produce payslips that are confidently
-/// wrong the year after they were written. An administrator enters the lines that apply.
-/// </summary>
+/// <summary>A named deduction a company applies to every payslip, such as a provident fund contribution or a staff loan repayment.</summary>
 public class PayrollDeduction : BaseEntity, ICompanyScoped
 {
     public Guid CompanyId { get; set; }
@@ -28,11 +21,7 @@ public class PayrollDeduction : BaseEntity, ICompanyScoped
     public bool IsActive { get; set; } = true;
 }
 
-/// <summary>
-/// A payslip as issued. The figures are stored rather than recomputed on each view: a
-/// payslip is a record of what somebody was paid, and it must not change because a rate was
-/// edited or an attendance log was corrected afterwards.
-/// </summary>
+/// <summary>A payslip as issued.</summary>
 public class Payslip : BaseEntity, ICompanyScoped
 {
     public Guid CompanyId { get; set; }
@@ -62,10 +51,7 @@ public class Payslip : BaseEntity, ICompanyScoped
     public ICollection<PayslipLine> Lines { get; set; } = new List<PayslipLine>();
 }
 
-/// <summary>
-/// One line of a payslip. Earnings and deductions share a table because a payslip reads as a
-/// single ordered list, and splitting them would mean merging them back for every view.
-/// </summary>
+/// <summary>One line of a payslip.</summary>
 public class PayslipLine : BaseEntity
 {
     public Guid PayslipId { get; set; }

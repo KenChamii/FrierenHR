@@ -7,12 +7,7 @@ import { AuthService } from './auth.service';
 const DISMISSED_KEY = 'hr_setup_dismissed';
 const ACKNOWLEDGED_KEY = 'hr_setup_acknowledged';
 
-/**
- * Tracks how far a new company has got with setup.
- *
- * Held here rather than in the dashboard because three places need it: the checklist, the
- * banner that carries somebody from one step to the next, and the sidebar pointer.
- */
+/** Tracks how far a new company has got with setup. */
 @Injectable({ providedIn: 'root' })
 export class SetupService {
   private readonly http = inject(HttpClient);
@@ -20,11 +15,7 @@ export class SetupService {
 
   private readonly raw = signal<SetupProgressDto | null>(null);
 
-  /**
-   * Steps marked done by hand. Each step is detected from real data, but a detection can be
-   * wrong, and a step stuck on "not done" with no way past it is worse than no checklist.
-   * This is the escape hatch, kept per browser since it is a display preference.
-   */
+  /** Steps marked done by hand. */
   readonly acknowledged = signal<string[]>(this.readAcknowledged());
 
   readonly dismissed = signal(this.readDismissed());
@@ -75,8 +66,7 @@ export class SetupService {
 
     this.http.get<SetupProgressDto>(`${environment.apiUrl}/api/setup/progress`).subscribe({
       next: progress => this.raw.set(progress),
-      // Silent. A checklist that cannot load is a missing nicety, not a failure worth
-      // interrupting somebody's dashboard for.
+      // Silent.
       error: () => this.raw.set(null),
     });
 
@@ -127,8 +117,7 @@ export class SetupService {
     try {
       localStorage.setItem(key, value);
     } catch {
-      // Private browsing, or storage refused. The change holds for this session, which is
-      // close enough for a display preference.
+      // Private browsing, or storage refused.
     }
   }
 }

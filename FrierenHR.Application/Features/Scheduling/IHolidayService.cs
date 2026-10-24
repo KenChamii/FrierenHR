@@ -8,11 +8,7 @@ public interface IHolidayService
     Task<HolidayDto> SaveAsync(SaveHolidayDto dto, CancellationToken ct = default);
     Task DeleteAsync(Guid id, Guid companyId, CancellationToken ct = default);
 
-    /// <summary>
-    /// A year's public holidays from an outside source, for review. Saves nothing: the
-    /// source lags proclamations and cannot tell a Regular holiday from a Special
-    /// Non-Working one, so an administrator corrects the list before importing it.
-    /// </summary>
+    /// <summary>A year's public holidays from an outside source, for review.</summary>
     Task<HolidaySuggestionsDto> GetSuggestionsAsync(
         Guid companyId, int year, string countryCode, CancellationToken ct = default);
 
@@ -20,10 +16,7 @@ public interface IHolidayService
     Task<HolidayImportResultDto> ImportAsync(
         Guid companyId, IEnumerable<SaveHolidayDto> holidays, CancellationToken ct = default);
 
-    /// <summary>
-    /// Working days in a range for one employee, with the non-working days listed. Used by
-    /// the leave request form so someone sees the deduction before they submit.
-    /// </summary>
+    /// <summary>Working days in a range for one employee, with the non-working days listed.</summary>
     Task<WorkingDaysDto> CountWorkingDaysAsync(
         Guid employeeId, DateOnly from, DateOnly to, CancellationToken ct = default);
 }

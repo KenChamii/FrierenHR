@@ -42,10 +42,7 @@ export class AuditComponent implements OnInit {
   readonly hasPrevious = computed(() => this.skip() > 0);
   readonly hasNext = computed(() => this.skip() + this.take < this.total());
 
-  /**
-   * The record types worth filtering by. Hardcoded rather than derived from the data, because
-   * a list built from whatever happens to be in the trail changes shape as people use it.
-   */
+  /** The record types worth filtering by. */
   readonly entityOptions = [
     { label: 'Everything', value: null as string | null },
     { label: 'Rules', value: 'CompanyRuleConfig' },
@@ -107,10 +104,7 @@ export class AuditComponent implements OnInit {
       ?? entityName.replace(/([a-z])([A-Z])/g, '$1 $2');
   }
 
-  /**
-   * The stored JSON is { field: { from, to } } for an update and { field: value } otherwise,
-   * because an insert or a delete has only one side. Both shapes are flattened here.
-   */
+  /** The stored JSON is { field: { from, to } } for an update and { field: value } otherwise. */
   private parse(entry: AuditEntryDto): Change[] {
     let parsed: Record<string, unknown>;
     try { parsed = JSON.parse(entry.changes ?? '{}'); }

@@ -14,8 +14,7 @@ public class AuditController : ControllerBase
     private readonly IAuditService _audit;
     public AuditController(IAuditService audit) => _audit = audit;
 
-    // GET /api/audit?entityName=CompanyRuleConfig&entityId=...&skip=0&take=50
-    // Scoped to the caller's company by the service, never by a query parameter.
+    // GET /api/audit?entityName=CompanyRuleConfig&entityId=...&skip=0&take=50 Scoped to the caller's company by the service.
     [HttpGet]
     public async Task<ActionResult<AuditPageDto>> Get(
         [FromQuery] string? entityName, [FromQuery] Guid? entityId,

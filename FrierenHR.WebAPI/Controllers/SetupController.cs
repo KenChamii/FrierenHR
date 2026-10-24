@@ -8,8 +8,7 @@ namespace FrierenHR.WebAPI.Controllers;
 
 [ApiController]
 [Route("api/setup")]
-// HR only. Setup is their work, and an employee seeing a list of things their company has
-// not configured would be noise at best.
+// HR only.
 [Authorize(Roles = "HRAdmin")]
 public class SetupController : ControllerBase
 {
@@ -22,8 +21,7 @@ public class SetupController : ControllerBase
         _setup = setup;
         _sampleData = sampleData;
 
-        // Off unless a deployment opts in. Sample staff are fine in a portfolio demo and
-        // clutter in a company somebody actually runs.
+        // Off unless a deployment opts in.
         _sampleDataEnabled = configuration.GetValue<bool>("Demo:AllowSampleData");
     }
 

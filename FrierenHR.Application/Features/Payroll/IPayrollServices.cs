@@ -11,10 +11,7 @@ public interface IPayrollDeductionService
 
 public interface IPayslipService
 {
-    /// <summary>
-    /// Issues payslips for every employee with hours in the period and a recorded rate.
-    /// Re-running replaces that period's payslips rather than adding a second set.
-    /// </summary>
+    /// <summary>Issues payslips for every employee with hours in the period and a recorded rate.</summary>
     Task<PayslipRunDto> GenerateAsync(
         Guid companyId, DateOnly from, DateOnly to, CancellationToken ct = default);
 

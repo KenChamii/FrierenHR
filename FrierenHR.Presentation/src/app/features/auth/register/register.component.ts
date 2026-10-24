@@ -61,8 +61,7 @@ export class RegisterComponent {
 
     this.auth.registerCompany(this.form.getRawValue() as RegisterCompanyDto).subscribe({
       next: result => {
-        // Same two-step as login: establish the session so the interceptor has a token, then
-        // resolve companyId from the employee's own record, which the response does not carry.
+        // Same two-step as login: establish the session so the interceptor has a token.
         this.auth.setSession(result);
         this.employees.getById(result.employeeId).subscribe({
           next: employee => {
@@ -71,8 +70,7 @@ export class RegisterComponent {
             this.router.navigateByUrl('/dashboard');
           },
           error: () => {
-            // Not fatal. The account exists and the session is valid; the screens that need
-            // companyId fill in after a refresh.
+            // Not fatal.
             this.loading.set(false);
             this.router.navigateByUrl('/dashboard');
           },
@@ -80,8 +78,7 @@ export class RegisterComponent {
       },
       error: err => {
         this.loading.set(false);
-        // The API returns the reason for a rejected sign-up, such as a company code already
-        // taken, and it is the person's to fix, so it is shown as written.
+        // The API returns the reason for a rejected sign-up, such as a company code already taken.
         this.errorMessage.set(err?.error?.message ?? 'Could not create the company.');
       },
     });

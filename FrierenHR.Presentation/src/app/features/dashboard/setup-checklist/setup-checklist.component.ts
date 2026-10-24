@@ -5,12 +5,7 @@ import { ButtonModule } from 'primeng/button';
 import { SetupService } from '../../../core/services/setup.service';
 import { SetupStepDto } from '../../../core/models/setup.model';
 
-/**
- * What a new company still has to do, in the order the steps depend on each other.
- *
- * Driven by the company's own data rather than by a tour somebody clicks through, so it
- * cannot claim a step is done when it is not, and it reappears if the thing is removed.
- */
+/** What a new company still has to do, in the order the steps depend on each other. */
 @Component({
   selector: 'app-setup-checklist',
   standalone: true,
@@ -42,10 +37,7 @@ export class SetupChecklistComponent implements OnInit {
 
   isNext(step: SetupStepDto): boolean { return this.nextStep()?.key === step.key; }
 
-  /**
-   * Marks a step done by hand. Each one is detected from real data, but a detection can be
-   * wrong, and a step stuck on "not done" with no way past it is worse than no checklist.
-   */
+  /** Marks a step done by hand. */
   markDone(step: SetupStepDto): void { this.setup.acknowledge(step.key); }
 
   dismiss(): void { this.setup.dismiss(); }

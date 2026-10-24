@@ -55,8 +55,7 @@ public class PayslipCalculatorTests
     [Fact]
     public void Percentages_are_all_taken_on_gross_so_their_order_cannot_change_net_pay()
     {
-        // Were each percentage taken on the running balance, entering them the other way
-        // round would quietly produce a different payslip.
+        // Were each percentage taken on the running balance.
         var oneWay = PayslipCalculator.Calculate(
             250m, 80m, 0m, [Percent("A", 5m, 0), Percent("B", 10m, 1)]);
 
@@ -101,9 +100,7 @@ public class PayslipCalculatorTests
             () => PayslipCalculator.Calculate(-1m, 80m, 0m, []));
     }
 
-    // Written as double literals on purpose. An int literal in InlineData cannot be
-    // converted to a double? parameter by xUnit's reflection, which fails at run time
-    // rather than at compile time.
+    // Written as double literals on purpose. An int literal in InlineData cannot be converted to a double?
     [Theory]
     [InlineData(34_800d, 174d, 200d)]
     [InlineData(30_000d, 174d, 172.41d)]

@@ -15,10 +15,7 @@ public class ShiftRepository : CompanyScopedRepository<Shift>, IShiftRepository
     public async Task<Shift?> GetDefaultAsync(Guid companyId, CancellationToken ct = default) =>
         await DbSet.AsNoTracking().FirstOrDefaultAsync(s => s.CompanyId == companyId && s.IsDefault, ct);
 
-    /// <summary>
-    /// One query with both shifts loaded, because resolving an employee's shift walks from
-    /// them to their department and doing that lazily is three round trips per clock-in.
-    /// </summary>
+    /// <summary>One query with both shifts loaded, because resolving an employee's shift walks from them to their department and doing that lazily is three round trips per clock-in.</summary>
     public async Task<Employee?> GetEmployeeWithShiftsAsync(Guid employeeId, CancellationToken ct = default) =>
         await Context.Set<Employee>().AsNoTracking()
             .Include(e => e.Shift)

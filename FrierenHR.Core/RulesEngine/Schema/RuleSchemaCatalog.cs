@@ -3,25 +3,14 @@ using FrierenHR.Core.RulesEngine.Models;
 
 namespace FrierenHR.Core.RulesEngine.Schema;
 
-/// <summary>
-/// Describes what a valid rule looks like for each rule type: the facts the evaluator will
-/// read, the actions the executor can carry out, and a working rule to start from.
-///
-/// Single source of truth for three callers that used to disagree. The editing UI builds its
-/// form from it, SaveAsync validates against it, and the engine is the thing it describes.
-/// Every field listed is set by a real caller, named in the comment above each entry. Adding
-/// a field means adding it here and at the caller.
-/// </summary>
+/// <summary>Describes what a valid rule looks like for each rule type: the facts the evaluator will read.</summary>
 public static class RuleSchemaCatalog
 {
     private static readonly string[] NumericOps = { ">=", "<=", "==", "!=" };
     private static readonly string[] TextOps = { "==", "!=", "in" };
     private static readonly string[] EqualityOps = { "==", "!=" };
 
-    /// <summary>
-    /// "None" is what the attendance service sets when the day is an ordinary working day,
-    /// so a rule can test for it the same way it tests for a holiday type.
-    /// </summary>
+    /// <summary>"None" is what the attendance service sets when the day is an ordinary working day.</summary>
     private static readonly string[] HolidayTypeOptions =
         ["None", .. Enum.GetNames<HolidayType>()];
 
@@ -137,9 +126,7 @@ public static class RuleSchemaCatalog
                     new RuleAction { Type = "LateGraceMinutes", Amount = 15m })
             },
 
-            // No caller yet. ApprovalService.EscalateOverdueAsync escalates from
-            // ApprovalChainStep.EscalateAfterDays instead of consulting the engine, so a rule of
-            // this type saves and validates but never runs. Wired is false so the UI says so.
+            // No caller yet.
             [RuleType.ApprovalEscalation] = new(
                 nameof(RuleType.ApprovalEscalation),
                 "Approval escalation",
@@ -166,10 +153,7 @@ public static class RuleSchemaCatalog
 
     public static RuleTypeSchema For(RuleType ruleType) => Schemas[ruleType];
 
-    /// <summary>
-    /// Checks a rule against the schema for its type. Returns null when valid, otherwise a
-    /// message naming the offending field, operator, value or action.
-    /// </summary>
+    /// <summary>Checks a rule against the schema for its type.</summary>
     public static string? Validate(RuleType ruleType, RuleDefinition rule)
     {
         var schema = Schemas[ruleType];

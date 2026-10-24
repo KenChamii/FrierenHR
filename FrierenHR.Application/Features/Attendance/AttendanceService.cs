@@ -37,11 +37,7 @@ public class AttendanceService : IAttendanceService
         _workingCalendar = workingCalendar;
     }
 
-    /// <summary>
-    /// Minutes past the shift's expected start. Zero when the employee is early, or when the
-    /// company has defined no shift, because without an expected start there is nothing to be
-    /// late for.
-    /// </summary>
+    /// <summary>Minutes past the shift's expected start.</summary>
     private static int MinutesLate(Shift? shift, DateTime clockIn)
     {
         if (shift is null) return 0;
@@ -58,9 +54,7 @@ public class AttendanceService : IAttendanceService
         return d.AddDays(-diff);
     }
 
-    /// <summary>Blocks attendance changes for a week whose timesheet has been submitted or
-    /// approved — that's the whole point of submitting: it locks the week so it can't be
-    /// quietly edited out from under the approver. Rejecting a timesheet unlocks it again.</summary>
+    /// <summary>Blocks attendance changes for a week whose timesheet has been submitted or approved.</summary>
     private async Task EnsureWeekUnlockedAsync(Guid employeeId, DateTime date, CancellationToken ct)
     {
         var weekStart = GetWeekStart(date);
@@ -93,8 +87,7 @@ public class AttendanceService : IAttendanceService
         var employee = await _employeeRepository.GetByIdAsync(dto.EmployeeId, ct)
             ?? throw new InvalidOperationException($"Employee '{dto.EmployeeId}' not found.");
 
-        // Lateness is measured against the employee's shift rather than inferred from the
-        // hour alone, which could not tell a late morning start from an on-time afternoon one.
+        // Lateness is measured against the employee's shift rather than inferred from the hour alone.
         var now = DateTime.UtcNow;
         var today = DateOnly.FromDateTime(now);
         var shift = await _shiftService.ResolveForEmployeeAsync(employee.Id, ct);
@@ -108,8 +101,7 @@ public class AttendanceService : IAttendanceService
             .Set("holidayType", calendar.HolidayTypeOn(today)?.ToString() ?? "None");
 
         var graceResult = _ruleEvaluator.EvaluateFirstMatch(graceRules, RuleType.LateGracePeriod.ToString(), graceContext);
-        // graceResult.ResultValue is the grace period in minutes. Compare it against
-        // minutesLate to flag or store lateness once there is somewhere to put it.
+        // graceResult.ResultValue is the grace period in minutes.
 
         var log = new AttendanceLog { EmployeeId = dto.EmployeeId, TimeIn = DateTime.UtcNow, Source = dto.Source };
         await _attendanceRepository.AddAsync(log, ct);
@@ -130,13 +122,7 @@ public class AttendanceService : IAttendanceService
         return ToDto(log, employee);
     }
 
-    // Remote-friendly alternative to punch clocking: log a shift as a start time,
-    // end time, and break duration for a given day. TimeIn/TimeOut store the actual
-    // clock-equivalent span; BreakMinutes is subtracted when computing hours worked.
-    // Source is tagged "Manual" so this never collides with an open Web/Mobile/Biometric
-    // punch, and re-submitting for the same day updates that day's entry instead of
-    // duplicating it. If EndTime is earlier than StartTime, the shift is treated as
-    // crossing midnight (end time rolls into the next day).
+    // Remote-friendly alternative to punch clocking: log a shift as a start time, end time.
     public async Task<AttendanceLogDto> LogShiftAsync(LogShiftDto dto, CancellationToken ct = default)
     {
         if (dto.BreakMinutes < 0 || dto.BreakMinutes > 12 * 60)
@@ -148,8 +134,7 @@ public class AttendanceService : IAttendanceService
         var dayStart = dto.Date.Date;
         var dayEnd = dayStart.AddDays(1);
 
-        // Mirror image of the check in ClockInAsync: don't let a manual shift entry silently
-        // coexist with a punch-clock entry for the same day.
+        // Mirror image of the check in ClockInAsync.
         var punchLogsToday = (await _attendanceRepository.GetByEmployeeAsync(dto.EmployeeId, dayStart, dayEnd, ct))
             .Where(l => l.Source != "Manual").ToList();
         if (punchLogsToday.Count > 0)
@@ -197,9 +182,7 @@ public class AttendanceService : IAttendanceService
         if (duplicate is not null)
             throw new InvalidOperationException($"{duplicate.Key:MMM d} appears more than once.");
 
-        // One transaction, so a week is never left half saved. LogShiftAsync is reused rather
-        // than reimplemented, which keeps the punch-clock collision check, the week lock and
-        // the break validation identical for one day and for seven.
+        // One transaction, so a week is never left half saved.
         return await _unitOfWork.ExecuteAsync(async token =>
         {
             var saved = new List<AttendanceLogDto>(dto.Days.Count);
@@ -249,8 +232,7 @@ public class AttendanceService : IAttendanceService
         const decimal standardHours = 8m; // MVP: fixed standard shift; make this an AppConfig/rule if you want it configurable too
         var otHours = Math.Max(0, totalHours - standardHours);
 
-        // Holiday facts so a company can configure a premium for overtime worked on one,
-        // without any change to the engine.
+        // Holiday facts so a company can configure a premium for overtime worked on one, without any change to the engine.
         var day = DateOnly.FromDateTime(date);
         var calendar = await _workingCalendar.ForEmployeeAsync(employeeId, day, day, ct);
 

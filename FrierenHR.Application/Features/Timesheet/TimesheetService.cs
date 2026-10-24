@@ -82,7 +82,6 @@ public class TimesheetService : ITimesheetService
 
             case TimesheetStatus.Approved when !requesterIsHrAdmin:
                 // Somebody has already acted on an approved week, possibly paid against it.
-                // Undoing that is HR's decision, not the employee's.
                 throw new InvalidOperationException(
                     "This week has been approved. Ask HR to reopen it.");
         }

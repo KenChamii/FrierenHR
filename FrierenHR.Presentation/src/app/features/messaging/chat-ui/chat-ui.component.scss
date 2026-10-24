@@ -1,6 +1,4 @@
 // The component's own element sits between the shell's content area and .chat-shell below.
-// Angular leaves it as an inline box by default, which has no height for a percentage to
-// resolve against, so the pane would collapse to the height of its messages.
 :host {
   display: block;
   height: 100%;
@@ -10,11 +8,7 @@
   display: grid;
   grid-template-columns: 320px 1fr;
 
-  // Whatever height is left inside the shell's content area, which is the scrolling
-  // element. Measured rather than calculated: subtracting the topbar and padding by hand
-  // was already wrong at narrow widths, and could never account for the setup banner,
-  // which appears above this pane while a company is still being set up and pushed the
-  // composer off the bottom of the screen.
+  // Whatever height is left inside the shell's content area, which is the scrolling element.
   height: 100%;
   background: var(--hr-surface);
   border: 1px solid var(--hr-border);
@@ -64,8 +58,7 @@
 
 .header-badge { min-width: 20px; height: 20px; font-size: 0.65rem; }
 
-// A dot rather than a count. The server reports unread as a flag, not an exact number, so a
-// badge reading "1" on a conversation holding six new messages would be a lie.
+// A dot rather than a count.
 .unread-dot {
   flex: none;
   width: 7px;
@@ -244,8 +237,7 @@
   background: var(--hr-surface-alt);
   border: 1px solid var(--hr-border);
 
-  // Own messages take the forest ground rather than gold, which stays reserved for counts
-  // and the one figure that matters on a screen.
+  // Own messages take the forest ground rather than gold.
   &.mine {
     align-self: flex-end;
     background: var(--hr-sidebar);
@@ -421,8 +413,7 @@
 
 // Below this width, show one pane at a time: the list, or the open chat with a back button.
 @media (max-width: 720px) {
-  // Content padding drops to 1.25rem top and bottom at this width, so the pane can claim
-  // the 0.5rem the desktop figure was reserving.
+  // Content padding drops to 1.25rem top and bottom at this width.
   .chat-shell { grid-template-columns: 1fr; }
   .conversation-list { display: block; }
   .chat-pane { display: none; }
@@ -433,8 +424,7 @@
     .chat-pane { display: flex; }
   }
 
-  // A bubble capped at 60% wastes most of a phone's width and wraps short messages onto
-  // several lines.
+  // A bubble capped at 60% wastes most of a phone's width and wraps short messages onto several lines.
   .bubble { max-width: 85%; }
 }
 

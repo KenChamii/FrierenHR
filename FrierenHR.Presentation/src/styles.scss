@@ -42,19 +42,13 @@ table,
   border-radius: var(--hr-radius) !important;
 }
 
-/* The width utility PrimeNG's styleClass is given in about a hundred places. PrimeFlex is
-   not a dependency, so without this the class resolves to nothing and the control keeps
-   its intrinsic width. Two component stylesheets defined it locally, which is why some
-   screens looked right and others did not. */
+/* The width utility PrimeNG's styleClass is given in about a hundred places. */
 .w-full { width: 100%; }
 
-/* PrimeNG renders its own element inside these hosts, and styleClass lands on that inner
-   element. The host itself stays inline, so a control told to fill its container often had
-   very little to fill. */
+/* PrimeNG renders its own element inside these hosts, and styleClass lands on that inner element. */
 p-dropdown.w-full,
 p-multiselect.w-full {
-  /* These hosts are themselves the PrimeNG select element, a flex row of label and trigger.
-     display: block stacked the trigger under a label squeezed to its own text width. */
+  /* These hosts are themselves the PrimeNG select element, a flex row of label and trigger. */
   display: flex;
   width: 100%;
 }
@@ -71,22 +65,13 @@ p-inputnumber.w-full input {
   width: 100%;
 }
 
-/* ---------------------------------------------------------------------------
-   Narrow screens
+/* Narrow screens. */
 
-   Rules that would otherwise be repeated in sixteen component stylesheets. Each
-   one addresses a way a desktop layout fails on a phone rather than a general
-   preference, so they are deliberately few.
-   --------------------------------------------------------------------------- */
-
-/* A long word or an unbroken id in a cell can push the page wider than the screen,
-   which leaves every screen scrolling sideways over empty space. */
+/* A long word or an unbroken id in a cell can push the page wider than the screen. */
 body { overflow-x: hidden; }
 
 @media (max-width: 900px) {
-  /* A table of eight columns cannot usefully shrink to 360px. Giving it its own
-     horizontal scroll keeps the columns readable and keeps the page itself still.
-     Both class names are matched because PrimeNG renamed this wrapper. */
+  /* A table of eight columns cannot usefully shrink to 360px. */
   .p-datatable-wrapper,
   .p-datatable-table-container {
     overflow-x: auto;

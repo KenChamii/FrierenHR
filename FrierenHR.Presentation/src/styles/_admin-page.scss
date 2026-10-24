@@ -1,8 +1,4 @@
-// Shared layout for the configuration and review screens: holidays, shifts, corrections and
-// the audit trail. They are the same shape, so the shape lives here rather than four times.
-//
-// Used with @use from a component stylesheet, which scopes everything to that component.
-// Colour and type come from the global tokens in _theme.scss, never redefined here.
+// Shared layout for the configuration and review screens: holidays, shifts, corrections and the audit trail.
 
 .page {
   display: flex;

@@ -41,8 +41,7 @@
 
           @if (!step.done) {
             <span class="step-actions">
-              <!-- Each step is detected from real data, but a detection can be wrong, and a
-                   step with no way past it is worse than no checklist. -->
+              <!-- Each step is detected from real data, but a detection can be wrong. -->
               <button type="button" class="mark-done" (click)="markDone(step)">Already done</button>
               <a [routerLink]="step.route" class="go">
                 {{ isNext(step) ? 'Start here' : 'Go' }}

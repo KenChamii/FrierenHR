@@ -6,14 +6,7 @@ import { filter } from 'rxjs/operators';
 import { ButtonModule } from 'primeng/button';
 import { SetupService } from '../../core/services/setup.service';
 
-/**
- * Carries somebody from one setup step to the next without going back to the dashboard.
- *
- * It re-reads progress on every navigation, so finishing a step is noticed and the banner
- * moves on by itself. It does not redirect on its own: adding one department rarely means
- * you are finished adding departments, and being yanked to another screen mid-task is worse
- * than a button.
- */
+/** Carries somebody from one setup step to the next without going back to the dashboard. */
 @Component({
   selector: 'app-setup-banner',
   standalone: true,
@@ -41,8 +34,7 @@ export class SetupBannerComponent implements OnInit {
   ngOnInit(): void {
     this.setup.refresh();
 
-    // Re-read after each navigation. Leaving a setup screen is the moment its step most
-    // likely just became done, and this is what makes the banner advance on its own.
+    // Re-read after each navigation.
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.setup.refresh());

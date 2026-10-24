@@ -35,11 +35,7 @@ export class WeeklyTimesheetWidgetComponent implements OnInit {
   readonly status = computed<TimesheetStatus>(() => this.timesheet()?.status ?? 'Draft');
   readonly canSubmit = computed(() => this.status() === 'Draft' || this.status() === 'Rejected');
 
-  /**
-   * An employee may recall their own submission while it is still awaiting a decision.
-   * Reopening an approved week is HR's, since somebody has already acted on it, and the
-   * server enforces that regardless of what this shows.
-   */
+  /** An employee may recall their own submission while it is still awaiting a decision. */
   readonly canReopen = computed(() =>
     this.status() === 'Submitted'
     || (this.status() === 'Approved' && this.authService.currentRole() === 'HRAdmin'));
@@ -67,9 +63,7 @@ export class WeeklyTimesheetWidgetComponent implements OnInit {
     if (!employeeId) { this.loading.set(false); return; }
     this.loading.set(true);
 
-    // Sent as a local date with no zone suffix. toISOString() turned local Monday midnight
-    // into the previous Sunday in UTC+8, and the server's week-start rule then moved that
-    // back another six days, so this read an entirely different week.
+    // Sent as a local date with no zone suffix.
     this.timesheetService.getForWeek(employeeId, toLocalDateTime(this.weekStart)).subscribe({
       next: (ts) => {
         this.timesheet.set(ts);
