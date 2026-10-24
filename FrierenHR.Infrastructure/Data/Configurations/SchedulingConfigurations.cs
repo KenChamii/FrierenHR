@@ -15,13 +15,11 @@ public class HolidayConfiguration : IEntityTypeConfiguration<Holiday>
         builder.HasOne(x => x.Company).WithMany().HasForeignKey(x => x.CompanyId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Restrict, not Cascade: deleting a department should not silently remove the
-        // holidays its people were counting on.
+        // Restrict, not Cascade: deleting a department should not silently remove the holidays its people were counting on.
         builder.HasOne(x => x.Department).WithMany().HasForeignKey(x => x.DepartmentId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // One record per date per scope. A company-wide entry and a department entry on the
-        // same date are both allowed; two identical ones are not.
+        // One record per date per scope.
         builder.HasIndex(x => new { x.CompanyId, x.Date, x.DepartmentId }).IsUnique();
 
         // Every lookup is "this company, this range", so lead with those two.
@@ -40,8 +38,7 @@ public class ShiftConfiguration : IEntityTypeConfiguration<Shift>
         builder.HasOne(x => x.Company).WithMany().HasForeignKey(x => x.CompanyId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Restrict both ways: a shift in use cannot be deleted out from under the people
-        // assigned to it. The service tells the caller to reassign first.
+        // Restrict both ways: a shift in use cannot be deleted out from under the people assigned to it.
         builder.HasMany(x => x.Employees).WithOne(e => e.Shift).HasForeignKey(e => e.ShiftId)
             .OnDelete(DeleteBehavior.Restrict);
         builder.HasMany(x => x.Departments).WithOne(d => d.Shift).HasForeignKey(d => d.ShiftId)
@@ -50,7 +47,6 @@ public class ShiftConfiguration : IEntityTypeConfiguration<Shift>
         builder.HasIndex(x => new { x.CompanyId, x.Name }).IsUnique();
 
         // A filtered unique index: at most one default per company, with the rest unaffected.
-        // Raw SQL, so PostgreSQL syntax. See the note in PayrollConfigurations.
         builder.HasIndex(x => x.CompanyId)
             .IsUnique()
             .HasFilter("\"IsDefault\" = true")
@@ -67,12 +63,7 @@ public class AttendanceCorrectionConfiguration : IEntityTypeConfiguration<Attend
         builder.Property(x => x.Reason).IsRequired().HasMaxLength(500);
         builder.Property(x => x.DecisionComment).HasMaxLength(500);
 
-        // Restrict rather than Cascade, for two reasons. SQL Server refuses two cascade paths
-        // from Employees to this table, and there is a second one through AttendanceLogs.
-        // It is also the behaviour we want: a correction records who asked for a change to
-        // their hours and why, so it should outlive a deleted account rather than vanish
-        // with it. Employees are deactivated through IsActive, not deleted, so this does not
-        // get in anyone's way in practice.
+        // Restrict rather than Cascade, for two reasons.
         builder.HasOne(x => x.Employee).WithMany().HasForeignKey(x => x.EmployeeId)
             .OnDelete(DeleteBehavior.Restrict);
 
@@ -97,8 +88,7 @@ public class AuditEntryConfiguration : IEntityTypeConfiguration<AuditEntry>
         builder.Property(x => x.EntityName).IsRequired().HasMaxLength(128);
         builder.Property(x => x.Changes).IsRequired();
 
-        // No navigation to Company or Employee on purpose. The trail outlives the records it
-        // describes, and a foreign key would either block their deletion or erase the history.
+        // No navigation to Company or Employee on purpose.
         builder.HasIndex(x => new { x.CompanyId, x.ChangedAt });
         builder.HasIndex(x => new { x.EntityName, x.EntityId });
     }

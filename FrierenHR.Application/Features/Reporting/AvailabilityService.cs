@@ -1,16 +1,12 @@
 using FrierenHR.Application.Common.DTOs;
 using FrierenHR.Application.Common.Interfaces;
 using FrierenHR.Application.Features.Scheduling;
-// FrierenHR.Application.Features.Employee is a namespace, so the bare name Employee resolves
-// to it rather than to the entity.
+// FrierenHR.Application.Features.Employee is a namespace.
 using EmployeeEntity = FrierenHR.Core.Entities.Employee;
 
 namespace FrierenHR.Application.Features.Reporting;
 
-/// <summary>
-/// Who is in and who is out, day by day. Reads approved leave against the working calendar,
-/// so a rest day and a holiday are shown as themselves rather than as absence.
-/// </summary>
+/// <summary>Who is in and who is out, day by day.</summary>
 public class AvailabilityService : IAvailabilityService
 {
     /// <summary>Days called out as thin, most exposed first.</summary>
@@ -52,15 +48,13 @@ public class AvailabilityService : IAvailabilityService
         var departmentNames = (await _departments.GetByCompanyAsync(companyId, ct))
             .ToDictionary(d => d.Id, d => d.Name);
 
-        // One query for everyone's leave, then grouped in memory. Asking per employee would
-        // be one round trip per person for a screen that shows the whole team.
+        // One query for everyone's leave, then grouped in memory.
         var leaveByEmployee = (await _leave.GetApprovedInRangeAsync(
                 companyId, from.ToDateTime(TimeOnly.MinValue), to.ToDateTime(TimeOnly.MaxValue), departmentId, ct))
             .GroupBy(l => l.EmployeeId)
             .ToDictionary(g => g.Key, g => g.ToList());
 
-        // The calendar is per employee because rest days follow their shift, and a
-        // department may observe a holiday the rest of the company does not.
+        // The calendar is per employee because rest days follow their shift.
         var rows = new List<AvailabilityRowDto>(employees.Count);
         foreach (var employee in employees)
         {
@@ -73,8 +67,7 @@ public class AvailabilityService : IAvailabilityService
                 var onLeave = leave.FirstOrDefault(l =>
                     DateOnly.FromDateTime(l.StartDate) <= date && DateOnly.FromDateTime(l.EndDate) >= date);
 
-                // Leave first: someone on leave is out, whatever else the day is. Then the
-                // holiday, which explains the absence better than "rest day" would.
+                // Leave first: someone on leave is out, whatever else the day is.
                 days.Add(onLeave is not null
                     ? new AvailabilityDayDto(date, DayAvailability.OnLeave, onLeave.LeaveType.ToString())
                     : calendar.IsHoliday(date)
@@ -94,10 +87,7 @@ public class AvailabilityService : IAvailabilityService
         return new AvailabilityDto(from, to, rows, ThinnestDays(rows, employees, departmentNames));
     }
 
-    /// <summary>
-    /// Coverage per department per day, worst first. Only days where somebody is actually
-    /// expected in are considered, so a public holiday does not read as a staffing crisis.
-    /// </summary>
+    /// <summary>Coverage per department per day, worst first.</summary>
     private static List<CoverageDto> ThinnestDays(
         List<AvailabilityRowDto> rows,
         List<EmployeeEntity> employees,

@@ -10,18 +10,13 @@ public class PayrollDeductionConfiguration : IEntityTypeConfiguration<PayrollDed
     {
         builder.Property(x => x.Name).IsRequired().HasMaxLength(100);
 
-        // Money and percentages both need exact arithmetic. The SQL Server default for
-        // decimal would silently truncate to whole numbers.
+        // Money and percentages both need exact arithmetic.
         builder.Property(x => x.Value).HasPrecision(18, 4);
 
         builder.HasOne(x => x.Company).WithMany().HasForeignKey(x => x.CompanyId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // One name per company, among the active ones. Two live "Provident fund" lines would
-        // quietly double the deduction.
-        //
-        // The filter is raw SQL and so is dialect-specific: double-quoted identifiers and a
-        // real boolean, which is PostgreSQL. A different provider needs this rewritten.
+        // One name per company, among the active ones.
         builder.HasIndex(x => new { x.CompanyId, x.Name })
             .IsUnique()
             .HasFilter("\"IsActive\" = true");
@@ -46,14 +41,11 @@ public class PayslipConfiguration : IEntityTypeConfiguration<Payslip>
         builder.HasOne(x => x.Company).WithMany().HasForeignKey(x => x.CompanyId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Restrict, for the same two reasons as the attendance corrections table: SQL Server
-        // refuses a second cascade path from Employees, and a record of what somebody was
-        // paid should outlive the deletion of their account.
+        // Restrict, for the same two reasons as the attendance corrections table.
         builder.HasOne(x => x.Employee).WithMany().HasForeignKey(x => x.EmployeeId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // One payslip per employee per period. Regenerating replaces rather than duplicates,
-        // and this is what makes that safe to rely on.
+        // One payslip per employee per period.
         builder.HasIndex(x => new { x.EmployeeId, x.PeriodStart, x.PeriodEnd }).IsUnique();
 
         builder.HasMany(x => x.Lines).WithOne(x => x.Payslip).HasForeignKey(x => x.PayslipId)

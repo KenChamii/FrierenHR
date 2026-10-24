@@ -23,8 +23,7 @@ public class AttendanceCorrectionRepository : Repository<AttendanceCorrection>, 
             .Include(c => c.Employee)
             .Where(c => c.Status == ApprovalStatus.Pending);
 
-        // HR sees the whole company; a manager sees only their own reports. Matches how
-        // TimesheetService.GetPendingForApproverAsync already splits the two.
+        // HR sees the whole company; a manager sees only their own reports.
         if (!companyWide)
             query = query.Where(c => c.Employee != null && c.Employee.ManagerId == approverEmployeeId);
         else

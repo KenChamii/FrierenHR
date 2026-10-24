@@ -22,8 +22,7 @@ public class ShiftsController : ControllerBase
         return Ok(await _shiftService.GetByCompanyAsync(companyId.Value, ct));
     }
 
-    // GET /api/shifts/for-employee/{id} — which shift applies and where it came from, so the
-    // attendance screen can show "08:00, from your department" rather than an unexplained time.
+    // GET /api/shifts/for-employee/{id} — which shift applies and where it came from.
     [HttpGet("for-employee/{employeeId:guid}")]
     public async Task<ActionResult<ResolvedShiftDto>> ForEmployee(Guid employeeId, CancellationToken ct)
     {

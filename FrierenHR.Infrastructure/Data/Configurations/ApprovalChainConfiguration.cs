@@ -40,6 +40,5 @@ public class ApprovalInstanceConfiguration : IEntityTypeConfiguration<ApprovalIn
         builder.HasOne(x => x.ApprovalChain).WithMany()
             .HasForeignKey(x => x.ApprovalChainId).OnDelete(DeleteBehavior.Restrict);
         // Restrict, not Cascade — LeaveRequestId isn't a nav-mapped FK here (no LeaveRequest?
-        // property), so there's no relationship for EF to cascade through on that side.
     }
 }

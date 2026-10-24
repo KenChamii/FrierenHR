@@ -5,15 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace FrierenHR.Infrastructure.External;
 
-/// <summary>
-/// Reads a year's public holidays from the Nager.Date public API.
-///
-/// Chosen because it is free, needs no key, and covers the Philippines. It is not
-/// authoritative: Philippine holidays are declared by Presidential Proclamation and the
-/// feed lags those, and it does not distinguish a Regular holiday from a Special
-/// Non-Working one, which is the distinction that drives pay. Everything it returns is
-/// reviewed by an administrator before it is saved.
-/// </summary>
+/// <summary>Reads a year's public holidays from the Nager.Date public API.</summary>
 public class NagerHolidayFeed : IHolidayFeed
 {
     private readonly HttpClient _http;
@@ -37,8 +29,7 @@ public class NagerHolidayFeed : IHolidayFeed
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
         {
-            // Logged with the detail, surfaced without it. The person needs to know the
-            // lookup failed and that typing the list in by hand still works.
+            // Logged with the detail, surfaced without it.
             _logger.LogWarning(ex, "Holiday feed request failed for {Year} {Country}.", year, countryCode);
 
             throw new InvalidOperationException(

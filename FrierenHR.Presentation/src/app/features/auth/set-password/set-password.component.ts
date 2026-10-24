@@ -79,8 +79,7 @@ export class SetPasswordComponent {
     }).subscribe({
       next: result => {
         this.saving.set(false);
-        // The old token still says a change is required, so the replacement has to be
-        // stored before navigating or every request would be refused.
+        // The old token still says a change is required.
         if (result?.token) this.auth.onPasswordChanged(result.token);
         this.router.navigateByUrl('/dashboard');
       },

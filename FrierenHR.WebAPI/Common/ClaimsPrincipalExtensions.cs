@@ -2,11 +2,7 @@ using System.Security.Claims;
 
 namespace FrierenHR.WebAPI.Common;
 
-/// <summary>
-/// Reads the authenticated caller's identity straight off their JWT claims
-/// (see TokenService.GenerateToken) instead of trusting whatever employeeId/
-/// companyId the client puts in the request body or query string.
-/// </summary>
+/// <summary>Reads the authenticated caller's identity straight off their JWT claims (see TokenService.GenerateToken) instead of trusting whatever employeeId/ companyId the client puts in the request body or query string.</summary>
 public static class ClaimsPrincipalExtensions
 {
     public static Guid? GetEmployeeId(this ClaimsPrincipal user)
@@ -23,7 +19,7 @@ public static class ClaimsPrincipalExtensions
 
     public static string? GetRole(this ClaimsPrincipal user) => user.FindFirstValue(ClaimTypes.Role);
 
-    /// <summary>True if the caller IS the given employee, or holds one of the allowed roles (e.g. Manager/HRAdmin viewing someone else's record).</summary>
+    /// <summary>True if the caller IS the given employee.</summary>
     public static bool IsSelfOrRole(this ClaimsPrincipal user, Guid employeeId, params string[] allowedRoles)
     {
         if (user.GetEmployeeId() == employeeId) return true;

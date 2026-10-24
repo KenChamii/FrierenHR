@@ -27,14 +27,7 @@ export class ShellComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
-  /**
-   * Whether the navigation drawer is open. Only meaningful on a narrow screen: above the
-   * breakpoint the sidebar is always visible and this is ignored.
-   *
-   * Nineteen links do not fit across the top of a phone, and wrapping them into rows of
-   * icons costs most of the screen before any content appears. A drawer keeps the full
-   * labelled list and gives the content the whole viewport.
-   */
+  /** Whether the navigation drawer is open. */
   readonly menuOpen = signal(false);
 
   /** The nav item the setup checklist is pointing at, or null when setup is done. */
@@ -71,14 +64,12 @@ export class ShellComponent implements OnInit {
     // Setup progress drives the pointer beside the nav item that comes next.
     this.setup.refresh();
 
-    // Closing on navigation rather than on click, so the drawer also closes when something
-    // else routes: the setup banner, a redirect, or the browser's back button.
+    // Closing on navigation rather than on click, so the drawer also closes when something else routes: the setup banner.
     this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.menuOpen.set(false));
 
-    // Connected here rather than on the Messages screen, so a message that arrives while
-    // somebody is on Leave or Attendance still lights up the sidebar.
+    // Connected here rather than on the Messages screen.
     try {
       await this.messaging.connect();
       const employeeId = this.authService.currentEmployeeId();
@@ -87,8 +78,7 @@ export class ShellComponent implements OnInit {
           .subscribe({ next: list => this.messaging.seedUnread(list) });
       }
     } catch {
-      // Chat is not essential to the rest of the application. The Messages screen reports
-      // the problem when somebody actually goes there.
+      // Chat is not essential to the rest of the application.
     }
   }
 
@@ -105,10 +95,7 @@ export class ShellComponent implements OnInit {
     return item.path === '/messages' && this.unreadMessages() > 0;
   }
 
-  /**
-   * True for the one nav item setup is asking for next, so the sidebar points at the same
-   * step the checklist does rather than leaving somebody to find it among nineteen links.
-   */
+  /** True for the one nav item setup is asking for next. */
   isSetupTarget(item: NavItem): boolean {
     return this.setupTarget() === item.path;
   }
@@ -129,8 +116,7 @@ export class ShellComponent implements OnInit {
   }
 
   async logout(): Promise<void> {
-    // Dropped before the token goes, so the next person to sign in on this browser does not
-    // inherit a socket authenticated as the previous one.
+    // Dropped before the token goes, so the next person to sign in on this browser does not inherit a socket authenticated as the previous one.
     await this.messaging.disconnect();
     this.authService.logout();
   }

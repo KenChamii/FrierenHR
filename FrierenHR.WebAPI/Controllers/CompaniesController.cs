@@ -13,14 +13,11 @@ public class CompaniesController : ControllerBase
     private readonly ICompanyService _companyService;
     public CompaniesController(ICompanyService companyService) => _companyService = companyService;
 
-    // Was anonymous, to populate a sign-up dropdown. That published every tenant's name,
-    // code and headcount to anyone who asked. Sign-up now creates its own company through
-    // POST /api/auth/register-company and needs no list.
+    // Was anonymous, to populate a sign-up dropdown.
     [HttpGet, Authorize(Roles = "HRAdmin")]
     public async Task<ActionResult<List<CompanyDto>>> GetAll(CancellationToken ct) => Ok(await _companyService.GetAllAsync(ct));
 
-    // Creating a company without its first HRAdmin leaves a tenant nobody can log into, so
-    // this is no longer the sign-up route and requires an existing administrator.
+    // Creating a company without its first HRAdmin leaves a tenant nobody can log into.
     [HttpPost, Authorize(Roles = "HRAdmin")]
     public async Task<ActionResult<CompanyDto>> Create(CreateCompanyDto dto, CancellationToken ct)
     {
@@ -39,8 +36,7 @@ public class CompaniesController : ControllerBase
     [HttpGet("{companyId:guid}/departments"), Authorize]
     public async Task<ActionResult<List<DepartmentDto>>> GetDepartments(Guid companyId, CancellationToken ct)
     {
-        // Same pattern as Employees: ignore whatever companyId is in the URL and use the
-        // caller's own, so nobody can browse another company's department list.
+        // Same pattern as Employees: ignore whatever companyId is in the URL and use the caller's own.
         var callerCompanyId = User.GetCompanyId();
         if (callerCompanyId is null) return Forbid();
         return Ok(await _companyService.GetDepartmentsAsync(callerCompanyId.Value, ct));

@@ -38,8 +38,7 @@
   .pct.low { color: var(--hr-danger, #8c3b2e); }
 }
 
-// The grid can be wider than the viewport, so it scrolls rather than squeezing the cells
-// below a size people can still read.
+// The grid can be wider than the viewport, so it scrolls rather than squeezing the cells below a size people can still read.
 .grid-scroll {
   overflow-x: auto;
   padding: 0 1.25rem 1rem;

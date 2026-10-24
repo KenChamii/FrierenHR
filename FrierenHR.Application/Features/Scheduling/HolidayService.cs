@@ -42,8 +42,7 @@ public class HolidayService : IHolidayService
 
         var suggestions = await _holidayFeed.GetForYearAsync(year, countryCode.Trim(), ct);
 
-        // Company-wide entries only. A department-specific holiday on the same date does not
-        // make the company-wide one redundant, so it should not suppress the suggestion.
+        // Company-wide entries only.
         var existingDates = (await _holidayRepository.GetByCompanyAsync(companyId, ct))
             .Where(h => h.DepartmentId is null && h.Date.Year == year)
             .Select(h => h.Date)
@@ -62,8 +61,7 @@ public class HolidayService : IHolidayService
         var from = new DateOnly(year, 1, 1);
         var to = new DateOnly(year, 12, 31);
 
-        // GetByCompanyAsync rather than GetForRangeAsync, because the admin screen shows every
-        // scope including department-specific entries, which the range query filters out.
+        // GetByCompanyAsync rather than GetForRangeAsync.
         var all = (await _holidayRepository.GetByCompanyAsync(companyId, ct))
             .Where(h => h.Date >= from && h.Date <= to)
             .ToList();
@@ -113,11 +111,7 @@ public class HolidayService : IHolidayService
         await _holidayRepository.SaveChangesAsync(ct);
     }
 
-    /// <summary>
-    /// Skips rather than fails on a date already recorded, because a year's calendar is
-    /// usually pasted in twice at some point and losing the other eleven months to one
-    /// duplicate helps nobody.
-    /// </summary>
+    /// <summary>Skips rather than fails on a date already recorded.</summary>
     public async Task<HolidayImportResultDto> ImportAsync(
         Guid companyId, IEnumerable<SaveHolidayDto> holidays, CancellationToken ct = default)
     {

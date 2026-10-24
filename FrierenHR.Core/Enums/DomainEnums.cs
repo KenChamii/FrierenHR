@@ -8,10 +8,7 @@ public enum ConversationType { Direct = 0, Group = 1, Broadcast = 2 }
 public enum ApprovalStatus { Pending = 0, Approved = 1, Rejected = 2, Escalated = 3 }
 public enum TimesheetStatus { Draft = 0, Submitted = 1, Approved = 2, Rejected = 3 }
 
-/// <summary>
-/// Kinds of non-working day. Not a bool, because they are paid and multiplied differently in
-/// most jurisdictions, and a rule needs to tell them apart.
-/// </summary>
+/// <summary>Kinds of non-working day.</summary>
 public enum HolidayType
 {
     /// <summary>Paid whether worked or not, and worked hours carry a premium.</summary>

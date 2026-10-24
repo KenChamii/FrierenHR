@@ -5,10 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FrierenHR.Infrastructure.Repositories;
 
-/// <summary>
-/// Read-only by design. Audit rows are written by the save interceptor, and nothing in the
-/// application is allowed to amend or delete them, so no write methods are offered here.
-/// </summary>
+/// <summary>Read-only by design.</summary>
 public class AuditRepository : IAuditRepository
 {
     private readonly FrierenHRDbContext _context;

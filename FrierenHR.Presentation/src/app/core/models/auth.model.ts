@@ -8,10 +8,7 @@ export interface LoginResultDto {
   mustChangePassword?: boolean;
 }
 
-/**
- * Company and first administrator, submitted together. The API creates both in one
- * transaction, because a company without an administrator cannot be logged into.
- */
+/** Company and first administrator, submitted together. */
 export interface RegisterCompanyDto {
   companyName: string;
   companyCode: string;

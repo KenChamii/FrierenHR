@@ -33,9 +33,7 @@ public class RuleConfigService : IRuleConfigService
         if (parsed is null)
             throw new InvalidOperationException("RuleJson did not describe a rule.");
 
-        // Valid JSON is not a valid rule. The schema catalog is the same one the form is built
-        // from, so a mistyped field or an unsupported operator is rejected here by name rather
-        // than silently never matching at evaluation time.
+        // Valid JSON is not a valid rule.
         var problem = RuleSchemaCatalog.Validate(dto.RuleType, parsed);
         if (problem is not null) throw new InvalidOperationException(problem);
 
@@ -78,8 +76,7 @@ public class RuleConfigService : IRuleConfigService
         foreach (var config in configs)
         {
             var parsed = JsonSerializer.Deserialize<RuleDefinition>(config.RuleJson, JsonOptions);
-            // Anything unparseable would already have failed SaveAsync on the way in. Skip
-            // rather than failing the whole test run.
+            // Anything unparseable would already have failed SaveAsync on the way in.
             if (parsed is not null) rules.Add(parsed);
         }
 
@@ -91,8 +88,7 @@ public class RuleConfigService : IRuleConfigService
         return new RuleEvaluationResultDto(result.Matched, result.Success, result.ResultValue, result.Message, result.ActionType);
     }
 
-    // Facts arrive as untyped JSON, so model binding gives JsonElement rather than int or
-    // string. ConditionEvaluator cannot read a JsonElement, so unwrap to CLR types first.
+    // Facts arrive as untyped JSON, so model binding gives JsonElement rather than int or string.
     private static object? NormalizeFactValue(object? raw)
     {
         if (raw is not JsonElement element) return raw;
@@ -115,11 +111,7 @@ public class RuleConfigService : IRuleConfigService
         return configs.Select(ToDto).ToList();
     }
 
-    /// <summary>
-    /// Fills in the catalog's starter rule for any rule type this company has not configured.
-    /// Never overwrites an existing config, so it is safe to call again after a new rule type
-    /// is added to the enum.
-    /// </summary>
+    /// <summary>Fills in the catalog's starter rule for any rule type this company has not configured.</summary>
     public async Task<List<RuleConfigDto>> SeedDefaultsAsync(Guid companyId, CancellationToken ct = default)
     {
         var existing = await _ruleConfigRepository.GetByCompanyAsync(companyId, ct);

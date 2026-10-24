@@ -28,8 +28,7 @@ public class PayslipsController : ControllerBase
     [HttpGet("by-employee/{employeeId:guid}")]
     public async Task<ActionResult<List<PayslipSummaryDto>>> ByEmployee(Guid employeeId, CancellationToken ct)
     {
-        // Pay is personal. An employee sees their own; only HR sees somebody else's, and a
-        // manager is deliberately not enough.
+        // Pay is personal.
         if (!User.IsSelfOrRole(employeeId, "HRAdmin")) return Forbid();
         return Ok(await _payslips.GetForEmployeeAsync(employeeId, ct));
     }

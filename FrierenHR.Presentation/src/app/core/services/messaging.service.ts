@@ -9,7 +9,6 @@ import {
 } from '../models/messaging.model';
 
 // Kept in sync with Messaging:MaxAttachmentSizeBytes in the backend's appsettings.json.
-// Client-side feedback only; the server enforces the real limit.
 export const MAX_ATTACHMENT_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 
 @Injectable({ providedIn: 'root' })
@@ -60,11 +59,7 @@ export class MessagingService {
     return this.http.post<AttachmentUploadResultDto>(`${this.baseUrl}/attachments`, form);
   }
 
-  /**
-   * Connects if not already connected, and is safe to call from anywhere: concurrent callers
-   * await the same attempt. A failed attempt is cleared rather than cached, so the next call
-   * genuinely retries instead of returning against a dead connection forever.
-   */
+  /** Connects if not already connected, and is safe to call from anywhere: concurrent callers await the same attempt. */
   async connect(): Promise<void> {
     if (this.hubConnection?.state === signalR.HubConnectionState.Connected) return;
     if (this.connecting) return this.connecting;
@@ -82,8 +77,7 @@ export class MessagingService {
     connection.on('ReceiveMessage', (message: MessageDto) =>
       this.liveMessages.update(list => [...list, message]));
 
-    // Sent only to participants who do not have the conversation open, so anything arriving
-    // here is by definition unread.
+    // Sent only to participants who do not have the conversation open, so anything arriving here is by definition unread.
     connection.on('ConversationUpdated', (message: MessageDto) => {
       this.unreadConversationIds.update(ids => new Set(ids).add(message.conversationId));
       this.lastNotification.set(message);
@@ -96,8 +90,7 @@ export class MessagingService {
     try {
       await connection.start();
     } catch (error) {
-      // Left null so a later call builds a fresh connection. Keeping the half-built one was
-      // what made a single failed attempt disable chat for the rest of the session.
+      // Left null so a later call builds a fresh connection.
       this.hubConnection = null;
       this.connectionState.set(signalR.HubConnectionState.Disconnected);
       throw error;
@@ -114,8 +107,7 @@ export class MessagingService {
   }
 
   async leaveConversation(conversationId: string): Promise<void> {
-    // Best effort. Leaving a group on a connection that has already gone is not a failure
-    // worth showing anyone.
+    // Best effort. Leaving a group on a connection that has already gone is not a failure worth showing anyone.
     try {
       await this.invoke('LeaveConversation', conversationId);
     } catch {
@@ -163,13 +155,7 @@ export class MessagingService {
     await connection?.stop();
   }
 
-  /**
-   * Every hub call goes through here, so none of them can be silently dropped.
-   *
-   * These used to be written as hubConnection?.invoke(...). When the connection was null,
-   * which it was whenever the first connect attempt had failed, the optional chain made the
-   * call evaluate to undefined and the message disappeared without an error anywhere.
-   */
+  /** Every hub call goes through here, so none of them can be silently dropped. */
   private async invoke(method: string, ...args: unknown[]): Promise<void> {
     await this.connect();
 

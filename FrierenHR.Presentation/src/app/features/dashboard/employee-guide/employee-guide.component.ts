@@ -15,13 +15,7 @@ interface GuideItem {
 
 const DISMISSED_KEY = 'hr_employee_guide_dismissed';
 
-/**
- * How the application is used week to week, for somebody who did not set it up.
- *
- * Not a checklist: an employee has no setup to finish, they have a routine to learn, and
- * nothing here is ever "done". So it is orientation that can be dismissed and brought back,
- * rather than progress that gets ticked off.
- */
+/** How the application is used week to week, for somebody who did not set it up. */
 @Component({
   selector: 'app-employee-guide',
   standalone: true,

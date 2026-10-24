@@ -15,9 +15,7 @@ export interface RuleEvaluationResultDto {
   matched: boolean; success: boolean; resultValue?: number; message: string; actionType?: string;
 }
 
-// --- Schema served by GET /api/rules-config/schema ---
-// Mirrors FrierenHR.Core.RulesEngine.Schema. The rules form is built from this rather than
-// from anything hardcoded here, so it cannot offer a field or operator the engine lacks.
+// --- Schema served by GET /api/rules-config/schema --- Mirrors FrierenHR.Core.RulesEngine.Schema.
 
 export type RuleValueKind = 'Integer' | 'Decimal' | 'Text' | 'Enum' | 'Boolean';
 

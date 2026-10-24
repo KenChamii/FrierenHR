@@ -6,19 +6,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FrierenHR.WebAPI.Controllers;
 
-/// <summary>
-/// Read-only reporting. Every endpoint takes its company from the caller's token rather than
-/// from a query parameter, so one tenant cannot ask for another's figures.
-/// </summary>
+/// <summary>Read-only reporting.</summary>
 [ApiController]
 [Route("api/reports")]
 [Authorize]
 public class ReportsController : ControllerBase
 {
-    /// <summary>
-    /// Widest window the availability grid will return. A year of employee-days is a slow
-    /// query and an unreadable screen.
-    /// </summary>
+    /// <summary>Widest window the availability grid will return.</summary>
     private const int MaxAvailabilityDays = 92;
 
     private readonly IAvailabilityService _availability;
@@ -54,8 +48,7 @@ public class ReportsController : ControllerBase
         return Ok(await _availability.GetAsync(companyId.Value, from, to, departmentId, ct));
     }
 
-    // GET /api/reports/leave-forecast?employeeId=...&horizon=2027-12-31
-    // An employee may forecast their own balance; only HR may forecast somebody else's.
+    // GET /api/reports/leave-forecast?employeeId=...&horizon=2027-12-31 An employee may forecast their own balance.
     [HttpGet("leave-forecast")]
     public async Task<ActionResult<LeaveForecastDto>> LeaveForecast(
         [FromQuery] Guid? employeeId, [FromQuery] DateOnly? horizon, CancellationToken ct = default)

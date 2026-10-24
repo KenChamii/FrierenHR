@@ -21,9 +21,7 @@ public class EmployeeRepository : Repository<Employee>, IEmployeeRepository
     public async Task<Employee?> GetByEmailAsync(string email, CancellationToken ct = default) =>
         await DbSet.Include(e => e.Department).Include(e => e.Manager)
             .FirstOrDefaultAsync(e => e.Email == email, ct);
-    // Not .AsNoTracking() — AuthController's login flow reads through this method,
-    // and while it doesn't mutate the entity today, GetByEmailAsync is also the
-    // natural place a future "update last login timestamp" would hang off of.
+    // Not .AsNoTracking() — AuthController's login flow reads through this method.
 
     public async Task<List<Employee>> GetDirectReportsAsync(Guid managerId, CancellationToken ct = default) =>
         await DbSet.Include(e => e.Department).AsNoTracking()

@@ -1,15 +1,7 @@
 import { definePreset } from '@primeng/themes';
 import Aura from '@primeng/themes/aura';
 
-/**
- * FrierenHR brand preset. Points PrimeNG's token layer at the Ledger palette in
- * styles/_theme.scss so buttons, inputs and tables match the custom screens without
- * per-component overrides.
- *
- * Radius is near square and surfaces are bone rather than white. Both are deliberate: the
- * design is built on hairline rules, so a rounded control beside a square panel reads as
- * unfinished.
- */
+/** FrierenHR brand preset. */
 export const HrPreset = definePreset(Aura, {
   semantic: {
     primary: {

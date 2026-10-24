@@ -31,19 +31,12 @@ export class AuthService {
     return this.http.post<LoginResultDto>(`${environment.apiUrl}/api/auth/login`, dto);
   }
 
-  /**
-   * Creates a company and its first administrator. Returns the same shape as login, so the
-   * caller establishes a session the same way and the person lands in the app signed in.
-   */
+  /** Creates a company and its first administrator. */
   registerCompany(dto: RegisterCompanyDto) {
     return this.http.post<LoginResultDto>(`${environment.apiUrl}/api/auth/register-company`, dto);
   }
 
-  /**
-   * Stores the session from a successful login. companyId isn't part of the
-   * login response, so it defaults to '' here — call updateCompanyId() once
-   * the employee's own record has been fetched (see LoginComponent.submit()).
-   */
+  /** Stores the session from a successful login. */
   setSession(result: LoginResultDto, companyId = ''): void {
     const stored: StoredAuth = {
       token: result.token, employeeId: result.employeeId, fullName: result.fullName,
@@ -53,10 +46,7 @@ export class AuthService {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
   }
 
-  /**
-   * Swaps in the token returned by a successful password change. The previous one still
-   * carries mustChangePassword, so without this the account stays locked out of everything.
-   */
+  /** Swaps in the token returned by a successful password change. */
   onPasswordChanged(token: string): void {
     const current = this._auth();
     if (!current) return;

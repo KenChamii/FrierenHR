@@ -25,8 +25,7 @@
   gap: 0.5rem;
 }
 
-// Seven square toggles rather than a multi-select: the week is short enough to show whole,
-// and a glance is faster than opening a list.
+// Seven square toggles rather than a multi-select: the week is short enough to show whole.
 .day-toggles {
   display: flex;
   flex-wrap: wrap;

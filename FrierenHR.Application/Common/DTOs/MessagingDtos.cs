@@ -12,6 +12,5 @@ public record SendMessageDto(
     Guid ConversationId, Guid SenderEmployeeId, string Body,
     string? AttachmentUrl = null, string? AttachmentFileName = null, string? AttachmentContentType = null, long? AttachmentSizeBytes = null);
 
-// Returned by the attachment upload endpoint so the client has everything it needs to
-// immediately follow up with SendMessage (over the hub) without a second round trip.
+// Returned by the attachment upload endpoint so the client has everything it needs to immediately follow up with SendMessage (over the hub) without a second round trip.
 public record AttachmentUploadResultDto(string Url, string FileName, string ContentType, long SizeBytes);

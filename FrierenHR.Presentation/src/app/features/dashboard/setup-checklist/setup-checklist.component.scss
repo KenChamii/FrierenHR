@@ -100,7 +100,6 @@
   }
 
   // Quieter than the primary action: the escape hatch, not the expected path.
-  // Named mark-done rather than mark, which is the tick circle above.
   .mark-done {
     border: none;
     background: none;
@@ -141,8 +140,7 @@
   .why { display: none; }
 }
 
-// The step to do next. Marked by a rule and weight as well as the ring, so it does not
-// depend on colour alone.
+// The step to do next. Marked by a rule and weight as well as the ring, so it does not depend on colour alone.
 .step.next {
   background: var(--hr-accent-soft);
   box-shadow: inset 2px 0 0 var(--hr-accent);
@@ -157,16 +155,14 @@
 
 .step.optional:not(.done) .mark { border-style: dashed; }
 
-// A slow pulse, once every couple of seconds. Enough to find on a page, not enough to
-// nag at somebody reading the step next to it.
+// A slow pulse, once every couple of seconds.
 @keyframes ring {
   0% { box-shadow: 0 0 0 0 var(--hr-accent); opacity: 1; }
   70% { box-shadow: 0 0 0 6px rgba(0, 0, 0, 0); opacity: 1; }
   100% { box-shadow: 0 0 0 0 rgba(0, 0, 0, 0); opacity: 1; }
 }
 
-// Respect a request for less movement. An animation nobody asked for is the first thing to
-// drop for somebody who finds motion uncomfortable.
+// Respect a request for less movement.
 @media (prefers-reduced-motion: reduce) {
   .step.next .mark { animation: none; }
   .bar .fill { transition: none; }

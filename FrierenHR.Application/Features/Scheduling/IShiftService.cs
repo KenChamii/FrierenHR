@@ -9,11 +9,7 @@ public interface IShiftService
     Task<ShiftDto> SaveAsync(SaveShiftDto dto, CancellationToken ct = default);
     Task DeleteAsync(Guid id, Guid companyId, CancellationToken ct = default);
 
-    /// <summary>
-    /// The shift that applies to an employee: their own, else their department's, else the
-    /// company default. Returns null when the company has defined no shifts at all, which
-    /// callers treat as "no expected start time" rather than as an error.
-    /// </summary>
+    /// <summary>The shift that applies to an employee: their own, else their department's, else the company default.</summary>
     Task<Shift?> ResolveForEmployeeAsync(Guid employeeId, CancellationToken ct = default);
 
     /// <summary>The same resolution, with the level that supplied it, for display.</summary>

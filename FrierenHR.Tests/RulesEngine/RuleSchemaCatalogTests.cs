@@ -6,10 +6,7 @@ using FrierenHR.Core.RulesEngine.Schema;
 
 namespace FrierenHR.Tests.RulesEngine;
 
-/// <summary>
-/// The catalog claims to describe the engine. These tests hold it to that, so the form, the
-/// save validation and the evaluator cannot drift apart silently.
-/// </summary>
+/// <summary>The catalog claims to describe the engine.</summary>
 public class RuleSchemaCatalogTests
 {
     public static TheoryData<RuleType> AllRuleTypes()
@@ -79,8 +76,7 @@ public class RuleSchemaCatalogTests
     [MemberData(nameof(AllRuleTypes))]
     public void Every_starter_rule_actually_runs(RuleType ruleType)
     {
-        // Seeding writes these in as live configs, so a starter that cannot evaluate would
-        // leave a company with a rule that never fires.
+        // Seeding writes these in as live configs, so a starter that cannot evaluate would leave a company with a rule that never fires.
         var schema = RuleSchemaCatalog.For(ruleType);
         var context = new RuleContext();
         foreach (var field in schema.Fields) context.Set(field.Name, SampleFor(field));
@@ -109,8 +105,7 @@ public class RuleSchemaCatalogTests
     [Fact]
     public void Holiday_overtime_can_be_expressed_without_changing_the_engine()
     {
-        // The reason the holiday facts were added: a company sets a premium for overtime on a
-        // regular holiday as configuration, not code.
+        // The reason the holiday facts were added: a company sets a premium for overtime on a regular holiday as configuration.
         var rule = new RuleDefinition
         {
             RuleType = nameof(RuleType.OTMultiplier),
@@ -262,8 +257,7 @@ public class RuleSchemaCatalogTests
     [Fact]
     public void ApprovalEscalation_is_marked_as_not_yet_wired()
     {
-        // ApprovalService escalates from ApprovalChainStep.EscalateAfterDays rather than the
-        // engine, so rules of this type never run. Delete this test when that is connected.
+        // ApprovalService escalates from ApprovalChainStep.EscalateAfterDays rather than the engine.
         Assert.False(RuleSchemaCatalog.For(RuleType.ApprovalEscalation).Wired);
         Assert.All(RuleSchemaCatalog.All.Where(kv => kv.Key != RuleType.ApprovalEscalation),
             kv => Assert.True(kv.Value.Wired));

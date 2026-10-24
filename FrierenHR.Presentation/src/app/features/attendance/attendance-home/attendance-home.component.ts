@@ -26,10 +26,7 @@ type TrackingTab = 'week' | 'today';
   styleUrl: './attendance-home.component.scss',
 })
 export class AttendanceHomeComponent {
-  /**
-   * The week grid leads. Logging a fixed remote schedule a day at a time was the complaint
-   * the grid exists to answer, so it should not be the tab people have to find.
-   */
+  /** The week grid leads. */
   readonly tab = signal<TrackingTab>('week');
 
   constructor(public authService: AuthService) {}

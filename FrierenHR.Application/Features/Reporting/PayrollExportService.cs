@@ -12,13 +12,7 @@ using EmployeeEntity = FrierenHR.Core.Entities.Employee;
 
 namespace FrierenHR.Application.Features.Reporting;
 
-/// <summary>
-/// One row per employee for a pay period: hours worked, overtime at the company's own
-/// multiplier, minutes late after grace, and leave taken.
-///
-/// The numbers are derived here rather than stored, so a corrected attendance log changes the
-/// export without anything needing to be recalculated or kept in step.
-/// </summary>
+/// <summary>One row per employee for a pay period: hours worked, overtime at the company's own multiplier.</summary>
 public class PayrollExportService : IPayrollExportService
 {
     /// <summary>Hours past which the rest of a day counts as overtime.</summary>
@@ -90,8 +84,7 @@ public class PayrollExportService : IPayrollExportService
             var logs = logsByEmployee.GetValueOrDefault(employee.Id) ?? [];
             var leave = leaveByEmployee.GetValueOrDefault(employee.Id) ?? [];
 
-            // An employee with neither attendance nor leave has nothing to pay for this
-            // period. Including them would pad the file with zero rows payroll has to skip.
+            // An employee with neither attendance nor leave has nothing to pay for this period.
             if (logs.Count == 0 && leave.Count == 0) continue;
 
             var calendar = await _calendars.ForEmployeeAsync(employee.Id, from, to, ct);
@@ -143,8 +136,7 @@ public class PayrollExportService : IPayrollExportService
         var daysWorked = 0;
         var holidaysWorked = 0;
 
-        // Only closed logs are counted. An open one means the person is still clocked in, and
-        // guessing a time out would put an invented number in a payroll file.
+        // Only closed logs are counted.
         foreach (var log in logs.Where(l => l.TimeOut is not null))
         {
             var worked = (decimal)(log.TimeOut!.Value - log.TimeIn).TotalHours
@@ -164,8 +156,7 @@ public class PayrollExportService : IPayrollExportService
 
         var multiplier = OvertimeMultiplierFor(employee, otRules);
 
-        // Leave days are clipped to the period, so a request that straddles two pay periods
-        // is not paid twice.
+        // Leave days are clipped to the period, so a request that straddles two pay periods is not paid twice.
         var leaveDays = leave.Sum(l => ClippedLeaveDays(l, calendar, periodStart, periodEnd));
 
         return new PayrollRowDto(
@@ -184,10 +175,7 @@ public class PayrollExportService : IPayrollExportService
             holidaysWorked);
     }
 
-    /// <summary>
-    /// Minutes late beyond the configured grace period. Without a shift there is no expected
-    /// start time, so nobody can be late.
-    /// </summary>
+    /// <summary>Minutes late beyond the configured grace period.</summary>
     private int LateMinutesFor(
         AttendanceLog log,
         Shift? shift,
@@ -227,8 +215,7 @@ public class PayrollExportService : IPayrollExportService
     private static decimal ClippedLeaveDays(
         LeaveRequest request, WorkingCalendar calendar, DateOnly periodStart, DateOnly periodEnd)
     {
-        // A request may start before the period or end after it, because the query matches on
-        // overlap. Only the part inside the period belongs in this export.
+        // A request may start before the period or end after it, because the query matches on overlap.
         var start = Max(DateOnly.FromDateTime(request.StartDate), periodStart);
         var end = Min(DateOnly.FromDateTime(request.EndDate), periodEnd);
         return end < start ? 0 : calendar.CountWorkingDays(start, end);
@@ -238,13 +225,7 @@ public class PayrollExportService : IPayrollExportService
 
     private static DateOnly Min(DateOnly a, DateOnly b) => a < b ? a : b;
 
-    /// <summary>
-    /// The configured amount of the first rule whose conditions hold.
-    ///
-    /// The rule's own Action.Amount is read rather than the evaluator's ResultValue, because
-    /// the OTMultiplier action returns hours already multiplied. This report needs the
-    /// multiplier itself, to show alongside the hours it applies to.
-    /// </summary>
+    /// <summary>The configured amount of the first rule whose conditions hold.</summary>
     private decimal? FirstMatchingAmount(
         List<RuleDefinition> rules, RuleType ruleType, RuleContext context)
     {

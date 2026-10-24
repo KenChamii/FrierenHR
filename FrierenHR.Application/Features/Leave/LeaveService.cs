@@ -37,8 +37,7 @@ public class LeaveService : ILeaveService
         var employee = await _employeeRepository.GetByIdAsync(dto.EmployeeId, ct)
             ?? throw new InvalidOperationException($"Employee '{dto.EmployeeId}' not found.");
 
-        // Working days, not calendar days. A request spanning a weekend or a public holiday
-        // used to deduct those days from the balance.
+        // Working days, not calendar days.
         var from = DateOnly.FromDateTime(dto.StartDate);
         var to = DateOnly.FromDateTime(dto.EndDate);
         if (to < from) throw new InvalidOperationException("The end date cannot be before the start date.");
@@ -84,8 +83,7 @@ public class LeaveService : ILeaveService
         }
         else
         {
-            // Deducted once. This ran twice before, halving an auto-approved employee's
-            // balance for every request they made.
+            // Deducted once. This ran twice before, halving an auto-approved employee's balance for every request they made.
             await ApplyBalanceDeduction(employee.Id, dto.LeaveType, days, ct);
         }
 

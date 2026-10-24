@@ -1,12 +1,6 @@
 ﻿namespace FrierenHR.Application.Common.Security;
 
-/// <summary>
-/// Minimum password requirements, enforced server-side so this can't be bypassed by hitting
-/// the API directly (the frontend mirrors this for immediate feedback, but that's UX only —
-/// this is the actual enforcement point). Deliberately not going overboard with special-char/
-/// rotation rules; current NIST guidance favors length + a mix of character types over complex
-/// composition rules that just push people toward "Password1!" and rotation calendars.
-/// </summary>
+/// <summary>Minimum password requirements, enforced server-side so this can't be bypassed by hitting the API directly (the frontend mirrors this for immediate feedback, but that's UX only — this is the actual enforcement point).</summary>
 public static class PasswordPolicy
 {
     public const int MinLength = 8;

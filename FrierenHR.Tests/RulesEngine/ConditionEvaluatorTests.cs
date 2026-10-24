@@ -31,8 +31,7 @@ public class ConditionEvaluatorTests
     [Fact]
     public void Numeric_comparison_works_across_mixed_numeric_types()
     {
-        // The rule value arrives from JSON and the fact from the domain, so one is often a
-        // double and the other a decimal. Both go through TryToDecimal.
+        // The rule value arrives from JSON and the fact from the domain, so one is often a double and the other a decimal.
         var matched = ConditionEvaluator.Matches(Condition("days", "<=", 2.5d), Context("days", 2.0m), out var error);
 
         Assert.Null(error);
@@ -90,9 +89,7 @@ public class ConditionEvaluatorTests
     [Fact]
     public void A_field_missing_from_the_context_is_an_error()
     {
-        // Worth pinning: this is an error rather than a non-match, and EvaluateFirstMatch
-        // treats it as a skip. A mistyped field name therefore falls through to the next rule
-        // instead of surfacing. See ApprovalEscalation note in RuleSchemaCatalog.
+        // Worth pinning: this is an error rather than a non-match, and EvaluateFirstMatch treats it as a skip.
         var matched = ConditionEvaluator.Matches(Condition("tenureMonth", ">=", 12), Context("tenureMonths", 24), out var error);
 
         Assert.False(matched);

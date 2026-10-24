@@ -5,11 +5,7 @@ namespace FrierenHR.Application.Features.Onboarding;
 
 public interface ISetupProgressService
 {
-    /// <summary>
-    /// What a new company still has to do, worked out from its own data rather than from a
-    /// checklist somebody ticks off. A step cannot be marked done without actually being done,
-    /// and it un-ticks if the thing is removed.
-    /// </summary>
+    /// <summary>What a new company still has to do, worked out from its own data rather than from a checklist somebody ticks off.</summary>
     Task<SetupProgressDto> GetAsync(Guid companyId, CancellationToken ct = default);
 }
 
@@ -45,11 +41,7 @@ public class SetupProgressService : ISetupProgressService
         var employees = await _employees.GetByCompanyAsync(companyId, ct);
         var deductions = await _deductions.GetActiveAsync(companyId, ct);
 
-        // Sign-up creates a default shift, so "has a shift" is always true and would start
-        // ticked. Whether anybody has looked at it is the useful question, and there are two
-        // kinds of evidence: the seeded shift was edited, or a second one was added. Checking
-        // only for an edit missed the second case and left the step stuck with no
-        // explanation, which is worse than not having the step at all.
+        // Sign-up creates a default shift, so "has a shift" is always true and would start ticked.
         var shiftReviewed =
             shifts.Any(s => s.UpdatedAt is not null)
             || shifts.Count > 1;

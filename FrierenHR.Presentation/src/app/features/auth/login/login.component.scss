@@ -1,5 +1,4 @@
-// Shared with the sign-up card, which @uses this file. Keep additions layout-level rather
-// than login-specific.
+// Shared with the sign-up card, which @uses this file.
 .alt {
   margin: 1.25rem 0 0;
   text-align: center;
@@ -23,8 +22,7 @@
   padding: 1.5rem;
 }
 
-// Two panels side by side on a desk-width screen, stacked on a phone. The card has a
-// hairline border instead of a shadow, in keeping with the rest of the app.
+// Two panels side by side on a desk-width screen, stacked on a phone.
 .login-card {
   width: 100%;
   max-width: 880px;
@@ -132,8 +130,7 @@
     }
   }
 
-  // Owns the icon's positioning context, so the icon sits against the input rather than
-  // against the field or its label.
+  // Owns the icon's positioning context, so the icon sits against the input rather than against the field or its label.
   .input-wrap {
     position: relative;
     display: flex;

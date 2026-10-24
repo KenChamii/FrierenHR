@@ -19,10 +19,7 @@ public sealed record PayslipCalculation(
     decimal NetPay,
     IReadOnlyList<CalculatedLine> Lines);
 
-/// <summary>
-/// Turns hours into money. Pure and dependency-free, because payroll arithmetic is the part
-/// that must be provable without a database or a web host in the way.
-/// </summary>
+/// <summary>Turns hours into money.</summary>
 public static class PayslipCalculator
 {
     /// <summary>Money is rounded to two places once, at the point it becomes a line.</summary>
@@ -31,11 +28,7 @@ public static class PayslipCalculator
     /// <summary>Prices a period.</summary>
     /// <param name="hourlyRate">Derived from monthly pay by the caller, so the divisor lives in one place.</param>
     /// <param name="regularHours">Hours up to the standard day, as the payroll export reports them.</param>
-    /// <param name="payableOvertimeHours">
-    /// Overtime hours with the company's multiplier already applied. Taking them pre-multiplied
-    /// keeps one definition of overtime between the payroll export and the payslip; multiplying
-    /// again here is how the same hours end up paid twice.
-    /// </param>
+    /// <param name="payableOvertimeHours">Overtime hours with the company's multiplier already applied.</param>
     public static PayslipCalculation Calculate(
         decimal hourlyRate,
         decimal regularHours,
@@ -67,8 +60,7 @@ public static class PayslipCalculator
         var totalDeductions = 0m;
         var sortOrder = 2;
 
-        // Every percentage is taken on gross, never on the running balance. Otherwise the
-        // order an administrator happened to enter the lines in would change the net pay.
+        // Every percentage is taken on gross, never on the running balance.
         foreach (var deduction in deductions.OrderBy(d => d.SortOrder).ThenBy(d => d.Name))
         {
             var amount = deduction.Kind switch
@@ -91,7 +83,6 @@ public static class PayslipCalculator
         }
 
         // Deductions larger than gross leave nothing to pay rather than a negative payslip.
-        // The lines still show in full, so the shortfall is visible rather than hidden.
         var net = Math.Max(0, gross - totalDeductions);
 
         return new PayslipCalculation(

@@ -34,10 +34,7 @@ export class ReportingService {
     return this.http.get<LiabilityDto>(`${this.baseUrl}/leave-liability`, { params });
   }
 
-  /**
-   * CSV comes back as a blob rather than text, so the browser saves the bytes the API sent,
-   * byte order mark included. Re-encoding a string here is what breaks accented names.
-   */
+  /** CSV comes back as a blob rather than text, so the browser saves the bytes the API sent, byte order mark included. */
   payrollPeriodCsv(from: string, to: string) {
     const params = new HttpParams().set('from', from).set('to', to);
     return this.http.get(`${this.baseUrl}/payroll-period.csv`, { params, responseType: 'blob' });

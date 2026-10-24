@@ -84,8 +84,7 @@ public class WorkingCalendarTests
     [Fact]
     public void A_duplicate_date_takes_the_last_entry_rather_than_throwing()
     {
-        // Two rows for one date is a data-entry mistake, not a reason to fail every query
-        // that touches the month.
+        // Two rows for one date is a data-entry mistake, not a reason to fail every query that touches the month.
         var calendar = WithHolidays(
             (Monday, HolidayType.Regular),
             (Monday, HolidayType.CompanySpecific));
@@ -119,8 +118,7 @@ public class WorkingCalendarTests
     [Fact]
     public void A_range_spanning_a_year_boundary_is_counted_correctly()
     {
-        // Thu 31 Dec 2026 to Mon 4 Jan 2027. Thursday, Friday and Monday are working days,
-        // and 1 January is a holiday.
+        // Thu 31 Dec 2026 to Mon 4 Jan 2027. Thursday, Friday and Monday are working days, and 1 January is a holiday.
         var calendar = WithHolidays((new DateOnly(2027, 1, 1), HolidayType.Regular));
 
         Assert.Equal(2, calendar.CountWorkingDays(new DateOnly(2026, 12, 31), new DateOnly(2027, 1, 4)));

@@ -35,10 +35,7 @@ public class MessagingController : ControllerBase
         var callerId = User.GetEmployeeId();
         if (callerId is null) return Forbid();
 
-        // No dedicated "is this employee a participant" repo method yet, so this reuses the
-        // caller's own conversation list as a membership check. A bit more work per request
-        // than a direct lookup would be, but avoids trusting conversationId blindly and
-        // avoids a repository/schema change to get there.
+        // No dedicated "is this employee a participant" repo method yet.
         var myConversations = await _messagingService.GetConversationsAsync(callerId.Value, ct);
         if (!myConversations.Any(c => c.Id == conversationId)) return Forbid();
 
@@ -48,8 +45,7 @@ public class MessagingController : ControllerBase
     [HttpPost("conversations/direct")]
     public async Task<ActionResult<ConversationDto>> GetOrCreateDirect(CreateDirectConversationDto dto, CancellationToken ct)
     {
-        // One side of the direct conversation must be you — otherwise anyone could wire up
-        // (and silently read) a DM thread between two other employees.
+        // One side of the direct conversation must be you.
         var callerId = User.GetEmployeeId();
         if (callerId != dto.EmployeeAId && callerId != dto.EmployeeBId && User.GetRole() != "HRAdmin") return Forbid();
         return Ok(await _messagingService.GetOrCreateDirectAsync(dto, ct));
@@ -64,8 +60,7 @@ public class MessagingController : ControllerBase
         return Ok(await _messagingService.CreateGroupAsync(dto, ct));
     }
 
-    // 10MB default via config (Messaging:MaxAttachmentSizeBytes); this attribute is just a hard
-    // ceiling so Kestrel doesn't even buffer a wildly oversized upload before we get to check it.
+    // 10MB default via config (Messaging:MaxAttachmentSizeBytes).
     [HttpPost("attachments")]
     [RequestSizeLimit(25_000_000)]
     [Consumes("multipart/form-data")]
@@ -81,8 +76,7 @@ public class MessagingController : ControllerBase
         if (allowedTypes.Length > 0 && !allowedTypes.Contains(file.ContentType, StringComparer.OrdinalIgnoreCase))
             return BadRequest($"File type '{file.ContentType}' isn't allowed.");
 
-        // Random filename on disk (never the original name) so a malicious filename can't do
-        // anything odd with the filesystem, and so two people uploading "invoice.pdf" don't collide.
+        // Random filename on disk (never the original name) so a malicious filename can't do anything odd with the filesystem.
         var ext = Path.GetExtension(file.FileName);
         var storedName = $"{Guid.NewGuid()}{ext}";
         var uploadsRoot = Path.Combine(_env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot"), "uploads", "messaging");
@@ -92,11 +86,7 @@ public class MessagingController : ControllerBase
         await using (var stream = System.IO.File.Create(fullPath))
             await file.CopyToAsync(stream, ct);
 
-        // Served back as a plain static file under /uploads — see app.UseStaticFiles() in
-        // Program.cs. NOTE: that means anyone with the direct link can fetch it without being
-        // logged in (the filename is an unguessable GUID, but it isn't access-controlled).
-        // Good enough for an internal HR tool; if that's not acceptable, this needs to become
-        // an authenticated streaming endpoint instead.
+        // Served back as a plain static file under /uploads — see app.UseStaticFiles() in Program.cs.
         var url = $"/uploads/messaging/{storedName}";
         return Ok(new AttachmentUploadResultDto(url, file.FileName, file.ContentType, file.Length));
     }

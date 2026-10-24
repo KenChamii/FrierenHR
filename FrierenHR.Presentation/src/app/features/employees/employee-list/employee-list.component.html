@@ -46,11 +46,7 @@
   <ng-template pTemplate="emptymessage"><tr><td colspan="9">No employees yet.</td></tr></ng-template>
 </p-table>
 
-<!--
-  Shown once, because the password is stored only as a hash. If HR closes this without
-  noting it down, the only remedy is another reset, which is the correct trade: a password
-  that can be looked up later is a password that is stored.
--->
+<!-- Shown once, because the password is stored only as a hash. -->
 <p-dialog header="Temporary password" [visible]="!!issuedPassword()"
           (visibleChange)="dismissIssuedPassword()" [modal]="true" [style]="{ width: '420px' }">
   @if (issuedPassword(); as issued) {

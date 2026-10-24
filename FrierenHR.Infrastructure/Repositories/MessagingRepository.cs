@@ -24,8 +24,7 @@ public class MessagingRepository : IMessagingRepository
         return conversation;
     }
 
-    // Single grouped query for "conversation list + last message + unread count" —
-    // NOT a per-conversation query loop. This is the line that matters most in this file.
+    // Single grouped query for "conversation list + last message + unread count" — NOT a per-conversation query loop.
     public async Task<List<ConversationDto>> GetConversationsForEmployeeAsync(Guid employeeId, CancellationToken ct = default)
     {
         var conversationIds = await _context.ConversationParticipants.AsNoTracking()
@@ -83,8 +82,7 @@ public class MessagingRepository : IMessagingRepository
         var participant = await _context.ConversationParticipants
             .FirstOrDefaultAsync(p => p.ConversationId == conversationId && p.EmployeeId == employeeId, ct);
 
-        // Nothing to do if the caller is not in the conversation. Silent rather than an error:
-        // marking something you cannot see as read is a no-op, not a failure.
+        // Nothing to do if the caller is not in the conversation.
         if (participant is null) return;
 
         participant.LastReadAt = DateTime.UtcNow;

@@ -12,10 +12,6 @@ import { toLocalDateTime, todayIso } from '../../../../core/utils/dates';
 type Handle = 'start' | 'end';
 
 // Remote-friendly alternative to punch clocking: a 24-hour rotating dial.
-// Drag the green handle to set start time and the red handle to set end
-// time; break length is a separate field since it doesn't need its own
-// handle on the dial. Backed by POST /api/attendance/log-shift and
-// DELETE /api/attendance/{id}.
 @Component({
   selector: 'app-shift-clock-widget',
   standalone: true,

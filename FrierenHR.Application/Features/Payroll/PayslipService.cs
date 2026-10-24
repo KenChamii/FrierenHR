@@ -8,13 +8,7 @@ using EmployeeEntity = FrierenHR.Core.Entities.Employee;
 
 namespace FrierenHR.Application.Features.Payroll;
 
-/// <summary>
-/// Issues payslips for a pay period.
-///
-/// The hours come from the payroll export rather than from a second pass over the attendance
-/// logs. One definition of a period's hours means the export and the payslips can never
-/// disagree, which is the kind of discrepancy nobody can explain afterwards.
-/// </summary>
+/// <summary>Issues payslips for a pay period.</summary>
 public class PayslipService : IPayslipService
 {
     private readonly IPayrollExportService _payroll;
@@ -59,8 +53,7 @@ public class PayslipService : IPayslipService
         {
             if (!employees.TryGetValue(row.EmployeeId, out var employee)) continue;
 
-            // Pricing somebody at zero because nobody entered their salary would produce a
-            // payslip that looks issued and says they earned nothing. Naming them instead.
+            // Pricing somebody at zero because nobody entered their salary would produce a payslip that looks issued and says they earned nothing.
             if (employee.MonthlyRate is not { } monthlyRate || monthlyRate <= 0)
             {
                 skipped.Add($"{row.EmployeeName}: no monthly rate recorded.");

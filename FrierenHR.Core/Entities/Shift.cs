@@ -3,14 +3,7 @@ using FrierenHR.Core.Enums;
 
 namespace FrierenHR.Core.Entities;
 
-/// <summary>
-/// The hours an employee is expected to work. Until this existed, lateness was inferred from
-/// the hour of the clock-in alone, which cannot tell a late morning shift from an on-time
-/// afternoon one.
-///
-/// Resolution order for an employee's shift is their own, then their department's, then the
-/// company default. See ShiftService.ResolveForEmployeeAsync.
-/// </summary>
+/// <summary>The hours an employee is expected to work.</summary>
 public class Shift : BaseEntity, ICompanyScoped
 {
     public Guid CompanyId { get; set; }

@@ -8,11 +8,6 @@ public record LogShiftDto(Guid EmployeeId, DateTime Date, TimeSpan StartTime, Ti
 /// <summary>One day of a week being saved together.</summary>
 public record LogWeekDayDto(DateTime Date, TimeSpan StartTime, TimeSpan EndTime, int BreakMinutes);
 
-/// <summary>
-/// A week of shifts saved in one request.
-///
-/// Saving seven days as seven calls can half-succeed, leaving a week that is neither the old
-/// one nor the new one. These commit together or not at all.
-/// </summary>
+/// <summary>A week of shifts saved in one request.</summary>
 public record LogWeekDto(Guid EmployeeId, List<LogWeekDayDto> Days);
 public record OtComputationResultDto(bool Matched, decimal OtHours, decimal PayableHours, string Message);

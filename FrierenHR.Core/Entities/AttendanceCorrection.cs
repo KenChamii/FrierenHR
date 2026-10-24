@@ -3,13 +3,7 @@ using FrierenHR.Core.Enums;
 
 namespace FrierenHR.Core.Entities;
 
-/// <summary>
-/// An employee's request to fix a day they forgot to clock in or out. Previously this needed
-/// an administrator to edit the attendance row directly, which left no record of who changed
-/// what or why.
-///
-/// Reuses ApprovalStatus rather than introducing a parallel status enum.
-/// </summary>
+/// <summary>An employee's request to fix a day they forgot to clock in or out.</summary>
 public class AttendanceCorrection : BaseEntity
 {
     public Guid EmployeeId { get; set; }
@@ -34,10 +28,7 @@ public class AttendanceCorrection : BaseEntity
     /// <summary>The approver's note, shown to the employee when a request is declined.</summary>
     public string? DecisionComment { get; set; }
 
-    /// <summary>
-    /// The attendance row this request created or amended once approved. Kept so the decision
-    /// can be traced to its effect, and so approving twice cannot create two rows.
-    /// </summary>
+    /// <summary>The attendance row this request created or amended once approved.</summary>
     public Guid? AttendanceLogId { get; set; }
     public AttendanceLog? AttendanceLog { get; set; }
 }

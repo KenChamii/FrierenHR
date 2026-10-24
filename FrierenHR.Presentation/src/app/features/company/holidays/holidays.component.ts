@@ -160,10 +160,7 @@ export class HolidaysComponent implements OnInit {
     });
   }
 
-  /**
-   * Pasting a year's calendar is how this actually gets filled in, so the import takes the
-   * shape people already have it in rather than requiring 15 separate forms.
-   */
+  /** Pasting a year's calendar is how this actually gets filled in. */
   runImport(): void {
     const companyId = this.auth.currentCompanyId();
     if (!companyId) return;
@@ -206,10 +203,7 @@ export class HolidaysComponent implements OnInit {
     return HOLIDAY_TYPES.find(t => t.value === type)?.label ?? type;
   }
 
-  /**
-   * Fetches a year for review. Nothing is written here: the list is a starting point, not
-   * an authority, and the types in particular need checking before they affect pay.
-   */
+  /** Fetches a year for review. */
   fetchSuggestions(): void {
     this.fetching.set(true);
     this.error.set(null);
@@ -222,8 +216,7 @@ export class HolidaysComponent implements OnInit {
         this.suggestionCaveat.set(result.caveat);
         this.suggestions.set(result.holidays.map(h => ({
           ...h,
-          // A date already on the calendar is shown but not ticked, so importing cannot
-          // quietly add a second entry for it.
+          // A date already on the calendar is shown but not ticked, so importing cannot quietly add a second entry for it.
           include: !h.alreadyRecorded,
           type: h.suggestedType,
         })));
@@ -290,8 +283,7 @@ export class HolidaysComponent implements OnInit {
   }
 
   weekdayOf(date: string): string {
-    // Parsed as parts rather than through Date(string) so the browser's time zone cannot
-    // shift the day.
+    // Parsed as parts rather than through Date(string) so the browser's time zone cannot shift the day.
     const [y, m, d] = date.split('-').map(Number);
     return new Date(y, m - 1, d).toLocaleDateString(undefined, { weekday: 'short' });
   }

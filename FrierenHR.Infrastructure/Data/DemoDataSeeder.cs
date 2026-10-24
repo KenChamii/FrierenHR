@@ -7,20 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FrierenHR.Infrastructure.Data;
 
-/// <summary>
-/// Fills an empty database with one company that has enough history to be worth looking at:
-/// staff across departments, a few weeks of attendance, leave in each state, and holidays.
-/// </summary>
-/// <remarks>
-/// A newly registered company is correct but shows nothing, so every screen in a demo reads
-/// as empty or broken. This exists to make the deployed demo representative, and for nothing
-/// else: it is gated on configuration and refuses to touch a database that already holds a
-/// company.
-///
-/// The company itself is created through <see cref="IRegistrationService"/> rather than
-/// written here, so the demo starts from exactly the state a real sign-up produces, including
-/// the default shift and the starter rules. Duplicating that setup would let the two drift.
-/// </remarks>
+/// <summary>Fills an empty database with one company that has enough history to be worth looking at: staff across departments.</summary>
 public static class DemoDataSeeder
 {
     public const string CompanyCode = "FRIEREN";
@@ -30,10 +17,7 @@ public static class DemoDataSeeder
     /// <summary>Weeks of attendance history generated behind the current date.</summary>
     private const int HistoryWeeks = 3;
 
-    /// <summary>
-    /// Fixed so the demo looks the same every time it is rebuilt. A varying demo makes a
-    /// screenshot impossible to reproduce and a reported oddity impossible to chase.
-    /// </summary>
+    /// <summary>Fixed so the demo looks the same every time it is rebuilt.</summary>
     private const int RandomSeed = 20261011;
 
     public static async Task SeedAsync(
@@ -42,8 +26,7 @@ public static class DemoDataSeeder
         string password,
         CancellationToken ct = default)
     {
-        // Refuses rather than merges. Adding demo staff to a company somebody is really using
-        // would be very hard to undo, so an occupied database is left exactly as it is.
+        // Refuses rather than merges.
         if (await context.Companies.AnyAsync(ct)) return;
 
         PasswordPolicy.Validate(password);
@@ -59,15 +42,8 @@ public static class DemoDataSeeder
         await PopulateAsync(context, registered.CompanyId, registered.EmployeeId, password, EmailDomain, ct);
     }
 
-    /// <summary>
-    /// Adds the demo departments, staff and history to a company that already exists. Split from
-    /// <see cref="SeedAsync"/> so a company someone signed up for can load the same data on
-    /// request. Callers are responsible for checking the company is empty first.
-    /// </summary>
-    /// <param name="emailDomain">
-    /// Emails are unique across every company, so a second company loading this data needs its own
-    /// domain or it collides with the first.
-    /// </param>
+    /// <summary>Adds the demo departments, staff and history to a company that already exists.</summary>
+    /// <param name="emailDomain">Emails are unique across every company, so a second company loading this data needs its own domain or it collides with the first.</param>
     public static async Task PopulateAsync(
         FrierenHRDbContext context,
         Guid companyId,
@@ -99,16 +75,14 @@ public static class DemoDataSeeder
         context.Departments.AddRange(engineering, support, people);
         await context.SaveChangesAsync(ct);
 
-        // The administrator belongs somewhere too, or the org chart has a person floating
-        // outside it and the department headcounts do not add up to the staff list.
+        // The administrator belongs somewhere too, or the org chart has a person floating outside it and the department headcounts do not add up to the staff list.
         var admin = await context.Employees.FirstAsync(e => e.Id == adminId, ct);
         admin.DepartmentId = people.Id;
         admin.MonthlyRate = 95_000m;
 
         var today = DateTime.UtcNow.Date;
 
-        // The leads report to the administrator, which is what puts their leave requests in the
-        // administrator's approvals inbox: a request is routed to the requester's own manager.
+        // The leads report to the administrator, which is what puts their leave requests in the administrator's approvals inbox.
         var engineeringLead = NewEmployee(
             companyId, engineering.Id, "Marco", "Villanueva", $"marco@{domain}",
             EmployeeRole.Manager, 110_000m, today.AddYears(-4), password, adminId);
@@ -133,13 +107,11 @@ public static class DemoDataSeeder
             NewEmployee(companyId, support.Id, "Kiko", "Dela Cruz", $"kiko@{domain}",
                 EmployeeRole.Employee, 36_000m, today.AddMonths(-9), password, supportLead.Id),
 
-            // Deliberately hired five weeks ago: below the six-month tenure the starter accrual
-            // rule requires, so the demo shows an employee the rules engine correctly skips.
+            // Deliberately hired five weeks ago: below the six-month tenure the starter accrual rule requires.
             NewEmployee(companyId, support.Id, "Trina", "Espinosa", $"trina@{domain}",
                 EmployeeRole.Employee, 34_000m, today.AddDays(-35), password, supportLead.Id),
 
-            // No recorded pay, which is what makes payslip generation skip somebody rather
-            // than price them at zero. Worth showing, because it is a real data gap.
+            // No recorded pay, which is what makes payslip generation skip somebody rather than price them at zero.
             NewEmployee(companyId, people.Id, "Noel", "Gatchalian", $"noel@{domain}",
                 EmployeeRole.Employee, null, today.AddMonths(-7), password, adminId),
         };
@@ -155,8 +127,7 @@ public static class DemoDataSeeder
         var leaveRequests = BuildLeaveRequests(staff, engineeringLead, supportLead, today);
         context.LeaveRequests.AddRange(leaveRequests);
 
-        // Pending requests only show up on the approvals screen when they have a running
-        // approval behind them, so give them one rather than leaving that screen empty.
+        // Pending requests only show up on the approvals screen when they have a running approval behind them.
         var chain = await context.ApprovalChains
             .Include(c => c.Steps)
             .FirstOrDefaultAsync(c => c.CompanyId == companyId, ct);
@@ -208,15 +179,11 @@ public static class DemoDataSeeder
             Role = role,
             IsActive = true,
 
-            // False on purpose. Everyone shares the demo password, and a forced change on
-            // first sign-in would lock a visitor out of the account they were just given.
+            // False on purpose.
             MustChangePassword = false,
         };
 
-    /// <summary>
-    /// Balances that look accrued rather than granted: roughly the starter rule's 1.25 days a
-    /// month, capped at 15, and nothing at all for anyone under the six-month threshold.
-    /// </summary>
+    /// <summary>Balances that look accrued rather than granted: roughly the starter rule's 1.25 days a month, capped at 15.</summary>
     private static List<LeaveBalance> BuildLeaveBalances(List<Employee> employees, DateTime today)
     {
         var balances = new List<LeaveBalance>();
@@ -246,11 +213,7 @@ public static class DemoDataSeeder
         return balances;
     }
 
-    /// <summary>
-    /// A handful of Philippine holidays on fixed dates, for the current year. Deliberately not
-    /// the full calendar: the movable ones are proclaimed annually and guessing them would put
-    /// wrong dates in front of somebody. The Holidays screen imports the real list.
-    /// </summary>
+    /// <summary>A handful of Philippine holidays on fixed dates, for the current year.</summary>
     private static List<Holiday> BuildHolidays(Guid companyId, DateTime today)
     {
         var year = today.Year;
@@ -267,10 +230,7 @@ public static class DemoDataSeeder
         ];
     }
 
-    /// <summary>
-    /// Leave in every state the approval screens have to render: approved, pending, rejected,
-    /// and one still to come so the who-is-out view has something in it.
-    /// </summary>
+    /// <summary>Leave in every state the approval screens have to render: approved, pending, rejected.</summary>
     private static List<LeaveRequest> BuildLeaveRequests(
         List<Employee> staff, Employee engineeringLead, Employee supportLead, DateTime today)
     {
@@ -335,8 +295,7 @@ public static class DemoDataSeeder
             RequiresApproval = true,
         });
 
-        // A single day, which the starter approval rule clears without a manager. Shows the
-        // rules engine having actually decided something.
+        // A single day, which the starter approval rule clears without a manager.
         requests.Add(new LeaveRequest
         {
             EmployeeId = staff[2].Id,
@@ -370,11 +329,7 @@ public static class DemoDataSeeder
         return requests;
     }
 
-    /// <summary>
-    /// Attendance for the past few weeks on each person's working days, varied enough to give
-    /// the reports something to show: mostly on time, some lateness inside and outside the
-    /// 15-minute grace, occasional overtime, and one day left open as a missing clock-out.
-    /// </summary>
+    /// <summary>Attendance for the past few weeks on each person's working days.</summary>
     private static List<AttendanceLog> BuildAttendance(
         List<Employee> employees, Shift dayShift, Shift nightShift, Guid supportDepartmentId, DateTime today)
     {
@@ -410,8 +365,7 @@ public static class DemoDataSeeder
 
                 var overtimeMinutes = random.Next(0, 10) < 2 ? random.Next(30, 150) : 0;
 
-                // One open shift per person: a clock-in with no clock-out, which is the state
-                // the attendance correction flow exists to fix.
+                // One open shift per person: a clock-in with no clock-out.
                 var leaveOpen = dayOffset == 2;
 
                 logs.Add(new AttendanceLog

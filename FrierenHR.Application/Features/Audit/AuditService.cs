@@ -24,9 +24,7 @@ public class AuditService : IAuditService
         var entries = await _audit.GetForCompanyAsync(companyId, entityName, entityId, skip, take, ct);
         var total = await _audit.CountForCompanyAsync(companyId, entityName, entityId, ct);
 
-        // One lookup for the page's actors rather than one per row. The trail deliberately
-        // holds no foreign key to Employee, so the name is resolved here and left blank for
-        // anyone since removed.
+        // One lookup for the page's actors rather than one per row.
         var employees = await _employees.GetByCompanyAsync(companyId, ct);
         var namesById = employees.ToDictionary(e => e.Id, e => $"{e.FirstName} {e.LastName}");
 

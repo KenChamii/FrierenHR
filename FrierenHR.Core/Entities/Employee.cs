@@ -20,27 +20,14 @@ public class Employee : BaseEntity, ICompanyScoped
     public string Email { get; set; } = string.Empty;
     public string PasswordHash { get; set; } = string.Empty;
 
-    /// <summary>
-    /// True while the account still carries a password somebody else chose. Set when HR
-    /// creates an account or issues a reset, cleared when the person sets their own.
-    ///
-    /// Until it is cleared the application lets them change their password and nothing else,
-    /// so an administrator's knowledge of the temporary password is short-lived.
-    /// </summary>
+    /// <summary>True while the account still carries a password somebody else chose.</summary>
     public bool MustChangePassword { get; set; }
     public DateTime HireDate { get; set; }
 
-    /// <summary>
-    /// Gross monthly pay before deductions. Null for an employee whose pay has not been
-    /// recorded, which is why payslip generation skips them rather than pricing them at zero.
-    /// </summary>
+    /// <summary>Gross monthly pay before deductions.</summary>
     public decimal? MonthlyRate { get; set; }
 
-    /// <summary>
-    /// Hours a full month is considered to be, used to derive the hourly rate. Held per
-    /// employee rather than per company so a part-timer on the same monthly cycle can be
-    /// priced correctly. 174 is 8 hours across 261 working days, divided by 12.
-    /// </summary>
+    /// <summary>Hours a full month is considered to be, used to derive the hourly rate.</summary>
     public decimal StandardMonthlyHours { get; set; } = 174m;
 
     /// <summary>Hourly rate implied by the monthly pay, or null when no rate is recorded.</summary>

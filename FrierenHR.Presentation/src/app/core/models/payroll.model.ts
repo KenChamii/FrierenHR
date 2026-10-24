@@ -3,8 +3,7 @@
 export type DeductionKind = 'FixedAmount' | 'PercentOfGross';
 export type PayslipLineKind = 'Earning' | 'Deduction';
 
-// Mutable, like HOLIDAY_TYPES and EMPLOYEE_ROLES: PrimeNG's options input does not accept a
-// readonly array.
+// Mutable, like HOLIDAY_TYPES and EMPLOYEE_ROLES: PrimeNG's options input does not accept a readonly array.
 export const DEDUCTION_KINDS: { label: string; value: DeductionKind }[] = [
   { label: 'Fixed amount', value: 'FixedAmount' },
   { label: 'Percent of gross', value: 'PercentOfGross' },

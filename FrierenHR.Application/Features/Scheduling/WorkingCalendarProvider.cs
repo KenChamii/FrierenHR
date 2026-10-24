@@ -6,11 +6,7 @@ namespace FrierenHR.Application.Features.Scheduling;
 
 public class WorkingCalendarProvider : IWorkingCalendarProvider
 {
-    /// <summary>
-    /// Used when a company has defined no shifts. Saturday and Sunday is the common case and
-    /// is a better default than treating every day as a working day, which would deduct
-    /// weekend days from someone's leave balance.
-    /// </summary>
+    /// <summary>Used when a company has defined no shifts.</summary>
     private const WeekDays FallbackRestDays = WeekDays.Weekend;
 
     private readonly IHolidayRepository _holidayRepository;

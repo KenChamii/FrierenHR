@@ -34,15 +34,13 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Fail at startup with a named error rather than later with an obscure one. An unset Jwt:Key
-// would otherwise produce an empty signing key and tokens nobody can validate.
+// Fail at startup with a named error rather than later with an obscure one.
 var connectionString = Required(builder.Configuration.GetConnectionString("DefaultConnection"), "ConnectionStrings:DefaultConnection");
 var jwtKey = Required(builder.Configuration["Jwt:Key"], "Jwt:Key");
 if (jwtKey.Length < 32)
     throw new InvalidOperationException("Jwt:Key must be at least 32 characters. Set it with: dotnet user-secrets set \"Jwt:Key\" \"<long random string>\"");
 
-// The audit interceptor needs the acting user, which is request scoped, so the context is
-// built per request with the interceptor resolved from the same scope.
+// The audit interceptor needs the acting user, which is request scoped.
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, HttpContextCurrentUser>();
 builder.Services.AddScoped<AuditSaveChangesInterceptor>();
@@ -67,9 +65,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateLifetime = true
         };
 
-        // SignalR cannot send an Authorization header on its fallback transports, so the client
-        // passes the token as ?access_token=. Without this, every hub connection is anonymous
-        // and ChatHub's [Authorize] rejects it.
+        // SignalR cannot send an Authorization header on its fallback transports.
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
@@ -92,8 +88,7 @@ builder.Services.AddRateLimiter(options =>
         _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromMinutes(1) }));
 });
 
-// Anything uncaught returns a consistent ProblemDetails and never leaks a stack trace
-// outside Development.
+// Anything uncaught returns a consistent ProblemDetails and never leaks a stack trace outside Development.
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
@@ -103,12 +98,10 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
-// Lets the chat hub address a person by employee id, for notifying recipients who do not
-// have the conversation open.
+// Lets the chat hub address a person by employee id, for notifying recipients who do not have the conversation open.
 builder.Services.AddSingleton<IUserIdProvider, EmployeeUserIdProvider>();
 
-// Reports unhealthy when the database is unreachable, which is the failure a load balancer
-// most needs to see. Written inline to avoid a package reference just for AddDbContextCheck.
+// Reports unhealthy when the database is unreachable, which is the failure a load balancer most needs to see.
 builder.Services.AddHealthChecks().AddCheck<DatabaseHealthCheck>("database");
 
 builder.Services.AddScoped<IRuleConfigRepository, RuleConfigRepository>();
@@ -139,8 +132,7 @@ builder.Services.AddScoped<IHolidayService, HolidayService>();
 builder.Services.AddScoped<IShiftService, ShiftService>();
 builder.Services.AddScoped<IWorkingCalendarProvider, WorkingCalendarProvider>();
 
-// The holiday feed is the only outbound call the API makes. A short timeout, because a slow
-// third party must not hold a request open: the screen it serves has a working fallback.
+// The holiday feed is the only outbound call the API makes.
 builder.Services.AddHttpClient<IHolidayFeed, NagerHolidayFeed>(client =>
 {
     client.BaseAddress = new Uri(
@@ -157,13 +149,11 @@ builder.Services.AddScoped<IAuditService, AuditService>();
 // Sign-up. Writes a company and its first administrator in one transaction.
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
-// Setup progress is read from the company's own data, so it cannot report a step as done
-// that is not, and it un-ticks if the thing is removed.
+// Setup progress is read from the company's own data, so it cannot report a step as done that is not.
 builder.Services.AddScoped<ISetupProgressService, SetupProgressService>();
 builder.Services.AddScoped<ISampleDataService, SampleDataService>();
 
-// Payroll. Payslips are priced from the payroll export, so the hours on a payslip and the
-// hours on the export can never disagree.
+// Payroll.
 builder.Services.AddScoped<IPayrollDeductionRepository, PayrollDeductionRepository>();
 builder.Services.AddScoped<IPayslipRepository, PayslipRepository>();
 builder.Services.AddScoped<IPayrollDeductionService, PayrollDeductionService>();
@@ -175,8 +165,7 @@ builder.Services.AddScoped<ILeaveForecastService, LeaveForecastService>();
 builder.Services.AddScoped<IPayrollExportService, PayrollExportService>();
 builder.Services.AddScoped<ILeaveLiabilityService, LeaveLiabilityService>();
 
-// True when TLS is terminated by something in front of this process, which is the case for
-// every containerised deployment and false when running from Visual Studio.
+// True when TLS is terminated by something in front of this process.
 var behindReverseProxy = builder.Configuration.GetValue<bool>("Hosting:BehindReverseProxy");
 
 if (behindReverseProxy)
@@ -185,11 +174,7 @@ if (behindReverseProxy)
     {
         options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
 
-        // The proxy is a sibling container on a Docker network, so its address is assigned at
-        // runtime and cannot be listed ahead of time. Clearing both lists makes the headers
-        // trusted from any caller, which is only acceptable because this container is not
-        // published directly: the proxy is the sole route to it. Publishing the API's own port
-        // would let a client forge its source address and defeat the rate limiter below.
+        // The proxy is a sibling container on a Docker network.
         options.KnownNetworks.Clear();
         options.KnownProxies.Clear();
     });
@@ -207,9 +192,7 @@ var app = builder.Build();
 
 app.UseExceptionHandler(); // early, so it wraps everything downstream
 
-// Migrations run in every environment: a deploy against an empty database used to start and
-// then fail on first query. Seeding stays in Development only. For a controlled rollout,
-// generate a migration bundle and run it as a deploy step instead of relying on this.
+// Migrations run in every environment: a deploy against an empty database used to start and then fail on first query.
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<FrierenHRDbContext>();
@@ -217,8 +200,7 @@ using (var scope = app.Services.CreateScope())
 
     if (app.Environment.IsDevelopment()) await DbSeeder.SeedAsync(db);
 
-    // Demo data for a public deployment. Opt-in, and the seeder itself refuses a database
-    // that already holds a company, so turning this on cannot disturb existing records.
+    // Demo data for a public deployment.
     if (builder.Configuration.GetValue<bool>("Demo:Seed"))
     {
         var demoPassword = builder.Configuration["Demo:Password"];
@@ -240,23 +222,17 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Must run before anything that reads the scheme or the caller's address. The rate limiter
-// partitions by remote IP, and without this every request behind the proxy shares one
-// partition, so a single visitor could exhaust the login limit for everyone.
+// Must run before anything that reads the scheme or the caller's address.
 if (behindReverseProxy) app.UseForwardedHeaders();
 
-// Behind a proxy the TLS hop already happened and this process is reached over plain HTTP on
-// an internal network, so redirecting here would bounce a request that is already secure.
+// Behind a proxy the TLS hop already happened and this process is reached over plain HTTP on an internal network.
 if (!behindReverseProxy) app.UseHttpsRedirection();
 
 app.UseStaticFiles(); // serves wwwroot/uploads for chat attachments
 
 app.UseRouting();
 
-// Before authentication, not after. A browser preflight carries no credentials, so with CORS
-// placed later the preflight reached the authorization middleware first and was rejected
-// before any CORS header was written. The browser reports that as a bare "Failed to fetch",
-// which is what the SignalR negotiate request was hitting.
+// Before authentication, not after.
 app.UseCors("AngularApp");
 
 app.UseAuthentication();

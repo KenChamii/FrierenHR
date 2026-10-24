@@ -5,14 +5,7 @@ using FrierenHR.Core.Enums;
 
 namespace FrierenHR.Application.Features.Reporting;
 
-/// <summary>
-/// What unused leave would cost if it were all paid out: the accrued-liability figure finance
-/// asks for at period end.
-///
-/// The daily rate is supplied by the caller rather than read from configuration. Employee
-/// carries no salary, and the global config row is not company scoped, so taking a rate from
-/// either would quietly produce a wrong number for every tenant but one.
-/// </summary>
+/// <summary>What unused leave would cost if it were all paid out: the accrued-liability figure finance asks for at period end.</summary>
 public class LeaveLiabilityService : ILeaveLiabilityService
 {
     private const string NoDepartment = "Unassigned";
@@ -47,8 +40,7 @@ public class LeaveLiabilityService : ILeaveLiabilityService
         var rows = (await _leave.GetBalancesForCompanyAsync(companyId, ct))
             .Where(b => b.Balance > 0)
             .Where(b => !NonPayableTypes.Contains(b.LeaveType))
-            // A balance may outlive its employee record being deactivated; those are no
-            // longer a liability on the active headcount.
+            // A balance may outlive its employee record being deactivated; those are no longer a liability on the active headcount.
             .Where(b => employees.ContainsKey(b.EmployeeId))
             .Select(b =>
             {

@@ -18,10 +18,7 @@ public record AvailabilityDayDto(DateOnly Date, DayAvailability Status, string? 
 public record AvailabilityRowDto(
     Guid EmployeeId, string EmployeeName, string? DepartmentName, List<AvailabilityDayDto> Days);
 
-/// <summary>
-/// How much of a department is actually in on a given day. The number people look at, since
-/// it is what makes a thin day visible before it arrives.
-/// </summary>
+/// <summary>How much of a department is actually in on a given day.</summary>
 public record CoverageDto(DateOnly Date, string DepartmentName, int Working, int Total, int PercentWorking);
 
 public record AvailabilityDto(

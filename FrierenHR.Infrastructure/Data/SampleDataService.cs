@@ -3,14 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FrierenHR.Infrastructure.Data;
 
-/// <summary>
-/// Loads <see cref="DemoDataSeeder"/>'s data into a company someone signed up for.
-/// </summary>
-/// <remarks>
-/// Every sample employee gets a random password nobody is told, so the accounts exist to be
-/// looked at but cannot be signed in to. Their emails sit under a per-company subdomain because
-/// emails are unique across every company.
-/// </remarks>
+/// <summary>Loads <see cref="DemoDataSeeder"/>'s data into a company someone signed up for.</summary>
 public class SampleDataService : ISampleDataService
 {
     private readonly FrierenHRDbContext _context;
@@ -19,8 +12,7 @@ public class SampleDataService : ISampleDataService
 
     public async Task<bool> IsAvailableAsync(Guid companyId, CancellationToken ct = default)
     {
-        // Only the administrator sign-up created may exist. Mixing sample staff into a company
-        // that holds real records is hard to undo, so anything more than that is a refusal.
+        // Only the administrator sign-up created may exist.
         var hasRecords =
             await _context.Departments.AnyAsync(d => d.CompanyId == companyId, ct)
             || await _context.Holidays.AnyAsync(h => h.CompanyId == companyId, ct)

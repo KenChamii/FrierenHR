@@ -29,10 +29,7 @@ public interface ILeaveRepository : IRepository<LeaveRequest>
     Task<List<LeaveBalance>> GetBalancesAsync(Guid employeeId, CancellationToken ct = default);
     Task UpsertBalanceAsync(LeaveBalance balance, CancellationToken ct = default);
 
-    /// <summary>
-    /// Approved leave overlapping a range, company-wide. Overlapping rather than contained,
-    /// so a fortnight's leave still shows on a week that falls inside it.
-    /// </summary>
+    /// <summary>Approved leave overlapping a range, company-wide.</summary>
     Task<List<LeaveRequest>> GetApprovedInRangeAsync(
         Guid companyId, DateTime from, DateTime to, Guid? departmentId = null, CancellationToken ct = default);
 
@@ -45,10 +42,7 @@ public interface IAttendanceRepository : IRepository<AttendanceLog>
     Task<AttendanceLog?> GetOpenLogAsync(Guid employeeId, CancellationToken ct = default);
     Task<List<AttendanceLog>> GetByEmployeeAsync(Guid employeeId, DateTime? from = null, DateTime? to = null, CancellationToken ct = default);
 
-    /// <summary>
-    /// Every log in the company for a period, in one query. The payroll export needs all of
-    /// them, and asking per employee would be one round trip per person.
-    /// </summary>
+    /// <summary>Every log in the company for a period, in one query.</summary>
     Task<List<AttendanceLog>> GetByCompanyAsync(
         Guid companyId, DateTime from, DateTime to, CancellationToken ct = default);
 }
@@ -82,10 +76,7 @@ public interface IMessagingRepository
     Task<Message> AddMessageAsync(Message message, CancellationToken ct = default);
     Task<List<MessageDto>> GetHistoryAsync(Guid conversationId, int skip, int take, CancellationToken ct = default);
 
-    /// <summary>
-    /// Everyone in a conversation. Needed to notify a recipient who is signed in but has that
-    /// conversation closed, and so is in no hub group to broadcast to.
-    /// </summary>
+    /// <summary>Everyone in a conversation.</summary>
     Task<List<Guid>> GetParticipantIdsAsync(Guid conversationId, CancellationToken ct = default);
 
     /// <summary>Marks a conversation read up to now, for the caller only.</summary>

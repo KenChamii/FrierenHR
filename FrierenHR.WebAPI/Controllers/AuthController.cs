@@ -43,12 +43,7 @@ public class AuthController : ControllerBase
             employee.MustChangePassword));
     }
 
-    // Company sign-up. Anonymous by necessity: there is no account yet. Throttled under the
-    // same policy as login, since it writes and is reachable by anyone.
-    //
-    // The company and its first HRAdmin are created together. Creating a company on its own
-    // leaves a tenant nobody can ever log into, because every other route to an employee
-    // needs an HRAdmin token for that same company.
+    // Company sign-up. Anonymous by necessity: there is no account yet.
     [HttpPost("register-company"), AllowAnonymous, EnableRateLimiting("login")]
     public async Task<ActionResult<LoginResultDto>> RegisterCompany(
         RegisterCompanyDto dto, CancellationToken ct)
@@ -57,8 +52,7 @@ public class AuthController : ControllerBase
         {
             var registered = await _registrationService.RegisterCompanyAsync(dto, ct);
 
-            // Reloaded so the token is minted from the stored row rather than from the
-            // request, and so the claims match exactly what login would produce.
+            // Reloaded so the token is minted from the stored row rather than from the request.
             var admin = await _employeeRepository.GetByIdAsync(registered.EmployeeId, ct);
             if (admin is null) return StatusCode(StatusCodes.Status500InternalServerError);
 
@@ -68,8 +62,7 @@ public class AuthController : ControllerBase
         }
         catch (InvalidOperationException ex)
         {
-            // A taken company code or email, or a password that fails the policy. All of them
-            // are the caller's to fix, so the message is returned as written.
+            // A taken company code or email, or a password that fails the policy.
             return BadRequest(new { message = ex.Message });
         }
     }

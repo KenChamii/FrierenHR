@@ -17,8 +17,7 @@ public class AttendanceController : ControllerBase
     [HttpPost("clock-in")]
     public async Task<ActionResult<AttendanceLogDto>> ClockIn(ClockInDto dto, CancellationToken ct)
     {
-        // Employees can only clock themselves in — an HRAdmin correcting someone else's
-        // record is a separate "adjust attendance" feature, not this self-service endpoint.
+        // Employees can only clock themselves in — an HRAdmin correcting someone else's record is a separate "adjust attendance" feature.
         if (!User.IsSelfOrRole(dto.EmployeeId, "HRAdmin")) return Forbid();
         try { return Ok(await _attendanceService.ClockInAsync(dto, ct)); }
         catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
@@ -40,8 +39,7 @@ public class AttendanceController : ControllerBase
         catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
     }
 
-    // Saves a whole week in one request. The alternative, one call per day, can half-fail and
-    // leave a week that is neither what it was nor what the person entered.
+    // Saves a whole week in one request.
     [HttpPost("log-week")]
     public async Task<ActionResult<List<AttendanceLogDto>>> LogWeek(LogWeekDto dto, CancellationToken ct)
     {

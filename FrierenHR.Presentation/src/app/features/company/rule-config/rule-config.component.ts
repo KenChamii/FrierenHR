@@ -52,8 +52,7 @@ export class RuleConfigComponent implements OnInit {
   readonly editingId = signal<string | null>(null);
   readonly showJson = signal(false);
 
-  // Mirrors the form so the preview and the dropdowns can be computed. The form itself is not
-  // a signal, so every change pushes into this counter.
+  // Mirrors the form so the preview and the dropdowns can be computed.
   private readonly revision = signal(0);
   private readonly ruleTypeSig = signal<RuleType>('LeaveAccrual');
 
@@ -111,8 +110,7 @@ export class RuleConfigComponent implements OnInit {
         const field = schema.fields.find(f => f.name === group.value.field);
         const value = group.value.value;
         if (!field || value === null || value === undefined || value === '') return null;
-        // false is a meaningful value for a Boolean field, so it must not be filtered out
-        // by the emptiness check above.
+        // false is a meaningful value for a Boolean field, so it must not be filtered out by the emptiness check above.
         if (value === false && field.kind !== 'Boolean') return null;
         const operator = OPERATOR_LABELS[group.value.op] ?? group.value.op;
         const rendered = Array.isArray(value)
@@ -293,8 +291,7 @@ export class RuleConfigComponent implements OnInit {
     this.testError.set(null);
     this.testResult.set(null);
 
-    // Only facts the administrator actually filled in are sent, so a blank input reproduces
-    // the "field missing from context" path rather than being silently sent as zero.
+    // Only facts the administrator actually filled in are sent.
     const facts: Record<string, any> = {};
     for (const [key, control] of Object.entries(this.testForm.controls)) {
       const value = (control as any).value;
@@ -352,8 +349,7 @@ export class RuleConfigComponent implements OnInit {
       action: { type: this.form.controls.actionType.value },
     };
 
-    // Only send the parameters this action declares, so a leftover cap from a previous action
-    // does not travel with a rule that has no cap.
+    // Only send the parameters this action declares.
     if (action?.parameters.some(p => p.name === 'amount') && this.form.controls.amount.value != null)
       rule.action.amount = this.form.controls.amount.value;
     if (action?.parameters.some(p => p.name === 'cap') && this.form.controls.cap.value != null)

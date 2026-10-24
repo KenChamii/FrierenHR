@@ -32,8 +32,7 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
         builder.HasOne(x => x.Department).WithMany(d => d.Employees)
             .HasForeignKey(x => x.DepartmentId).OnDelete(DeleteBehavior.Restrict);
 
-        // The self-referencing FK — Restrict is not optional here, SQL Server
-        // refuses to create the table with Cascade/SetNull on a self-join.
+        // The self-referencing FK — Restrict is not optional here.
         builder.HasOne(x => x.Manager).WithMany()
             .HasForeignKey(x => x.ManagerId).OnDelete(DeleteBehavior.Restrict);
     }

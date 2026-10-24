@@ -84,8 +84,7 @@ export class PayslipsComponent implements OnInit {
         this.generating.set(false);
         this.scope.set('period');
         this.rows.set(run.payslips);
-        // Surfaced, not swallowed. A run that quietly covered fewer people than expected is
-        // the kind of thing nobody notices until payday.
+        // Surfaced, not swallowed.
         this.skipped.set(run.skipped);
       },
       error: err => {

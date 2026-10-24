@@ -20,8 +20,7 @@
   }
 }
 
-// The approver's queue sits above everything else, because it is the only part of this page
-// that someone else is waiting on.
+// The approver's queue sits above everything else.
 .inbox .box-h .exhibit { color: var(--hr-accent); }
 
 .requests {

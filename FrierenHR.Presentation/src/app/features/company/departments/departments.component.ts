@@ -26,9 +26,7 @@ export class DepartmentsComponent implements OnInit {
   readonly saving = signal(false);
   readonly errorMessage = signal<string | null>(null);
 
-  // inject() resolves immediately (no constructor-ordering issue), so this field
-  // initializer can safely use `this.fb` right away — unlike constructor-parameter
-  // injection, where field initializers run before the parameter is assigned.
+  // inject() resolves immediately (no constructor-ordering issue).
   form = this.fb.group({ name: ['', Validators.required] });
 
   ngOnInit(): void { this.load(); }

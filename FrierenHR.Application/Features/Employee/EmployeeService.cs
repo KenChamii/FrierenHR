@@ -30,8 +30,7 @@ public class EmployeeService : IEmployeeService
             Role = dto.Role,
             MonthlyRate = dto.MonthlyRate,
             StandardMonthlyHours = dto.StandardMonthlyHours,
-            // HR chose this password, so HR knows it. The account can do nothing but change
-            // it until the person sets one of their own.
+            // HR chose this password, so HR knows it.
             MustChangePassword = true,
         };
         await _employeeRepository.AddAsync(entity, ct);
@@ -106,8 +105,7 @@ public class EmployeeService : IEmployeeService
         var entity = await _employeeRepository.GetByIdAsync(employeeId, ct)
             ?? throw new InvalidOperationException($"Employee '{employeeId}' not found.");
 
-        // Checked here as well as at the endpoint, because this hands back a working
-        // credential and must not depend on a caller remembering to scope it.
+        // Checked here as well as at the endpoint, because this hands back a working credential and must not depend on a caller remembering to scope it.
         if (entity.CompanyId != companyId)
             throw new InvalidOperationException("That employee is not in your company.");
 
@@ -120,8 +118,7 @@ public class EmployeeService : IEmployeeService
         _employeeRepository.Update(entity);
         await _employeeRepository.SaveChangesAsync(ct);
 
-        // Returned once, and never stored in readable form. Losing it means another reset,
-        // which is the correct trade: a retrievable password is a stored password.
+        // Returned once, and never stored in readable form.
         return new ResetPasswordResultDto(
             entity.Id, $"{entity.FirstName} {entity.LastName}", temporary);
     }

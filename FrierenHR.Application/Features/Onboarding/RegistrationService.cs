@@ -11,13 +11,7 @@ using EmployeeEntity = FrierenHR.Core.Entities.Employee;
 
 namespace FrierenHR.Application.Features.Onboarding;
 
-/// <summary>
-/// Sign-up for a new company.
-///
-/// A company and its first administrator are created together, because every other way of
-/// creating an employee requires an HRAdmin token for that company. A company committed
-/// without one is unreachable forever, so the two writes share a transaction.
-/// </summary>
+/// <summary>Sign-up for a new company.</summary>
 public class RegistrationService : IRegistrationService
 {
     private const string DefaultShiftName = "Standard day";
@@ -59,9 +53,7 @@ public class RegistrationService : IRegistrationService
             throw new InvalidOperationException("Your first and last name are required.");
         if (email.Length == 0) throw new InvalidOperationException("Email is required.");
 
-        // Checked before the transaction so the common mistakes come back as a clear message
-        // rather than as a unique-index violation. The index is still the authority: two
-        // simultaneous sign-ups with one code are decided there, not here.
+        // Checked before the transaction so the common mistakes come back as a clear message rather than as a unique-index violation.
         if (await _companies.GetByCodeAsync(companyCode, ct) is not null)
             throw new InvalidOperationException($"Company code '{companyCode}' is already in use.");
 
@@ -98,11 +90,7 @@ public class RegistrationService : IRegistrationService
         }, ct);
     }
 
-    /// <summary>
-    /// A company with no shift and no rules looks broken on first use: nothing knows the
-    /// working day, and every leave request needs a manual decision. These are ordinary
-    /// starting values the administrator can change on the Shifts and Rules screens.
-    /// </summary>
+    /// <summary>A company with no shift and no rules looks broken on first use: nothing knows the working day.</summary>
     private async Task AddStarterConfiguration(Guid companyId, CancellationToken ct)
     {
         await _shifts.AddAsync(new Shift
@@ -131,10 +119,7 @@ public class RegistrationService : IRegistrationService
         await _rules.SaveChangesAsync(ct);
     }
 
-    /// <summary>
-    /// Built as objects and serialised, rather than written as JSON strings, so a change to
-    /// RuleDefinition breaks the build here instead of producing rules the engine skips.
-    /// </summary>
+    /// <summary>Built as objects and serialised, rather than written as JSON strings.</summary>
     private static List<(RuleType Type, int Priority, RuleDefinition Rule)> StarterRules() =>
     [
         // Accrue 1.25 days a month to a 15-day ceiling, the common Philippine leave shape.
